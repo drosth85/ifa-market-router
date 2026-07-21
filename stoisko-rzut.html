@@ -1,0 +1,142 @@
+<title>MARKET ROUTER — rzut stoiska (układ organizatora H27E-17)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg0:#0A0B0E; --bg1:#14161D; --bg2:#20232C; --line:#2A2E3A;
+    --ink:#EDEAE0; --ink2:#E7DCC2; --mut:#8b8e99;
+    --amber:#FFB020; --teal:#2FE3C6; --coral:#FF6B6B; --green:#4ADE80;
+    --org:#8a7d63;
+    --fd:"Georgia",serif; --fm:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    --fc:ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(120% 90% at 50% -10%,#181b22,var(--bg0));
+    color:var(--ink);font-family:var(--fm);line-height:1.5;-webkit-font-smoothing:antialiased;
+    padding:clamp(20px,4vw,56px)}
+  .wrap{max-width:1080px;margin:0 auto}
+  header{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:32px}
+  .kick{font-family:var(--fc);font-size:12px;letter-spacing:.28em;color:var(--teal);text-transform:uppercase}
+  h1{font-family:var(--fd);font-weight:600;font-size:clamp(24px,3.6vw,38px);margin:.35em 0 .1em}
+  h1 b{color:var(--amber);font-weight:600}
+  .sub{color:var(--mut);font-size:14px;max-width:64ch}
+  .grid{display:grid;grid-template-columns:minmax(240px,320px) 1fr;gap:clamp(20px,4vw,44px);align-items:start}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+  .planwrap{overflow-x:auto}
+  svg{display:block;width:100%;height:auto;max-width:320px;margin:0 auto}
+  .zlabel{font-family:var(--fm);font-size:10.5px;fill:var(--ink);font-weight:600}
+  .zsub{font-family:var(--fc);font-size:8px;fill:var(--mut)}
+  .dim{font-family:var(--fc);font-size:9px;fill:var(--mut);letter-spacing:.05em}
+  .zones{display:flex;flex-direction:column;gap:14px}
+  .z{background:linear-gradient(180deg,var(--bg1),var(--bg0));border:1px solid var(--line);
+    border-radius:12px;padding:15px 18px;position:relative;overflow:hidden}
+  .z::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tag,var(--amber))}
+  .z .tag{font-family:var(--fc);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--tag,var(--amber))}
+  .z h3{margin:.3em 0 .35em;font-size:15px;font-family:var(--fd);font-weight:600;color:var(--ink)}
+  .z p{margin:0;font-size:13px;color:var(--ink2)}
+  .z .meta{margin-top:7px;font-family:var(--fc);font-size:11px;color:var(--mut)}
+  .paths{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:26px}
+  @media(max-width:520px){.paths{grid-template-columns:1fr}}
+  .p{border:1px solid var(--line);border-radius:10px;padding:12px 13px;background:var(--bg1)}
+  .p .v{font-family:var(--fd);font-size:14px;font-weight:600}
+  .p .n{font-family:var(--fc);font-size:10px;letter-spacing:.12em;color:var(--mut);margin-top:2px}
+  .p .d{font-size:12px;color:var(--ink2);margin-top:7px}
+  .p1 .v{color:var(--teal)} .p2 .v{color:var(--amber)} .p3 .v{color:var(--coral)}
+  footer{margin-top:34px;border-top:1px solid var(--line);padding-top:16px;color:var(--mut);
+    font-family:var(--fc);font-size:11px;display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="kick">IFA Berlin 2026 · Reseller Park · H27E-17</div>
+    <h1>MARKET <b>ROUTER</b> — rzut stoiska (układ organizatora)</h1>
+    <div class="sub">Brandujemy tylko: <b style="color:var(--ink2)">tylną ścianę + dwie boczne + TV + ladę wejściową</b>. Środek (stolik barowy, hokery) i brązowa konstrukcja są narzucone przez organizatora.</div>
+  </header>
+
+  <div class="grid">
+    <div class="planwrap">
+      <svg viewBox="0 0 240 430" role="img" aria-label="Rzut stoiska z góry — układ organizatora">
+        <text x="120" y="14" text-anchor="middle" class="dim">← szer. ok. 2 m →</text>
+        <text x="13" y="220" text-anchor="middle" class="dim" transform="rotate(-90 13 220)">← głęb. ok. 4 m →</text>
+
+        <!-- stand -->
+        <rect x="40" y="24" width="160" height="360" rx="4" fill="#12141b" stroke="#2A2E3A" stroke-width="1.5"/>
+
+        <!-- BACK WALL: organizer branding strip -->
+        <rect x="40" y="24" width="160" height="20" fill="#2a2519" stroke="var(--org)" stroke-width="1"/>
+        <text x="120" y="37" text-anchor="middle" class="zsub" fill="#c9b78a">mobilki · monstelo · Reseller Park (organizator)</text>
+
+        <!-- TV on back wall -->
+        <rect x="82" y="50" width="76" height="30" rx="3" fill="#1c2733" stroke="var(--teal)" stroke-width="1.3"/>
+        <text x="120" y="64" text-anchor="middle" class="zlabel" fill="var(--teal)">◤ TV ◢</text>
+        <text x="120" y="74" text-anchor="middle" class="zsub">demo: mapa + skan cen</text>
+
+        <!-- LEFT WALL A -->
+        <rect x="40" y="92" width="18" height="206" fill="#191c25" stroke="var(--amber)" stroke-width="1.2"/>
+        <text x="49" y="196" text-anchor="middle" class="zlabel" fill="var(--amber)" transform="rotate(-90 49 196)">A · DATA ENGINE + MARKI</text>
+
+        <!-- RIGHT WALL B -->
+        <rect x="182" y="92" width="18" height="206" fill="#191c25" stroke="var(--coral)" stroke-width="1.2"/>
+        <text x="191" y="196" text-anchor="middle" class="zlabel" fill="var(--coral)" transform="rotate(-90 191 196)">B · 3 ŚCIEŻKI</text>
+
+        <!-- organizer furniture: bar table + stools (center) -->
+        <circle cx="120" cy="200" r="22" fill="#23262f" stroke="#3a3f4c" stroke-width="1"/>
+        <circle cx="120" cy="168" r="7" fill="#20232c" stroke="#3a3f4c"/>
+        <circle cx="120" cy="232" r="7" fill="#20232c" stroke="#3a3f4c"/>
+        <circle cx="88"  cy="200" r="7" fill="#20232c" stroke="#3a3f4c"/>
+        <circle cx="152" cy="200" r="7" fill="#20232c" stroke="#3a3f4c"/>
+        <text x="120" y="203" text-anchor="middle" class="zsub" fill="#8b8e99">meble</text>
+        <text x="120" y="258" text-anchor="middle" class="zsub" fill="#6b6e78">(organizator)</text>
+
+        <!-- entrance counter (lada) -->
+        <rect x="70" y="330" width="100" height="26" rx="4" fill="#1a1d24" stroke="var(--ink2)" stroke-width="1"/>
+        <text x="120" y="343" text-anchor="middle" class="zsub" fill="var(--ink2)">LADA — hasło / plakat</text>
+        <text x="120" y="352" text-anchor="middle" class="zsub" fill="var(--mut)">MARKET ROUTER</text>
+
+        <text x="120" y="376" text-anchor="middle" class="dim">▲ WEJŚCIE / ALEJKA</text>
+      </svg>
+    </div>
+
+    <div class="zones">
+      <div class="z" style="--tag:var(--teal)">
+        <span class="tag">Tylna ściana · TV</span>
+        <h3>Demo Market Router</h3>
+        <p>Animacja: mapa Europy + skan cen (EAN → route). Cached/offline, w pętli. TV montowany na tylnej ścianie organizatora.</p>
+        <div class="meta">plik: demo-market-router.html</div>
+      </div>
+      <div class="z" style="--tag:var(--amber)">
+        <span class="tag">Ściana A · lewa</span>
+        <h3>Data Engine + marki</h3>
+        <p>241 marek · 11 000 SKU · 31 rynków (EU·UK·USA) · 80% w 24h · AI data-driven sell engine. Niżej logotypy: Apple, Samsung, JBL, HOCO, MyScreen, PopSockets, Spigen. „Phones · Audio · Accessories".</p>
+        <div class="meta">prompt: prompts/panel_data_engine.txt</div>
+      </div>
+      <div class="z" style="--tag:var(--coral)">
+        <span class="tag">Ściana B · prawa</span>
+        <h3>Trzy ścieżki (głos klienta)</h3>
+        <p>I have a brand → we grow it · I have stock → we sell it · I want stock → we have prices.</p>
+        <div class="meta">prompt: prompts/panel_triptych.txt</div>
+      </div>
+      <div class="z" style="--tag:var(--ink2)">
+        <span class="tag">Lada · wejście</span>
+        <h3>Hasło / plakat</h3>
+        <p>Mała lada przy wejściu: logo MARKET ROUTER + LAUNCH · SELL · RESELL. Punkt zaczepienia z alejki.</p>
+      </div>
+      <div class="z" style="--tag:var(--org)">
+        <span class="tag">Organizator · nie ruszamy</span>
+        <h3>Środek + konstrukcja</h3>
+        <p>Stolik barowy + hokery, brązowe belki i tylny panel z brandingiem — narzucone. Projektujemy tylko powierzchnie ścian, TV i ladę.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="paths">
+    <div class="p p1"><div class="v">I HAVE A BRAND</div><div class="n">→ WE GROW IT</div><div class="d">long-term · margin success-fee</div></div>
+    <div class="p p2"><div class="v">I HAVE STOCK</div><div class="n">→ WE SELL IT</div><div class="d">31 markets · data-driven precision</div></div>
+    <div class="p p3"><div class="v">I WANT STOCK</div><div class="n">→ WE HAVE PRICES</div><div class="d">ask us · up to 50% of wholesale</div></div>
+  </div>
+
+  <footer>
+    <span>MONSTELO × MOBILKI GSM</span>
+    <span>układ: render organizatora (H27E-17)</span>
+    <span>2026-07-21</span>
+  </footer>
+</div>
