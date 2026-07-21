@@ -76,7 +76,7 @@
   /* TV pionowy zamontowany na tylnej ścianie, środek lewej połowy */
   /* TV pionowy na standzie — lewa strona, przy lewej ścianie */
   .tvstand{position:absolute;width:168px;left:22px;top:22px;
-    transform:translateZ(calc(var(--D) * -0.42));transform-style:preserve-3d;text-align:center}
+    transform:translateZ(calc(var(--D) * -0.86));transform-style:preserve-3d;text-align:center}
   .tvstand .screen{width:168px;height:262px;border-radius:8px;overflow:hidden;position:relative;margin:0 auto;
     border:6px solid #0a0b0e;box-shadow:0 0 0 1px #23262f,0 26px 54px rgba(0,0,0,.7),0 0 60px rgba(47,227,198,.16)}
   .tvstand .screen iframe{width:100%;height:100%;border:0;display:block;background:#07090d}
@@ -162,6 +162,12 @@
     box-shadow:0 0 8px var(--amber);animation:tascan 4s ease-in-out infinite}
   @keyframes tascan{0%{top:0}100%{top:100%}}
   @media (prefers-reduced-motion:reduce){.ta-node,.ta-scan{animation:none}}
+  .m-pth .h{font-size:17px;font-weight:600;color:var(--ink2);white-space:nowrap;line-height:1.05}
+  .m-pth .h2{font-size:25px;font-weight:800;color:var(--ink);white-space:nowrap;line-height:1.05;margin-top:3px}
+  .m-pth .sm{font-size:14px;color:var(--mut);font-weight:600}
+  .cp .h{font-weight:600;font-size:3.4cqw;color:var(--ink2);white-space:nowrap}
+  .cp .h2{font-weight:800;font-size:5.4cqw;color:var(--ink);margin-top:.6cqw;white-space:nowrap}
+  .cp .sm{font-size:2cqw;color:var(--mut)}
 </style>
 
 <div class="navdots">
@@ -202,12 +208,9 @@
         <div class="m-panel">
           <div class="m-cat" style="color:var(--teal)">Choose your path</div>
           <div class="m-paths">
-            <div class="m-pth"><div class="h">I HAVE A BRAND <span class="ar">→</span> <em>WE GROW IT</em></div>
-              <div class="s">long-term · <b>margin success-fee</b></div></div>
-            <div class="m-pth"><div class="h">I HAVE STOCK <span class="ar">→</span> <em>WE SELL IT</em></div>
-              <div class="s">31 markets · <b>data-driven precision</b></div></div>
-            <div class="m-pth"><div class="h">I WANT STOCK <span class="ar">→</span> <em>WE HAVE PRICES</em></div>
-              <div class="s">ask us · <b>up to 50% of wholesale</b></div></div>
+            <div class="m-pth"><div class="h">YOU HAVE STOCK <span class="ar">→</span></div><div class="h2">WE SOLD IT</div></div>
+            <div class="m-pth"><div class="h">YOU WANT STOCK <span class="ar">→</span></div><div class="h2">WE PRICED IT <span class="sm">(ask us)</span></div></div>
+            <div class="m-pth"><div class="h">YOU HAVE BRAND <span class="ar">→</span></div><div class="h2">WE GROW IT</div></div>
           </div>
         </div>
         <div class="orgstrip"><span class="rp">Reseller Park</span><span class="oc">H27E-17</span></div>
@@ -260,12 +263,9 @@
     <div class="pad">
       <div class="lab">Choose your path</div>
       <div class="rows">
-        <div><div class="h">I HAVE A BRAND <span class="ar">→</span> <em>WE GROW IT</em></div>
-          <div class="s">long-term partnership · <b>margin success-fee</b></div></div>
-        <div><div class="h">I HAVE STOCK <span class="ar">→</span> <em>WE SELL IT</em></div>
-          <div class="s">31 markets · <b>data-driven precision</b></div></div>
-        <div><div class="h">I WANT STOCK <span class="ar">→</span> <em>WE HAVE PRICES</em></div>
-          <div class="s">ask us · <b>up to 50% of wholesale price</b></div></div>
+        <div><div class="h">YOU HAVE STOCK <span class="ar">→</span></div><div class="h2">WE SOLD IT</div></div>
+        <div><div class="h">YOU WANT STOCK <span class="ar">→</span></div><div class="h2">WE PRICED IT <span class="sm">(ask us)</span></div></div>
+        <div><div class="h">YOU HAVE BRAND <span class="ar">→</span></div><div class="h2">WE GROW IT</div></div>
       </div>
       <div class="fcat">Phones · Audio · Accessories</div>
     </div>
