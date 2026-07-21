@@ -61,7 +61,7 @@
   .m-kpis{display:flex;gap:22px;margin-top:18px}
   .m-kpi .n{font-size:40px;font-weight:800;line-height:.88}
   .m-kpi .c{font-family:var(--fc);font-size:10px;color:var(--ink2);letter-spacing:.04em;margin-top:7px;text-transform:uppercase;line-height:1.25;white-space:nowrap}
-  .m-paths{display:flex;flex-direction:column;justify-content:center;gap:24px;flex:1}
+  .m-paths{display:flex;flex-direction:column;justify-content:flex-start;gap:22px;margin-top:6px}
   .m-pth .h{font-size:24px;font-weight:800;line-height:1.05;white-space:nowrap}
   .m-pth .h .ar{color:var(--teal)}
   .m-pth .h em{font-style:normal}
@@ -75,14 +75,14 @@
   /* portrait TV on a stand */
   /* TV pionowy zamontowany na tylnej ścianie, środek lewej połowy */
   /* TV pionowy na standzie — lewa strona, przy lewej ścianie */
-  .tvstand{position:absolute;width:168px;left:22px;top:calc(var(--H) - 326px);
+  .tvstand{position:absolute;width:168px;left:22px;top:22px;
     transform:translateZ(calc(var(--D) * -0.42));transform-style:preserve-3d;text-align:center}
   .tvstand .screen{width:168px;height:262px;border-radius:8px;overflow:hidden;position:relative;margin:0 auto;
     border:6px solid #0a0b0e;box-shadow:0 0 0 1px #23262f,0 26px 54px rgba(0,0,0,.7),0 0 60px rgba(47,227,198,.16)}
-  .tvstand .screen video{width:100%;height:100%;object-fit:cover;display:block}
+  .tvstand .screen iframe{width:100%;height:100%;border:0;display:block;background:#07090d}
   .tvstand .tvcap{position:absolute;left:8px;bottom:7px;font-family:var(--fc);font-size:9px;
     letter-spacing:.16em;color:var(--teal);text-shadow:0 1px 4px #000}
-  .tvstand .pole{width:14px;height:52px;margin:0 auto;background:linear-gradient(#20232c,#0e1015)}
+  .tvstand .pole{width:14px;height:252px;margin:0 auto;background:linear-gradient(#20232c,#0e1015)}
   .tvstand .base{width:150px;height:14px;margin:0 auto;border-radius:3px;background:linear-gradient(#181b22,#0c0e12);
     box-shadow:0 10px 20px rgba(0,0,0,.5)}
 
@@ -218,15 +218,7 @@
       <!-- portrait TV on stand -->
       <div class="tvstand">
         <div class="screen">
-          <div class="tvanim">
-            <div class="ta-top">EAN → ROUTE</div>
-            <div class="ta-route">
-              <span class="ta-node n1"></span><span class="ta-node n2"></span>
-              <span class="ta-node n3"></span><span class="ta-node n4"></span>
-              <div class="ta-scan"></div>
-            </div>
-            <div class="ta-bot">28 EU · UK · USA</div>
-          </div>
+          <iframe class="tvframe" src="demo-tv.html" title="demo" scrolling="no"></iframe>
           <span class="tvcap">EAN → ROUTE TO MARKET</span>
         </div>
         <div class="pole"></div><div class="base"></div>
