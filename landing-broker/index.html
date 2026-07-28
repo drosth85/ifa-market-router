@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>
+  // design v1 = ciemny (domyślny), v2 = jasny. Ustawiane przed renderem — bez mignięcia.
+  (function(){ try{ var t = localStorage.getItem('ifa-design');
+    if(t) document.documentElement.setAttribute('data-theme', t); }catch(e){} })();
+</script>
+<title>Monstelo × mobilki gsm.pl — overstock in, best price out | IFA Berlin 2026, H27E-17</title>
+<meta name="description" content="Data-driven stock trading across Europe. We buy surplus stock — overstock, clearance, returns — and sell it at the best price, powered by hard analytics. IFA Berlin 2026, stand H27E-17.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <span class="lockup">MONSTELO<span class="dot">.</span> <span class="sep">×</span> mobilki gsm.pl</span>
+    <span class="spacer"></span>
+    <button type="button" id="theme" class="themebtn" aria-live="polite">design v1 · ciemny</button>
+    <span class="booth"><span class="mono-label">Stand</span> <b>H27E-17</b></span>
+  </div>
+</header>
+
+<main>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="kicker">IFA Berlin · 4–8 Sep · Reseller Park</p>
+    <h1>Overstock in.<br><span class="amb">Best price out.</span></h1>
+    <p class="hero-sub">Data-driven stock trading across Europe. We buy your surplus, we sell it fast and sharp.</p>
+    <p class="manifest">
+      <span>241 brands</span><span>28 EU markets</span><span>~8000 prices tracked</span><span>~80% shipped in 24h</span>
+    </p>
+  </div>
+</section>
+
+<section class="strip">
+  <div class="wrap strip-in">
+    <span class="mono-label">We source</span>
+    <span class="mp">Overstock</span>
+    <span class="mp">Clearance</span>
+    <span class="mp">Returns</span>
+    <span class="mp">Open-box</span>
+    <span class="mp">End-of-line</span>
+  </div>
+</section>
+
+<section class="offers">
+  <div class="wrap">
+    <p class="offers-intro">Two ways to trade with us.</p>
+    <div id="offer-list"></div>
+  </div>
+</section>
+
+<section class="also">
+  <div class="wrap">
+    <p class="also-lbl">Also — brand &amp; logistics services</p>
+    <div class="also-row" id="also-list"></div>
+  </div>
+</section>
+
+<section class="facts">
+  <div class="wrap">
+    <ul>
+      <li>Ships from Poland · B2B across 28 EU markets</li>
+      <li>Retail on consignment · you own it until it sells</li>
+      <li>Not live yet · bonded warehouse, refurbishment lane</li>
+    </ul>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div class="wrap">
+    <h2 class="sec-title">Ask us something</h2>
+    <p class="contact-sub">Stock list, terms, a meeting at the stand — write and we answer.</p>
+
+    <form id="enquiry-form" method="POST" action="">
+      <input type="hidden" name="source" value="enquiry">
+
+      <label for="enq-email"><span class="lbl">Work e-mail</span>
+        <input type="email" name="email" id="enq-email" required placeholder="you@company.com" autocomplete="email" inputmode="email">
+      </label>
+      <div class="field-pair">
+        <label for="enq-name"><span class="lbl">Name <em class="opt">optional</em></span>
+          <input type="text" name="name" id="enq-name" placeholder="Name" autocomplete="name">
+        </label>
+        <label for="enq-company"><span class="lbl">Company <em class="opt">optional</em></span>
+          <input type="text" name="company" id="enq-company" placeholder="Company" autocomplete="organization">
+        </label>
+      </div>
+      <label for="enq-msg"><span class="lbl">Your question</span>
+        <textarea name="message" id="enq-msg" rows="4" placeholder="What do you need?"></textarea>
+      </label>
+
+      <label class="check">
+        <input type="checkbox" name="meeting" value="yes">
+        <span>Let's talk at the stand — get in touch to set a time.</span>
+      </label>
+
+      <button type="submit" class="btn btn-primary btn-wide" id="enquiry-send">Send</button>
+      <p class="formnote">One follow-up, nothing else. We do not sell or share your address.</p>
+    </form>
+
+    <div id="enquiry-done" hidden aria-live="polite"></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <span class="lockup">MONSTELO<span class="dot">.</span> <span class="sep">×</span> mobilki gsm.pl</span>
+      <span class="foot-booth">IFA Berlin 2026 · Reseller Park · H27E-17 · 4–8 Sep</span>
+    </div>
+    <p class="foot-contact">[[CONTACT]] · [[DOMAIN]]</p>
+    <p class="disc">Figures are trailing-12-month operational data. Third-party brand and marketplace
+      names are property of their respective owners and are used nominatively, to describe what we
+      distribute and where we sell. Not an endorsement or a claim of affiliation.</p>
+  </div>
+</footer>
+
+<div class="sticky" id="sticky">
+  <a class="btn btn-primary btn-wide" href="#offer-list">Get a deck</a>
+</div>
+
+<!-- optional contact, asked only after the deck is already on its way -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-back" data-modal-close></div>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <h2 id="modal-title">Leave your contact?</h2>
+    <p class="modal-sub">All optional. It only helps us come back to you properly.</p>
+    <form id="modal-form">
+      <input type="hidden" id="modal-offer" value="">
+      <input type="hidden" id="modal-email" value="">
+      <label for="modal-name"><span class="lbl">Name</span>
+        <input type="text" id="modal-name" autocomplete="name" placeholder="Name">
+      </label>
+      <label for="modal-phone"><span class="lbl">Phone</span>
+        <input type="tel" id="modal-phone" autocomplete="tel" placeholder="+48 …">
+      </label>
+      <label for="modal-company"><span class="lbl">Company</span>
+        <input type="text" id="modal-company" autocomplete="organization" placeholder="Company">
+      </label>
+      <div class="modal-act">
+        <button type="submit" class="btn btn-primary" id="modal-send">Send</button>
+        <button type="button" class="btn btn-ghost" data-modal-close>No thanks</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

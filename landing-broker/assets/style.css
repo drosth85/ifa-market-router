@@ -1,0 +1,242 @@
+/* IFA 2026 lead-gen landing — Black Book design system
+   Tokens 1:1 with ../materialy-drukowane/ + ../docs/DESIGN_GUIDELINES.md
+   Grammar copied from the booth walls: big label, one line under it, hairline between rows. */
+:root{
+  --bg:#0A0B0E; --bg2:#14161D; --bg3:#101219;
+  --ink:#EDEAE0; --parch:#E7DCC2;
+  --amber:#FFB020; --teal:#2FE3C6;
+  --line:rgba(231,220,194,.14); --line2:rgba(231,220,194,.07);
+  --mut:rgba(237,234,224,.58);
+  --disp:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  --mono:"SF Mono","Menlo","Consolas",monospace;
+  --gut:clamp(20px,5vw,40px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--disp);line-height:1.5;font-size:16px;
+  background:radial-gradient(90% 45% at 100% 0%,rgba(47,227,198,.07),transparent 62%),
+             radial-gradient(80% 40% at 0% 100%,rgba(255,176,32,.05),transparent 58%),var(--bg)}
+.wrap{max-width:1060px;margin:0 auto;padding:0 var(--gut)}
+img{max-width:100%;height:auto;display:block}
+
+.mono-label{font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:.22em;text-transform:uppercase}
+.amb{color:var(--amber)}
+.dot{color:var(--amber)}
+:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:4px}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:40;background:rgba(10,11,14,.82);
+  backdrop-filter:saturate(140%) blur(10px);border-bottom:1px solid var(--line2)}
+.topbar-in{display:flex;align-items:center;justify-content:space-between;height:50px;gap:16px}
+.lockup{font-weight:800;font-size:14px;letter-spacing:.02em;white-space:nowrap}
+.lockup .sep{color:var(--mut);font-weight:400;margin:0 2px}
+.topbar .booth{font-family:var(--mono);font-size:12px;color:var(--mut);white-space:nowrap}
+.topbar .booth b{color:var(--teal);letter-spacing:.04em}
+
+/* ---------- hero (left wall) ---------- */
+.hero{padding:clamp(38px,8vw,72px) 0 clamp(26px,4vw,38px)}
+.kicker{font-family:var(--mono);font-size:clamp(11px,2.4vw,13px);color:var(--teal);
+  letter-spacing:.3em;text-transform:uppercase;margin-bottom:clamp(16px,3.4vw,24px)}
+.hero h1{font-weight:800;font-size:clamp(52px,14vw,116px);line-height:.9;letter-spacing:-.035em;
+  text-transform:uppercase}
+.hero-sub{font-size:clamp(17px,2.8vw,24px);color:var(--parch);margin-top:clamp(16px,3vw,24px);max-width:34ch}
+.manifest{display:flex;flex-wrap:wrap;margin-top:clamp(26px,4.5vw,38px);
+  border-top:1px solid var(--line);padding-top:16px;
+  font-family:var(--mono);font-size:12px;color:var(--mut);letter-spacing:.05em}
+.manifest span{padding:3px 14px 3px 0;margin-right:14px;border-right:1px solid var(--line2)}
+.manifest span:last-child{border-right:none;margin-right:0}
+
+/* ---------- marketplace strip ---------- */
+.strip{border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);
+  background:var(--bg3);padding:18px 0}
+.strip-in{display:flex;align-items:center;gap:10px 22px;flex-wrap:wrap}
+.mp{font-weight:700;font-size:15px;color:var(--parch);letter-spacing:.01em;opacity:.92}
+
+/* ---------- offers (right wall) ---------- */
+.offers{padding:clamp(40px,6vw,64px) 0 clamp(30px,4vw,44px)}
+.offers-intro{font-family:var(--mono);font-size:clamp(13px,2.4vw,16px);color:var(--amber);
+  letter-spacing:.14em;text-transform:uppercase;margin-bottom:clamp(20px,3vw,28px)}
+.side + .side{margin-top:clamp(34px,5vw,52px)}
+.side-label{font-family:var(--mono);font-size:12px;color:var(--teal);letter-spacing:.2em;
+  text-transform:uppercase;margin-bottom:6px}
+
+.offer{display:grid;grid-template-columns:64px minmax(0,1fr);gap:16px;align-items:center;
+  border-top:1px solid var(--line);padding:clamp(20px,3vw,26px) 0}
+.side .offer:last-child{border-bottom:1px solid var(--line)}
+@media(min-width:820px){
+  .offer{grid-template-columns:96px minmax(0,1fr) 250px;gap:28px}
+}
+.offer-cover img{border:1px solid var(--line);border-radius:4px;box-shadow:0 8px 20px rgba(0,0,0,.5)}
+.offer-cover-ph{display:flex;align-items:center;justify-content:center;text-align:center;
+  width:64px;height:90px;border:1px dashed var(--line);border-radius:4px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--mut);line-height:1.5}
+@media(min-width:820px){.offer-cover-ph{width:96px;height:135px;font-size:11px}}
+.also{border-top:1px solid var(--line2);padding:clamp(22px,3vw,30px) 0}
+.also-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--mut);margin-bottom:12px}
+.also-row{display:flex;flex-wrap:wrap;gap:10px 24px}
+.also-link{font-family:var(--mono);font-size:13px;color:var(--parch);text-decoration:none;
+  border-bottom:1px solid var(--line);padding-bottom:3px}
+.also-link:hover{color:var(--teal);border-color:var(--teal)}
+.offer-owner{font-family:var(--mono);font-size:10.5px;color:var(--mut);letter-spacing:.2em;text-transform:uppercase}
+.offer-label{font-weight:800;font-size:clamp(24px,4.6vw,38px);line-height:1.02;letter-spacing:-.025em;
+  margin-top:6px}
+.offer-payoff{font-size:clamp(15px,2.4vw,19px);color:var(--parch);margin-top:8px}
+.side-buy .offer-label{color:var(--ink)}
+.side-sell .offer-owner{color:var(--teal)}
+.offer-act{display:flex;flex-direction:column;gap:8px;align-items:flex-start;
+  grid-column:1 / -1;margin-top:14px}
+@media(min-width:820px){.offer-act{grid-column:auto;margin-top:0}.offer-act .btn{width:100%}}
+.offer-meta{font-family:var(--mono);font-size:10.5px;color:var(--mut);letter-spacing:.06em}
+
+/* ---------- buttons ---------- */
+.btn{cursor:pointer;display:inline-block;text-align:center;text-decoration:none;
+  font-family:var(--disp);font-weight:800;font-size:15px;border:none;border-radius:8px;
+  padding:14px 22px;transition:filter .16s ease}
+.btn-primary{background:var(--amber);color:var(--bg)}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-download{background:var(--teal);color:var(--bg)}
+.btn-download:hover{filter:brightness(1.06)}
+.btn-wide{width:100%}
+.btn:disabled{opacity:.6;cursor:default}
+
+/* ---------- facts (three lines, no prose) ---------- */
+.facts{border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);
+  background:var(--bg3);padding:clamp(20px,3vw,26px) 0}
+.facts ul{list-style:none;display:grid;gap:8px;grid-template-columns:1fr}
+@media(min-width:860px){.facts ul{grid-template-columns:repeat(3,1fr);gap:24px}}
+.facts li{font-family:var(--mono);font-size:12px;color:var(--mut);letter-spacing:.04em;line-height:1.5}
+
+/* ---------- enquiry form (general contact, no deck attached) ---------- */
+.contact{padding:clamp(40px,6vw,68px) 0;border-top:1px solid var(--line2)}
+.contact-sub{color:var(--mut);font-size:15px;margin-top:10px;max-width:46ch}
+.field-pair{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:520px){.field-pair{grid-template-columns:1fr 1fr}}
+#enquiry-form textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:14px;
+  color:var(--ink);font-size:16px;font-family:var(--disp);letter-spacing:0;text-transform:none;resize:vertical}
+#enquiry-form textarea:focus{outline:none;border-color:var(--teal)}
+.sec-title{font-weight:800;font-size:clamp(26px,4.6vw,40px);line-height:1.06;letter-spacing:-.025em}
+#enquiry-form{display:flex;flex-direction:column;gap:16px;max-width:520px;margin-top:clamp(22px,3vw,28px);
+  background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:clamp(20px,3.5vw,28px)}
+#enquiry-form[hidden]{display:none}
+#enquiry-form label{display:flex;flex-direction:column;gap:7px;font-family:var(--mono);
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)}
+#enquiry-form .lbl{display:block}
+#enquiry-form .opt{font-style:normal;text-transform:none;letter-spacing:.04em;color:rgba(237,234,224,.34)}
+#enquiry-form input[type=email],#enquiry-form input[type=text]{background:var(--bg);border:1px solid var(--line);
+  border-radius:8px;padding:14px;color:var(--ink);font-size:16px;font-family:var(--disp);
+  letter-spacing:0;text-transform:none}
+#enquiry-form input:focus{outline:none;border-color:var(--teal)}
+.check{flex-direction:row!important;align-items:flex-start;gap:10px!important;
+  text-transform:none!important;letter-spacing:.01em!important;font-family:var(--disp)!important;
+  font-size:14px!important;color:var(--parch)!important;cursor:pointer}
+.check input{margin-top:3px;accent-color:var(--teal);width:17px;height:17px;flex:0 0 auto}
+.formnote{font-size:12px;color:var(--mut);line-height:1.5}
+.formnote b{color:var(--parch);font-weight:600}
+.err{color:var(--amber);font-family:var(--mono);font-size:12px;line-height:1.5}
+.err[hidden]{display:none}
+
+#enquiry-done{max-width:520px;margin-top:clamp(22px,3vw,28px);background:var(--bg2);
+  border:1px solid var(--line);border-radius:14px;padding:clamp(20px,3.5vw,28px)}
+#enquiry-done[hidden]{display:none}
+.done-line{font-size:15px;color:var(--parch)}
+.done-line b{color:var(--teal);font-family:var(--mono);letter-spacing:.04em}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--line);padding:30px 0 110px}
+@media(min-width:720px){footer{padding-bottom:40px}}
+.foot-top{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline;justify-content:space-between}
+.foot-booth,.foot-contact{font-family:var(--mono);font-size:12px;color:var(--mut);letter-spacing:.04em}
+.foot-contact{margin-top:14px}
+.disc{margin-top:14px;font-family:var(--mono);font-size:10px;line-height:1.6;color:var(--mut);
+  opacity:.75;max-width:76ch}
+
+/* ---------- sticky mobile CTA ---------- */
+.sticky{position:fixed;left:0;right:0;bottom:0;z-index:50;
+  padding:12px var(--gut) calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,rgba(10,11,14,0),rgba(10,11,14,.92) 32%);
+  transition:transform .22s ease,opacity .22s ease}
+.sticky.off{transform:translateY(130%);opacity:0;pointer-events:none}
+@media(min-width:720px){.sticky{display:none}}
+
+
+/* ---------- drawer: one field under the deck button ---------- */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.drawer{width:100%;margin-top:4px;overflow:hidden}
+.drawer[hidden]{display:none}
+.drawer-form{animation:drawer-slide .28s cubic-bezier(.22,.7,.25,1)}
+.drawer-done{animation:drawer-in .18s ease}
+@keyframes drawer-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@keyframes drawer-slide{from{opacity:0;transform:translateY(-10px);max-height:0}to{opacity:1;transform:none;max-height:200px}}
+.drawer-form[hidden],.drawer-done[hidden]{display:none}
+.drawer-row{display:flex;gap:8px;align-items:stretch}
+.drawer-row input{flex:1 1 auto;min-width:0;background:var(--bg);border:1px solid var(--line);
+  border-radius:8px;padding:12px 14px;color:var(--ink);font-size:16px;font-family:var(--disp);min-height:48px}
+.drawer-row input:focus{outline:none;border-color:var(--teal)}
+.drawer-send{flex:0 0 48px;width:48px;height:48px;padding:0;display:grid;place-items:center}
+.offer-act .drawer-send{width:48px}   /* nadpisuje .offer-act .btn{width:100%} z desktopu */
+.drawer-send svg{display:block}
+.drawer-send .spin{animation:spin .7s linear infinite;transform-origin:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+.drawer-note{font-family:var(--mono);font-size:11px;color:var(--teal);letter-spacing:.04em;margin-top:8px}
+.drawer-done .done-line{font-size:13.5px;color:var(--parch);margin-bottom:10px}
+.drawer-done .btn{width:100%}
+
+/* ---------- modal: optional contact, after the deck is already sent ---------- */
+body.locked{overflow:hidden}
+.modal{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center;
+  padding:0}
+.modal[hidden]{display:none}
+@media(min-width:640px){.modal{align-items:center;padding:24px}}
+.modal-back{position:absolute;inset:0;background:rgba(6,7,9,.72);backdrop-filter:blur(3px)}
+.modal-box{position:relative;z-index:1;width:100%;max-width:440px;background:var(--bg2);
+  border:1px solid var(--line);border-radius:16px 16px 0 0;padding:24px 22px calc(24px + env(safe-area-inset-bottom));
+  animation:modal-in .2s ease}
+@media(min-width:640px){.modal-box{border-radius:16px;padding:28px}}
+@keyframes modal-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.modal-box h2{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.modal-sub{font-size:14px;color:var(--mut);margin-top:8px}
+#modal-form{display:flex;flex-direction:column;gap:14px;margin-top:20px}
+#modal-form label{display:flex;flex-direction:column;gap:7px;font-family:var(--mono);
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut)}
+#modal-form input{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:13px;
+  color:var(--ink);font-size:16px;font-family:var(--disp);letter-spacing:0;text-transform:none}
+#modal-form input:focus{outline:none;border-color:var(--teal)}
+.modal-act{display:flex;gap:10px;margin-top:4px}
+.modal-act .btn{flex:1 1 auto}
+.btn-ghost{background:transparent;color:var(--mut);border:1px solid var(--line);font-weight:600}
+.btn-ghost:hover{color:var(--ink);border-color:var(--teal)}
+
+
+/* ---------- design v2 (jasny) — paleta z oferty detal; v1 = ciemny, domyślny ----------
+   Akcja jest w tym motywie zielono-morska (#0E9C86); bursztyn zostaje tylko w ostrzeżeniach. */
+:root[data-theme="light"]{
+  --bg:#F4F1E9; --bg2:#FFFFFF; --bg3:#EDE8DB;
+  --ink:#15171E; --parch:#2A2E3A;
+  --amber:#0E9C86; --teal:#0E9C86;
+  --line:#DED8C7; --line2:rgba(21,23,30,.08);
+  --mut:#5A5D68;
+}
+:root[data-theme="light"] body{
+  background:radial-gradient(90% 45% at 100% 0%,rgba(14,156,134,.07),transparent 62%),var(--bg)}
+:root[data-theme="light"] .topbar{background:rgba(244,241,233,.86)}
+:root[data-theme="light"] .btn-primary{color:#F4F1E9}
+:root[data-theme="light"] .btn-download{background:#15171E;color:#F4F1E9}
+:root[data-theme="light"] .offer-cover img{box-shadow:0 8px 20px rgba(21,23,30,.14)}
+:root[data-theme="light"] .sticky{
+  background:linear-gradient(180deg,rgba(244,241,233,0),rgba(244,241,233,.94) 32%)}
+:root[data-theme="light"] .err{color:#B3400A}
+:root[data-theme="light"] .dot{color:#0E9C86}
+
+/* design switch */
+.themebtn{cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--mut);background:transparent;border:1px solid var(--line);
+  border-radius:999px;padding:6px 11px;white-space:nowrap}
+.themebtn:hover{color:var(--ink);border-color:var(--teal)}
+.topbar-in .spacer{margin-left:auto}
+
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}

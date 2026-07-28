@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monstelo — Logistics HUB (A4 flyer)</title>
+<style>
+  :root{
+    --bg:#0A0B0E; --bg2:#14161D; --bg3:#101219;
+    --ink:#EDEAE0; --parch:#E7DCC2;
+    --amber:#FFB020; --teal:#2FE3C6;
+    --line:rgba(231,220,194,.14);
+    --mut:rgba(237,234,224,.60);
+    --disp:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --mono:"SF Mono","Menlo","Consolas",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#26282e;color:var(--ink);font-family:var(--disp)}
+  .sheet{position:relative;width:210mm;height:297mm;margin:8mm auto;background:var(--bg);
+    overflow:hidden;padding:16mm 15mm;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+  .sheet::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(120% 80% at 0% 0%,rgba(255,176,32,.06),transparent 58%),
+               radial-gradient(120% 80% at 100% 100%,rgba(47,227,198,.055),transparent 55%)}
+  .sheet > *{position:relative;z-index:1}
+
+  .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12mm}
+  .wordmark{font-weight:800;font-size:20pt;letter-spacing:.16em}
+  .wordmark .dot{color:var(--amber)}
+  .badge{text-align:right;font-family:var(--mono);font-size:7.5pt;color:var(--mut);line-height:1.5;letter-spacing:.06em}
+  .badge b{color:var(--teal);display:block;font-size:8.5pt;letter-spacing:.14em}
+
+  .eyebrow{font-family:var(--mono);font-size:9pt;color:var(--teal);letter-spacing:.28em;text-transform:uppercase;margin-bottom:6mm}
+  h1{font-weight:800;font-size:35pt;line-height:.98;letter-spacing:-.01em;text-transform:uppercase}
+  h1 .amb{color:var(--amber)}
+  .lead{font-size:12.5pt;line-height:1.5;color:var(--parch);max-width:150mm;margin-top:7mm}
+
+  /* route diagram */
+  .route{display:flex;align-items:center;gap:0;margin-top:12mm;margin-bottom:2mm}
+  .node{flex:1;text-align:center}
+  .node .ic{font-weight:800;font-size:15pt;color:var(--ink);font-family:var(--mono);letter-spacing:.02em}
+  .node .lb{font-family:var(--mono);font-size:7.5pt;color:var(--mut);margin-top:2mm;letter-spacing:.06em;text-transform:uppercase}
+  .arr{color:var(--amber);font-size:16pt;padding:0 2mm;margin-bottom:6mm;font-weight:700}
+
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm;margin-top:auto}
+  .kpi{background:var(--bg2);border:1px solid var(--line);border-radius:3mm;padding:7mm 6mm}
+  .kpi .n{font-weight:800;font-size:28pt;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .kpi .n.t{color:var(--teal)} .kpi .n.a{color:var(--amber)}
+  .kpi .l{font-family:var(--mono);font-size:8pt;color:var(--mut);margin-top:3mm;letter-spacing:.05em;line-height:1.4}
+  .subline{font-family:var(--mono);font-size:8.5pt;color:var(--mut);letter-spacing:.04em;margin-top:6mm;text-align:center}
+  .subline b{color:var(--parch)}
+
+  .footstrip{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);
+    margin-top:8mm;padding-top:5mm;font-family:var(--mono);font-size:8pt;letter-spacing:.14em}
+  .footstrip .tag{color:var(--teal);font-weight:600}
+  .footstrip .url{color:var(--mut)}
+
+  /* BACK */
+  h2{font-weight:800;font-size:22pt;text-transform:uppercase;letter-spacing:-.01em;margin-bottom:8mm}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:5mm}
+  .cap{background:var(--bg3);border:1px solid var(--line);border-radius:3mm;padding:6mm}
+  .cap .h{display:flex;align-items:baseline;gap:3mm;margin-bottom:3mm}
+  .cap .h .k{font-family:var(--mono);font-size:9pt;color:var(--amber);font-weight:700}
+  .cap h3{font-weight:800;font-size:12pt;text-transform:uppercase;letter-spacing:.02em}
+  .cap p{font-size:10pt;line-height:1.45;color:var(--mut)}
+  .cap p b{color:var(--parch);font-weight:600}
+
+  .roadmap{margin-top:7mm}
+  .roadmap .eyebrow{margin-bottom:4mm}
+  .rm-row{display:flex;gap:4mm;flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:8.5pt;letter-spacing:.04em;padding:3mm 5mm;border-radius:2mm;
+    border:1px solid var(--line);color:var(--parch)}
+  .chip.live{border-color:rgba(47,227,198,.5);color:var(--teal)}
+  .chip.live::before{content:"● ";color:var(--teal)}
+  .chip.soon{color:var(--mut)}
+  .chip.soon::before{content:"○ "}
+
+  .cta{margin-top:auto;background:linear-gradient(135deg,rgba(255,176,32,.14),rgba(47,227,198,.08));
+    border:1px solid rgba(255,176,32,.35);border-radius:3mm;padding:7mm;
+    display:grid;grid-template-columns:1fr 30mm;gap:6mm;align-items:center}
+  .cta h3{font-weight:800;font-size:16pt;text-transform:uppercase;line-height:1.05;margin-bottom:4mm}
+  .cta h3 .amb{color:var(--amber)}
+  .cta .contact{font-family:var(--mono);font-size:9pt;color:var(--parch);line-height:1.7;letter-spacing:.02em}
+  .cta .contact b{color:var(--teal)}
+  .qr{width:30mm;height:30mm;background:var(--ink);border-radius:2mm;display:flex;align-items:center;
+    justify-content:center;font-family:var(--mono);font-size:6.5pt;color:#0A0B0E;text-align:center;padding:3mm}
+
+  .disclaimer{font-family:var(--mono);font-size:6.5pt;color:rgba(237,234,224,.38);line-height:1.5;margin-top:6mm;text-align:center;letter-spacing:.02em}
+  .pglabel{position:absolute;top:4mm;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:6pt;color:rgba(237,234,224,.25);letter-spacing:.2em}
+
+  @media print{html,body{background:#fff}.sheet{margin:0;box-shadow:none;page-break-after:always}.pglabel{display:none}@page{size:A4;margin:0}}
+</style>
+<style id="design-v2">
+  /* ---- DESIGN v2 (jasny) — paleta z oferty detal. v1 (ciemny) zostaje domyślny. ----
+     Akcja/akcent w v2 = #0E9C86; drugi akcent to jego ciemniejszy wariant, żeby
+     drobne etykiety mono nie ginęły na kremowym tle. */
+  :root[data-theme="light"]{
+    --bg:#F4F1E9; --bg2:#FFFFFF; --bg3:#EDE8DB;
+    --ink:#15171E; --parch:#2A2E3A;
+    --amber:#0E9C86; --teal:#0B7C6B;
+    --line:#DED8C7;
+    --mut:#5A5D68;
+  }
+  :root[data-theme="light"] .qr{color:var(--bg)}            /* QR: jasny tekst na ciemnym polu */
+  :root[data-theme="light"] feFlood{flood-color:#15171E}    /* logotypy marketplace na ciemno */
+  :root[data-theme="light"]{background:#DED8C7}          /* tło poza arkuszem/ścianą */
+  :root[data-theme="light"] body{background:#DED8C7}
+  :root[data-theme="light"] .sheet,:root[data-theme="light"] .wall{background:var(--bg)}
+  .designbtn{position:fixed;right:14px;bottom:14px;z-index:999;cursor:pointer;
+    font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--mut);background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:8px 12px}
+  .designbtn:hover{color:var(--ink)}
+  @media print{.designbtn{display:none}}
+</style>
+<script>
+  (function(){ try{ var t=localStorage.getItem('ifa-design');
+    if(t) document.documentElement.setAttribute('data-theme',t); }catch(e){} })();
+</script>
+</head>
+<body>
+
+<!-- ============ FRONT ============ -->
+<section class="sheet">
+  <span class="pglabel">A4 · FRONT</span>
+  <div class="top">
+    <div class="wordmark">MONSTELO<span class="dot">.</span></div>
+    <div class="badge"><b>IFA 2026</b>Hall H27E-17<br>Reseller Park · Berlin</div>
+  </div>
+
+  <div class="eyebrow">Fulfilment &amp; route-to-market</div>
+  <h1>Your stock.<br>Our engine.<br><span class="amb">Europe's<br>markets.</span></h1>
+  <p class="lead">One HUB that turns an <b style="color:var(--ink)">EAN into a route to market</b> — warehousing, multi-channel listing and cross-border fulfilment across the EU, run on live demand data.</p>
+
+  <div class="route">
+    <div class="node"><div class="ic">EAN</div><div class="lb">your product</div></div>
+    <div class="arr">→</div>
+    <div class="node"><div class="ic">HUB</div><div class="lb">store · pick · pack</div></div>
+    <div class="arr">→</div>
+    <div class="node"><div class="ic">6 CH</div><div class="lb">channels</div></div>
+    <div class="arr">→</div>
+    <div class="node"><div class="ic">28 EU</div><div class="lb">markets</div></div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n a">~80%</div><div class="l">orders shipped<br>within 24h</div></div>
+    <div class="kpi"><div class="n t">28</div><div class="l">EU markets<br>fulfilled B2B</div></div>
+    <div class="kpi"><div class="n">6</div><div class="l">sales channels<br>integrated</div></div>
+  </div>
+  <p class="subline"><b>~35%</b> shipped same-day &nbsp;·&nbsp; <b>8,000</b> products price-monitored &nbsp;·&nbsp; live inventory API</p>
+
+  <div class="footstrip">
+    <span class="tag">FROM EAN TO EUROPE</span>
+    <span class="url">monstelo.com</span>
+  </div>
+</section>
+
+<!-- ============ BACK ============ -->
+<section class="sheet">
+  <span class="pglabel">A4 · BACK</span>
+  <div class="eyebrow">What the HUB does</div>
+  <h2>Ready to launch,<br>today</h2>
+
+  <div class="grid2">
+    <div class="cap">
+      <div class="h"><span class="k">01</span><h3>Warehousing</h3></div>
+      <p>Your goods stored in our facility, <b>live stock levels</b> visible via API. FIFO handling and inventory accuracy built in.</p>
+    </div>
+    <div class="cap">
+      <div class="h"><span class="k">02</span><h3>Multi-channel listing</h3></div>
+      <p>One feed, <b>six channels</b> — Allegro, MediaMarkt, amazon, Refurbed, Empik and our own store — with pricing driven by live market data.</p>
+    </div>
+    <div class="cap">
+      <div class="h"><span class="k">03</span><h3>Cross-border fulfilment</h3></div>
+      <p>Pick, pack and ship across <b>28 EU markets</b>. ~80% of orders leave within 24h, ~35% same day.</p>
+    </div>
+    <div class="cap">
+      <div class="h"><span class="k">04</span><h3>Data &amp; reporting</h3></div>
+      <p><b>8,000 products</b> price-monitored, sell-through and demand analytics — you see what moves, where, and at what margin.</p>
+    </div>
+  </div>
+
+  <div class="roadmap">
+    <div class="eyebrow">Capabilities — live &amp; on the roadmap</div>
+    <div class="rm-row">
+      <span class="chip live">EU warehousing</span>
+      <span class="chip live">Multi-channel fulfilment</span>
+      <span class="chip live">Live inventory API</span>
+      <span class="chip live">Data &amp; pricing engine</span>
+      <span class="chip soon">Bonded / customs warehouse</span>
+      <span class="chip soon">Refurbishment lane</span>
+    </div>
+  </div>
+
+  <div class="cta">
+    <div>
+      <h3>Route your stock through <span class="amb">stand H27E-17</span></h3>
+      <div class="contact">
+        <b>Contact:</b> [name] · [role]<br>
+        [email] &nbsp;·&nbsp; WhatsApp [ ]<br>
+        Reseller Park · IFA Berlin, 4–8 Sep 2026
+      </div>
+    </div>
+    <div class="qr">QR → HUB one-pager (PDF)</div>
+  </div>
+
+  <p class="disclaimer">Figures are trailing-12-month operational data. "Bonded / customs warehouse" and "Refurbishment lane" are roadmap capabilities, not yet live. Channel names are third-party marketplaces referenced for identification only.</p>
+</section>
+
+<button type="button" class="designbtn" id="designbtn"></button>
+<script>
+  (function(){ var r=document.documentElement, b=document.getElementById('designbtn');
+    function l(){ b.textContent = r.getAttribute('data-theme')==='light' ? 'design v2 · jasny' : 'design v1 · ciemny'; }
+    l(); b.addEventListener('click', function(){
+      var n = r.getAttribute('data-theme')==='light' ? 'dark' : 'light';
+      r.setAttribute('data-theme', n);
+      try{ localStorage.setItem('ifa-design', n); }catch(e){}
+      l(); });
+  })();
+</script>
+</body>
+</html>
