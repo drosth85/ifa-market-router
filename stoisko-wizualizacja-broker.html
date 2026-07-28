@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>WIN THE MARKET. — wizualizacja stoiska (Kierunek B)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg0:#0A0B0E; --bg1:#14161D; --line:#2A2E3A; --ink:#EDEAE0; --ink2:#E7DCC2; --mut:#8b8e99;
+    --amber:#FFB020; --teal:#2FE3C6; --org:#a89577;
+    --grot:"Helvetica Neue",Helvetica,"Arial Nova",Arial,sans-serif;
+    --fc:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --BW:440px; --H:550px; --D:880px;   /* booth 2m x 4m x 2,5m */
+    --SWH:var(--H);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:#050608;color:var(--ink);font-family:var(--grot)}
+  .section{min-height:100vh;position:relative;display:flex;align-items:center;justify-content:center;
+    padding:60px 4vw;border-top:1px solid #12141b}
+  .slab{position:absolute;top:3vh;left:0;right:0;text-align:center;z-index:8;font-family:var(--fc);
+    font-size:clamp(14px,2vw,23px);letter-spacing:.14em;color:var(--ink2);text-transform:uppercase;font-weight:600}
+  .slab b{color:var(--amber)}
+
+  /* ===================== SECTION 0: 3D MOCKUP ===================== */
+  .scene{position:relative;width:100%;height:94vh;perspective:1400px;perspective-origin:50% 46%;
+    display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(120% 80% at 50% 0%, #16181f 0%, #050608 62%);border-radius:6px;overflow:hidden}
+  .room{position:relative;width:var(--BW);height:var(--H);transform-style:preserve-3d;
+    transform:translateZ(-40px) scale(1.16);will-change:transform}
+  .face{position:absolute;top:0;left:0;overflow:hidden}
+  .m-panel,.frontbeam,.orgstrip,.counter,.person,.tvstand{backface-visibility:hidden}
+
+  .back{width:var(--BW);height:var(--H);transform:translateZ(calc(var(--D)*-1));
+    border:1px solid #8a7d63;background:linear-gradient(180deg,#bcab8a,#a2906f)}
+
+  .orgstrip{flex:0 0 25%;background:linear-gradient(180deg,#bcab8a,#a2906f);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;padding:20px 8px}
+  .left .orgstrip{border-right:1px solid #8a7d63}
+  .right .orgstrip{border-left:1px solid #8a7d63}
+  .orgstrip .rp{font-weight:800;font-size:19px;color:#161616;writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.02em}
+  .orgstrip .oc{font-family:var(--fc);font-size:12px;color:#4a4234;writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.12em}
+
+  /* fascia — ORIGINAL (nie zmieniana) */
+  .frontbeam{position:absolute;top:-64px;left:-20px;width:calc(var(--BW) + 40px);height:66px;
+    transform:translateZ(130px);border:1px solid #8a7d63;border-radius:2px;
+    background:linear-gradient(180deg,#bfae8d,#a89577);box-shadow:0 18px 34px rgba(0,0,0,.5);
+    display:flex;gap:46px;align-items:center;justify-content:center}
+  .frontbeam .fb{font-size:32px;font-weight:800;color:#161616;line-height:1}
+  .frontbeam .fb.mon{font-weight:600}
+  .frontbeam .gs{font-size:15px;color:#5a5040;font-weight:600}
+
+  .left{width:var(--D);height:var(--SWH);transform-origin:left center;transform:rotateY(90deg);
+    background:#101219;border-right:1px solid #23262f;display:flex}
+  .right{width:var(--D);height:var(--SWH);left:auto;right:0;transform-origin:right center;
+    transform:rotateY(-90deg);background:#101219;border-left:1px solid #23262f;display:flex}
+  .m-panel{position:relative;flex:1;padding:20px 42px;display:flex;flex-direction:column;overflow:hidden}
+
+  .m-kick{font-family:var(--fc);font-size:14px;color:var(--teal);letter-spacing:.32em;text-transform:uppercase}
+  .m-hero{font-size:58px;font-weight:800;line-height:.9;letter-spacing:-.01em;margin-top:10px}
+  .m-hero .amb{color:var(--amber)}
+  .m-sub{font-size:17px;color:var(--ink2);margin-top:11px}
+  .m-kpis{display:flex;gap:32px;margin-top:18px;align-items:flex-end}
+  .m-kpi .n{font-size:46px;font-weight:800;line-height:.86}
+  .m-kpi .n.t{color:var(--teal)} .m-kpi .n.wd{font-size:28px;color:var(--amber);line-height:1}
+  .m-kpi .c{font-family:var(--fc);font-size:13px;font-weight:600;color:var(--ink2);letter-spacing:.05em;margin-top:7px;line-height:1.2;text-transform:uppercase}
+  .m-lbl{font-family:var(--fc);font-size:13px;letter-spacing:.16em;color:var(--teal);text-transform:uppercase;margin-top:16px}
+  .m-logos{display:flex;flex-wrap:nowrap;align-items:center;gap:15px;margin-top:9px;overflow:hidden}
+  .m-logos span{font-size:16px;font-weight:700;color:var(--ink2);white-space:nowrap;flex:none;opacity:.92}
+  .m-sellon{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;margin-top:15px;overflow:hidden}
+  .m-sellon .k{font-family:var(--fc);font-size:13px;color:var(--amber);letter-spacing:.12em;text-transform:uppercase}
+  .mp-chip{display:inline-flex;align-items:center;height:28px;padding:0 12px;border:1.5px solid rgba(231,220,194,.5);
+    border-radius:14px;font-size:14px;font-weight:800;color:var(--ink2);letter-spacing:.01em;white-space:nowrap}
+  .mp-logo{display:inline-flex;align-items:center}
+  .mp-logo svg{width:auto;fill:var(--ink2);display:block}
+  .mp-logo.al svg{height:21px}
+  .mp-logo.mm svg{height:25px}
+  .mp-logo.am svg{height:20px}
+  .mp-logo.rf svg{height:21px}
+  .mp-logo.ek svg{height:26px}
+  .m-engine{margin-top:28px;border-top:1px solid #23262f;padding-top:16px;font-family:var(--fc);font-size:13px;color:var(--mut);letter-spacing:.05em}
+  .m-engine b{color:var(--teal)}
+  .m-tag{font-size:24px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;margin-top:12px}
+  .m-tag .amb{color:var(--amber)}
+
+  .m-look{font-family:var(--fc);font-size:22px;color:var(--teal);letter-spacing:.14em;margin-bottom:6px}
+  .m-paths{display:flex;flex-direction:column;justify-content:flex-start;gap:28px;flex:1}
+  .right .m-panel{text-align:right}
+  .m-pth{border-top:1px solid #23262f;padding-top:20px}
+  .m-pth:first-child{border-top:none}
+  .m-pth .h{font-size:48px;font-weight:800;line-height:.98;letter-spacing:-.01em;white-space:nowrap}
+  .m-pth .h .amb{color:var(--amber)}
+  .m-pth .s{font-size:20px;color:var(--ink2);margin-top:7px}
+  .m-foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;
+    font-family:var(--fc);font-size:13px;color:var(--mut);letter-spacing:.12em;border-top:1px solid #23262f;padding-top:14px}
+  .m-foot .win{color:var(--amber);font-weight:600}
+
+  .floor{width:var(--BW);height:var(--D);top:100%;transform-origin:top center;transform:rotateX(-90deg);
+    background:linear-gradient(180deg,rgba(47,227,198,.05),transparent 46%),
+      repeating-linear-gradient(90deg,#0b0c11 0 48px,#0e0f15 48px 49px),linear-gradient(180deg,#121319,#08090d)}
+
+  /* TV portrait — animacja bez wideo (demo-tv.html) */
+  .tvstand{position:absolute;width:168px;left:22px;top:24px;
+    transform:translateZ(calc(var(--D) * -0.86));transform-style:preserve-3d;text-align:center}
+  .tvstand .screen{width:168px;height:262px;border-radius:8px;overflow:hidden;position:relative;margin:0 auto;
+    border:6px solid #0a0b0e;box-shadow:0 0 0 1px #23262f,0 26px 54px rgba(0,0,0,.7),0 0 60px rgba(47,227,198,.16)}
+  .tvstand .screen iframe{width:100%;height:100%;border:0;display:block;background:#07090d}
+  .tvstand .cap{position:absolute;left:9px;bottom:8px;font-family:var(--fc);font-size:9px;letter-spacing:.14em;color:var(--teal);text-shadow:0 1px 4px #000;z-index:3}
+  .tvstand .pole{width:14px;height:250px;margin:0 auto;background:linear-gradient(#20232c,#0e1015)}
+  .tvstand .base{width:150px;height:14px;margin:0 auto;border-radius:3px;background:linear-gradient(#181b22,#0c0e12);box-shadow:0 10px 20px rgba(0,0,0,.5)}
+
+  .counter{position:absolute;width:186px;height:170px;left:calc(var(--BW) - 206px);top:calc(var(--H) - 170px);
+    transform:translateZ(calc(var(--D) * -0.1));transform-style:preserve-3d}
+  .counter .front{position:absolute;inset:0;border-radius:3px;background:linear-gradient(180deg,#1c1f27,#0d0f14);
+    border:1px solid #2a2e3a;box-shadow:0 26px 44px rgba(0,0,0,.6);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+  .counter .top{position:absolute;top:0;left:0;width:100%;height:70px;transform-origin:top center;
+    transform:rotateX(90deg);background:linear-gradient(#23262f,#171a21);border:1px solid #23262f}
+  .counter .lg{font-size:22px;font-weight:800;line-height:1.06;text-align:center;letter-spacing:.02em}
+  .counter .cond{font-family:var(--fc);font-size:11px;letter-spacing:.18em;color:var(--teal);text-transform:uppercase;text-align:center;margin-top:7px}
+  .counter .clogos{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:14px;padding-top:13px;
+    border-top:1px solid rgba(231,220,194,.16);width:78%}
+  .counter .clogo svg{width:auto;fill:var(--ink2);display:block}
+  .counter .clogo.al svg{height:14px}
+  .counter .clogo.am svg{height:13px}
+  .counter .clogo.rf svg{height:14px}
+  .counter .cwm{font-size:13px;font-weight:800;color:var(--ink2);letter-spacing:.01em}
+  .person{position:absolute;width:118px;height:334px;left:calc(var(--BW) - 178px);top:calc(var(--H) - 338px);
+    transform:translateZ(calc(var(--D) * -0.2))}
+  .person .head{width:52px;height:52px;border-radius:50%;margin:0 auto;background:radial-gradient(circle at 42% 34%,#4a5262,#20252e);box-shadow:0 3px 8px rgba(0,0,0,.5)}
+  .person .torso{width:118px;height:224px;margin-top:10px;border-radius:52px 52px 16px 16px;position:relative;
+    background:linear-gradient(180deg,#243243,#0f1620);box-shadow:0 3px 10px rgba(0,0,0,.5)}
+  .person .torso::after{content:"";position:absolute;left:50%;top:70px;transform:translateX(-50%);width:4px;height:88px;background:rgba(47,227,198,.25)}
+
+  .vignette{position:absolute;inset:0;z-index:6;pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 44%, transparent 54%, rgba(3,4,6,.72) 100%)}
+  .hint{position:absolute;left:0;right:0;bottom:16px;text-align:center;z-index:7;font-family:var(--fc);
+    font-size:11px;letter-spacing:.18em;color:var(--mut);text-transform:uppercase}
+  .hint b{color:var(--ink2)}
+
+  /* ===================== FLAT WALLS (sections 1–2) ===================== */
+  .wall{container-type:inline-size;width:min(1150px,94vw);aspect-ratio:6/5;position:relative;overflow:hidden;
+    background:linear-gradient(180deg,#15171e,#0b0c11 70%),var(--bg0);border:1px solid #20232c;border-radius:3px;
+    box-shadow:0 26px 60px rgba(0,0,0,.55)}
+  .pad{position:absolute;inset:0;padding:5cqw 5cqw;display:flex;flex-direction:column;justify-content:space-between}
+  .zone{display:flex;flex-direction:column}
+  .flab{font-family:var(--fc);color:var(--teal);letter-spacing:.3em;text-transform:uppercase;font-size:1.5cqw}
+  .fhero{font-weight:800;font-size:9cqw;line-height:.9;letter-spacing:-.01em;margin-top:1.6cqw}
+  .fhero .amb{color:var(--amber)}
+  .fsub{font-size:2.1cqw;color:var(--ink2);margin-top:1.6cqw}
+  .fkpis{display:flex;gap:5cqw;margin-top:0;align-items:flex-end}
+  .fkpi{display:flex;flex-direction:column}
+  .fkpi .n{font-size:6cqw;font-weight:800;line-height:.86;letter-spacing:-.02em;height:6cqw;display:flex;align-items:flex-end}
+  .fkpi .n.t{color:var(--teal)} .fkpi .n.wd{font-size:3.4cqw;color:var(--amber);line-height:1}
+  .fkpi .c{font-family:var(--fc);font-size:1.5cqw;color:var(--ink2);letter-spacing:.05em;margin-top:1cqw;line-height:1.25;text-transform:uppercase}
+  .flbl{font-family:var(--fc);color:var(--teal);letter-spacing:.16em;text-transform:uppercase;font-size:1.5cqw;margin-top:2.6cqw}
+  .flogos{display:flex;flex-wrap:nowrap;align-items:center;gap:2.4cqw;margin-top:1.2cqw;overflow:hidden}
+  .flogos span{font-size:2cqw;font-weight:700;color:var(--ink2);white-space:nowrap;opacity:.92}
+  .fsellon{display:flex;align-items:center;gap:1.4cqw;flex-wrap:wrap;margin-top:2.4cqw}
+  .fsellon .k{font-family:var(--fc);font-size:1.5cqw;color:var(--amber);letter-spacing:.14em;text-transform:uppercase}
+  .fchip{display:inline-flex;align-items:center;height:3.4cqw;padding:0 1.6cqw;border:0.15cqw solid rgba(231,220,194,.5);
+    border-radius:2cqw;font-size:1.9cqw;font-weight:800;color:var(--ink2);white-space:nowrap}
+  .flogo{display:inline-flex;align-items:center}
+  .flogo svg{width:auto;fill:var(--ink2);display:block}
+  .flogo.al svg{height:2.7cqw}
+  .flogo.mm svg{height:3.1cqw}
+  .flogo.am svg{height:2.6cqw}
+  .flogo.rf svg{height:2.7cqw}
+  .flogo.ek svg{height:3.4cqw}
+  .fengine{margin-top:0;border-top:1px solid #23262f;padding-top:2cqw;font-family:var(--fc);font-size:1.5cqw;color:var(--mut);letter-spacing:.04em}
+  .fengine b{color:var(--teal)}
+  .ftag{font-size:3.2cqw;font-weight:800;letter-spacing:.03em;text-transform:uppercase;margin-top:1.4cqw}
+  .ftag .amb{color:var(--amber)}
+  /* right flat wall */
+  .flook{font-family:var(--fc);font-size:2.6cqw;color:var(--teal);letter-spacing:.14em;margin-bottom:1cqw}
+  .frows{display:flex;flex-direction:column;justify-content:flex-start;gap:3.2cqw;flex:1}
+  .frow{border-top:1px solid #23262f;padding-top:2.4cqw}
+  .frow:first-child{border-top:none}
+  .frow .h{font-size:6.4cqw;font-weight:800;line-height:.98;letter-spacing:-.01em}
+  .frow .h .amb{color:var(--amber)}
+  .frow .s{font-size:2.4cqw;color:var(--ink2);margin-top:.8cqw}
+  #s2 .pad{text-align:right}
+  #s1 .pad{justify-content:flex-start;gap:3.5cqw}
+
+  /* embeds */
+  .embed{width:min(1150px,94vw);aspect-ratio:16/9;border-radius:6px;overflow:hidden;border:1px solid #20232c;
+    box-shadow:0 26px 60px rgba(0,0,0,.55);background:#07090d}
+  .embed iframe{width:100%;height:100%;border:0;display:block}
+</style>
+<style id="design-v2">
+  /* ---- DESIGN v2 (jasny) — paleta z oferty detal. v1 (ciemny) domyślny. ----
+     Zadruk ścian + otoczenie makiety + CAŁY fizyczny stand (podłoga, TV, lada, postać)
+     przechodzą na jasno. Elementy organizatora (ściana tylna, pas, belka) zostają beżowe. */
+  :root[data-theme="light"]{
+    --bg0:#F4F1E9; --bg1:#FFFFFF; --line:#DED8C7;
+    --ink:#15171E; --ink2:#2A2E3A; --mut:#5A5D68;
+    --amber:#0E9C86; --teal:#0B7C6B;
+    background:#DED8C7;
+  }
+  :root[data-theme="light"] body{background:#DED8C7}
+  :root[data-theme="light"] .section{border-top-color:#C9C2AF}
+  :root[data-theme="light"] .scene{background:radial-gradient(120% 80% at 50% 0%,#EFEADF 0%,#D6CFBD 62%)}
+  :root[data-theme="light"] .left,
+  :root[data-theme="light"] .right{background:var(--bg0);border-color:#DED8C7}
+  :root[data-theme="light"] .wall{background:linear-gradient(180deg,#FAF7F0,#EFEADF 70%),var(--bg0);
+    border-color:#DED8C7;box-shadow:0 26px 60px rgba(21,23,30,.22)}
+  :root[data-theme="light"] .m-engine,
+  :root[data-theme="light"] .m-pth,
+  :root[data-theme="light"] .m-foot,
+  :root[data-theme="light"] .fengine,
+  :root[data-theme="light"] .frow{border-top-color:#DED8C7}
+  :root[data-theme="light"] feFlood{flood-color:#15171E}
+  /* jasny stand: cały fizyczny stand jest jasny; logo na ladzie ciemne — jak na ścianie */
+  :root[data-theme="light"] .floor{background:
+    linear-gradient(180deg,rgba(14,156,134,.06),transparent 46%),
+    repeating-linear-gradient(90deg,#E8E2D3 0 48px,#DFD8C7 48px 49px),
+    linear-gradient(180deg,#EDE7DA,#D8D0BD)}
+  :root[data-theme="light"] .tvstand .screen{border-color:#CFC7B4;
+    box-shadow:0 0 0 1px #DED8C7,0 26px 54px rgba(21,23,30,.28),0 0 60px rgba(14,156,134,.14)}
+  :root[data-theme="light"] .tvstand .pole{background:linear-gradient(#E4DECF,#CFC7B4)}
+  :root[data-theme="light"] .tvstand .base{background:linear-gradient(#EDE7DA,#D2CBB8);
+    box-shadow:0 10px 20px rgba(21,23,30,.18)}
+  :root[data-theme="light"] .counter .front{background:linear-gradient(180deg,#FFFFFF,#EDE7DA);
+    border-color:#DED8C7;box-shadow:0 26px 44px rgba(21,23,30,.20)}
+  :root[data-theme="light"] .counter .top{background:linear-gradient(#F4F1E9,#E4DECF);border-color:#DED8C7}
+  :root[data-theme="light"] .counter .lg{color:#15171E}
+  :root[data-theme="light"] .counter .cond{color:#0B7C6B}
+  :root[data-theme="light"] .counter .cwm{color:#2A2E3A}
+  :root[data-theme="light"] .counter .clogo svg{fill:#15171E}
+  :root[data-theme="light"] .counter .clogos{border-top-color:#DED8C7}
+  :root[data-theme="light"] .person .head{background:radial-gradient(circle at 42% 34%,#CFC7B4,#B0A892);
+    box-shadow:0 3px 8px rgba(21,23,30,.2)}
+  :root[data-theme="light"] .person .torso{background:linear-gradient(180deg,#E4DECF,#CBC3AF);
+    box-shadow:0 3px 10px rgba(21,23,30,.18)}
+  :root[data-theme="light"] .person .torso::after{background:rgba(14,156,134,.3)}
+  /* v3: chowamy logotypy marketplace na ścianach i ladzie */
+  .m-sellon,.fsellon,.counter .clogos{display:none}
+  .designbtn{position:fixed;right:14px;bottom:14px;z-index:999;cursor:pointer;
+    font-family:var(--fc);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--mut);background:var(--bg1);border:1px solid var(--line);border-radius:999px;padding:8px 12px}
+  .designbtn:hover{color:var(--ink)}
+  @media print{.designbtn{display:none}}
+</style>
+<script>
+  (function(){ try{ var t=localStorage.getItem('ifa-design');
+    if(t) document.documentElement.setAttribute('data-theme',t); }catch(e){} })();
+</script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="cream"><feFlood flood-color="#E7DCC2" result="f"/><feComposite in="f" in2="SourceGraphic" operator="in"/></filter>
+  <filter id="lum"><feColorMatrix type="luminanceToAlpha" result="al"/><feComponentTransfer in="al" result="al2"><feFuncA type="discrete" tableValues="0 0 0 0 1 1 1"/></feComponentTransfer><feFlood flood-color="#E7DCC2" result="f"/><feComposite in="f" in2="al2" operator="in"/></filter>
+</defs></svg>
+
+<!-- ===================== S0: 3D BOOTH ===================== -->
+<section class="section" id="s0" style="border-top:none">
+  <div class="slab"><b>01</b> · Stoisko 3D — <b style="color:var(--amber)">OVERSTOCK IN. BEST PRICE OUT.</b> (rusz myszką)</div>
+  <div class="scene" id="scene">
+    <div class="room" id="room">
+
+      <!-- fascia (oryginalna) -->
+      <div class="frontbeam">
+        <span class="fb">mobilki<span class="gs"> gsm.pl</span></span>
+        <span class="fb mon">monstelo</span>
+      </div>
+
+      <div class="face back"></div>
+
+      <!-- LEFT WALL -->
+      <div class="face left">
+        <div class="orgstrip"><span class="rp">Reseller Park</span><span class="oc">H27E-17</span></div>
+        <div class="m-panel">
+          <div class="m-hero">OVERSTOCK IN.<br><span class="amb">BEST PRICE OUT.</span></div>
+          <div class="m-sub">Data-driven stock trading across Europe.</div>
+          <div class="m-kpis">
+            <div class="m-kpi"><div class="n">241</div><div class="c">brands</div></div>
+            <div class="m-kpi"><div class="n t">28</div><div class="c">EU markets</div></div>
+            <div class="m-kpi"><div class="n wd">~8000</div><div class="c">prices tracked</div></div>
+          </div>
+          <div class="m-lbl">Brands we trade</div>
+          <div class="m-logos">
+            <span>apple</span><span>samsung</span><span>xiaomi</span><span>sony</span><span>jbl</span><span>philips</span><span>lg</span><span>huawei</span><span>marshall</span>
+          </div>
+          <div class="m-sellon">
+            <span class="k">We sell on:</span>
+            <span class="mp-logo al"><svg viewBox="0 7.5 24 7.5"><path d="M4.59 7.981a.124.124 0 0 0-.122.124v5.917a.124.124 0 0 0 .124.124h.72a.124.124 0 0 0 .124-.124h-.002V8.105a.124.124 0 0 0-.124-.124Zm1.691 0a.124.124 0 0 0-.124.124v5.917a.124.124 0 0 0 .124.124h.72a.124.124 0 0 0 .123-.124V8.105a.124.124 0 0 0-.122-.124Zm12.667 1.776a1.868 1.868 0 0 0-1.317.532 1.674 1.674 0 0 0-.531 1.254v2.48a.124.124 0 0 0 .123.123h.72a.124.124 0 0 0 .124-.124v-2.427c0-.752.5-1.113 1.314-.946a.13.13 0 0 0 .168-.142v-.495c0-.13-.014-.18-.1-.208a2.794 2.794 0 0 0-.501-.047Zm-4.626 0a2.193 2.193 0 0 0-1.732.849 2.355 2.355 0 0 0 0 2.678 2.13 2.131 0 0 0 1.732.849 2.21 2.21 0 0 0 1.234-.372v.53c0 .717-.627.848-1.03.873a4.73 4.73 0 0 1-.826-.045c-.11-.017-.188 0-.188.119v.636a.109.109 0 0 0 .114.103c.933.08 1.56.064 2.032-.206a1.537 1.537 0 0 0 .69-.875 2.928 2.928 0 0 0 .117-.874v-2.077h.002a2.245 2.245 0 0 0-.412-1.34 2.193 2.193 0 0 0-1.733-.848Zm-12.255.002a2.903 2.903 0 0 0-1.465.39.092.092 0 0 0-.045.08l.038.63a.112.112 0 0 0 .185.065c.627-.387 1.38-.459 1.764-.265a.67.67 0 0 1 .335.605v.092H1.832c-.45 0-1.83.167-1.83 1.434v.014a1.229 1.229 0 0 0 .45 1.017 1.768 1.768 0 0 0 1.118.32h2.118a.124.124 0 0 0 .124-.125v-2.51l-.002.004c0-.57-.127-1.004-.402-1.303-.274-.3-.827-.45-1.34-.45zm7.707 0c-1.28 0-1.84.858-2.02 1.585a2.44 2.44 0 0 0-.074.6 2.277 2.277 0 0 0 .412 1.338 2.198 2.198 0 0 0 1.733.85c.691.024 1.153-.093 1.506-.294a.196.196 0 0 0 .084-.212v-.558c0-.114-.069-.167-.167-.098a2.185 2.185 0 0 1-1.393.334 1.14 1.14 0 0 1-1.118-1.016h2.845a.117.117 0 0 0 .117-.116c.05-.778-.175-2.413-1.925-2.413Zm12.08 0a2.193 2.193 0 0 0-1.731.848 2.275 2.275 0 0 0-.412 1.34 2.275 2.275 0 0 0 .412 1.339 2.193 2.193 0 0 0 3.465 0 2.277 2.277 0 0 0 .412-1.34 2.277 2.277 0 0 0-.412-1.339 2.193 2.193 0 0 0-1.733-.848Zm-7.532.833c1.157 0 1.196 1.18 1.196 1.351 0 .171-.039 1.351-1.196 1.351-.517 0-.89-.378-1.047-.849a1.552 1.552 0 0 1 0-1.004c.157-.47.53-.849 1.047-.849zm-4.546.004a.86.86 0 0 1 .91.922H8.754a.968.968 0 0 1 1.024-.922zm12.078 0c.515-.012.89.378 1.048.848a1.553 1.553 0 0 1 0 1.003v.002c-.158.47-.531.837-1.048.848-.518.012-.89-.378-1.047-.848a1.552 1.552 0 0 1 0-1.005c.158-.47.53-.837 1.047-.848zM1.89 12.121h.99v1.246H1.63a.773.773 0 0 1-.444-.156.492.492 0 0 1-.21-.412c0-.226.153-.678.914-.678z"/></svg></span>
+            <span class="mp-logo mm"><svg viewBox="0 0 24 24"><path d="M19.829 22.075c-.064.192 2.63-2.76 2.63-2.76-.256-2.759-1.54-5.775-1.54-5.775-2.117-4.428-6.801-5.904-9.56-3.53-.129.065-.322.129-.45.193 2.118-2.952 6.93-2.695 10.075.963 0 0 1.412 1.732 2.438 4.363.257-.898.45-1.86.514-2.823-1.669-2.31-3.594-3.658-3.594-3.658-3.978-2.695-8.663-1.732-9.946 1.604-.129.193-.257.385-.321.578.385-3.594 4.684-5.84 9.176-4.3 0 0 2.182.835 4.428 2.631 0-.128-.064-.256-.128-.449-.257-.962-.578-1.86-1.027-2.695-2.567-1.155-4.877-1.347-4.877-1.347-4.877-.321-8.535 3.08-7.765 6.802v.513c-1.668-3.337.963-7.636 5.776-8.535 0 0 2.246-.385 5.005 0a11.844 11.844 0 0 0-2.374-1.989c-2.76.32-4.813 1.283-4.813 1.283-4.428 2.182-5.84 7.06-3.401 9.819.064.192.192.32.32.449-3.08-2.054-2.887-7.123.77-10.396 0 0 1.733-1.476 4.3-2.503C14.375.193 13.283 0 12.193 0 10.01 1.668 8.79 3.465 8.79 3.465c-2.759 4.171-1.604 9.113 1.99 10.268h.064c.128.064.192.128.32.192-3.657-.192-6.031-4.684-4.427-9.369 0 0 .77-2.053 2.374-4.171-.962.257-1.796.578-2.63 1.09-1.027 2.568-1.284 4.75-1.284 4.75-.321 4.94 3.016 8.599 6.61 7.893H12c.128 0 .257 0 .385-.065-3.273 1.669-7.444-1.026-8.406-5.903 0 0-.385-2.182 0-4.941-.77.77-1.476 1.604-2.054 2.63.321 2.696 1.284 4.685 1.284 4.685 2.181 4.492 6.994 5.968 9.754 3.401l.064-.064c.128-.064.256-.128.32-.257-1.989 3.145-6.994 3.016-10.203-.77 0 0-1.604-2.117-2.438-4.556 0-.064-.642 3.209-.642 3.209 1.604 1.925 3.658 3.529 3.658 3.529 3.979 2.695 8.663 1.668 9.946-1.668a1.39 1.39 0 0 0 .321-.514c-.385 3.594-4.684 5.84-9.176 4.236 0 0-1.99-.77-4.107-2.439 0 .064.064.193.064.257a15.14 15.14 0 0 0 1.091 2.823c2.438 1.027 4.62 1.22 4.62 1.22 4.877.32 8.47-3.08 7.765-6.674v-.514c1.54 3.337-1.09 7.508-5.84 8.47 0 0-2.117.386-4.748 0a11.229 11.229 0 0 0 2.117 1.798c2.76-.321 4.813-1.284 4.813-1.284 4.3-2.117 5.776-6.802 3.53-9.625-.065-.193-.193-.385-.321-.578 2.952 2.118 2.76 7.059-.899 10.267 0 0-1.796 1.476-4.427 2.567 1.026.321 2.117.578 3.208.642 2.246-1.733 3.594-3.658 3.594-3.658 2.76-4.17 1.604-9.112-1.925-10.267a1.04 1.04 0 0 0-.45-.257c3.722.193 6.032 4.685 4.428 9.37 0 0-.77 2.245-2.567 4.491.129 0 .257-.064.45-.128a17.58 17.58 0 0 0 2.566-.963c1.091-2.63 1.284-4.94 1.284-4.94.32-4.878-2.888-8.472-6.417-7.958-.129 0-.321-.064-.45-.064h-.128c3.273-1.412 7.316 1.219 8.214 5.968 0 0 .578 2.246.128 4.94-.064.386-.256.963-.577 1.54z"/></svg></span>
+            <span class="mp-logo am"><svg viewBox="0 0 793 350"><image href="assets/mp/amazon.png" width="793" height="350" filter="url(#cream)"/></svg></span><span class="mp-logo rf"><svg viewBox="0 10 1655 420"><image href="assets/mp/refurbed.png" width="1655" height="619" filter="url(#cream)"/></svg></span><span class="mp-logo ek"><svg viewBox="0 0 960 438"><image href="assets/mp/empik.jpg" width="960" height="438" filter="url(#lum)"/></svg></span>
+          </div>
+          <div class="m-engine"><b>The engine:</b> EAN · XML · CSV · API · live monitoring · AI analysis &amp; reporting</div>
+          <div class="m-tag">DATA-DRIVEN <span class="amb">STOCK</span> TRADING</div>
+        </div>
+      </div>
+
+      <!-- RIGHT WALL -->
+      <div class="face right">
+        <div class="m-panel">
+          <div class="m-look">We are looking for:</div>
+          <div class="m-paths">
+            <div class="m-pth"><div class="h">FOR <span class="amb">SUPPLIERS</span></div><div class="s">we buy your overstock, clearance &amp; returns</div></div>
+            <div class="m-pth"><div class="h">FOR <span class="amb">SELLERS</span></div><div class="s">we sell it back at the market's best price</div></div>
+            <div class="m-pth"><div class="h">PRICED BY <span class="amb">DATA</span></div><div class="s">every deal priced by analytics, not guesswork</div></div>
+          </div>
+          <div class="m-foot"><span class="win">OVERSTOCK IN. BEST PRICE OUT.</span><span>H27E-17 · Reseller Park</span></div>
+        </div>
+        <div class="orgstrip"><span class="rp">Reseller Park</span><span class="oc">H27E-17</span></div>
+      </div>
+
+      <div class="face floor"></div>
+
+      <!-- TV: animacja bez wideo -->
+      <div class="tvstand">
+        <div class="screen">
+          <iframe src="demo-tv.html" title="animacja TV" scrolling="no"></iframe>
+          <span class="cap">EAN → MARKETPLACE</span>
+        </div>
+        <div class="pole"></div><div class="base"></div>
+      </div>
+
+      <!-- host + reception -->
+      <div class="person"><div class="head"></div><div class="torso"></div></div>
+      <div class="counter"><div class="top"></div>
+        <div class="front">
+          <div class="lg">SELL / BUY</div>
+          <div class="cond">NEW · USED · REFURBED</div>
+          <div class="clogos">
+            <span class="clogo al"><svg viewBox="0 7.5 24 7.5"><path d="M4.59 7.981a.124.124 0 0 0-.122.124v5.917a.124.124 0 0 0 .124.124h.72a.124.124 0 0 0 .124-.124h-.002V8.105a.124.124 0 0 0-.124-.124Zm1.691 0a.124.124 0 0 0-.124.124v5.917a.124.124 0 0 0 .124.124h.72a.124.124 0 0 0 .123-.124V8.105a.124.124 0 0 0-.122-.124Zm12.667 1.776a1.868 1.868 0 0 0-1.317.532 1.674 1.674 0 0 0-.531 1.254v2.48a.124.124 0 0 0 .123.123h.72a.124.124 0 0 0 .124-.124v-2.427c0-.752.5-1.113 1.314-.946a.13.13 0 0 0 .168-.142v-.495c0-.13-.014-.18-.1-.208a2.794 2.794 0 0 0-.501-.047Zm-4.626 0a2.193 2.193 0 0 0-1.732.849 2.355 2.355 0 0 0 0 2.678 2.13 2.131 0 0 0 1.732.849 2.21 2.21 0 0 0 1.234-.372v.53c0 .717-.627.848-1.03.873a4.73 4.73 0 0 1-.826-.045c-.11-.017-.188 0-.188.119v.636a.109.109 0 0 0 .114.103c.933.08 1.56.064 2.032-.206a1.537 1.537 0 0 0 .69-.875 2.928 2.928 0 0 0 .117-.874v-2.077h.002a2.245 2.245 0 0 0-.412-1.34 2.193 2.193 0 0 0-1.733-.848Zm-12.255.002a2.903 2.903 0 0 0-1.465.39.092.092 0 0 0-.045.08l.038.63a.112.112 0 0 0 .185.065c.627-.387 1.38-.459 1.764-.265a.67.67 0 0 1 .335.605v.092H1.832c-.45 0-1.83.167-1.83 1.434v.014a1.229 1.229 0 0 0 .45 1.017 1.768 1.768 0 0 0 1.118.32h2.118a.124.124 0 0 0 .124-.125v-2.51l-.002.004c0-.57-.127-1.004-.402-1.303-.274-.3-.827-.45-1.34-.45zm7.707 0c-1.28 0-1.84.858-2.02 1.585a2.44 2.44 0 0 0-.074.6 2.277 2.277 0 0 0 .412 1.338 2.198 2.198 0 0 0 1.733.85c.691.024 1.153-.093 1.506-.294a.196.196 0 0 0 .084-.212v-.558c0-.114-.069-.167-.167-.098a2.185 2.185 0 0 1-1.393.334 1.14 1.14 0 0 1-1.118-1.016h2.845a.117.117 0 0 0 .117-.116c.05-.778-.175-2.413-1.925-2.413Zm12.08 0a2.193 2.193 0 0 0-1.731.848 2.275 2.275 0 0 0-.412 1.34 2.275 2.275 0 0 0 .412 1.339 2.193 2.193 0 0 0 3.465 0 2.277 2.277 0 0 0 .412-1.34 2.277 2.277 0 0 0-.412-1.339 2.193 2.193 0 0 0-1.733-.848Zm-7.532.833c1.157 0 1.196 1.18 1.196 1.351 0 .171-.039 1.351-1.196 1.351-.517 0-.89-.378-1.047-.849a1.552 1.552 0 0 1 0-1.004c.157-.47.53-.849 1.047-.849zm-4.546.004a.86.86 0 0 1 .91.922H8.754a.968.968 0 0 1 1.024-.922zm12.078 0c.515-.012.89.378 1.048.848a1.553 1.553 0 0 1 0 1.003v.002c-.158.47-.531.837-1.048.848-.518.012-.89-.378-1.047-.848a1.552 1.552 0 0 1 0-1.005c.158-.47.53-.837 1.047-.848zM1.89 12.121h.99v1.246H1.63a.773.773 0 0 1-.444-.156.492.492 0 0 1-.21-.412c0-.226.153-.678.914-.678z"/></svg></span>
+            <span class="clogo am"><svg viewBox="0 0 793 350"><image href="assets/mp/amazon.png" width="793" height="350" filter="url(#cream)"/></svg></span><span class="clogo rf"><svg viewBox="0 10 1655 420"><image href="assets/mp/refurbed.png" width="1655" height="619" filter="url(#cream)"/></svg></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="vignette"></div>
+    <div class="hint">Rusz myszką, aby się rozejrzeć · przewiń w dół ↓</div>
+  </div>
+</section>
+
+<!-- ===================== S1: LEFT WALL FLAT ===================== -->
+<section class="section" id="s1">
+  <div class="slab"><b>02</b> · Lewa ściana (płaska)</div>
+  <div class="wall">
+    <div class="pad">
+      <div class="zone">
+      <div class="fhero">OVERSTOCK IN. <span class="amb">BEST PRICE OUT.</span></div>
+      <div class="fsub">Data-driven stock trading across Europe.</div>
+      </div>
+      <div class="zone">
+      <div class="fkpis">
+        <div class="fkpi"><div class="n">241</div><div class="c">brands</div></div>
+        <div class="fkpi"><div class="n t">28</div><div class="c">EU markets</div></div>
+        <div class="fkpi"><div class="n wd">~8000</div><div class="c">prices tracked</div></div>
+      </div>
+      <div class="flbl">Brands we trade</div>
+      <div class="flogos">
+        <span>apple</span><span>samsung</span><span>xiaomi</span><span>sony</span><span>jbl</span><span>philips</span><span>lg</span><span>huawei</span><span>marshall</span>
+      </div>
+      <div class="fsellon">
+        <span class="k">We sell on:</span>
+        <span class="flogo al"><svg viewBox="0 7.5 24 7.5"><path d="M4.59 7.981a.124.124 0 0 0-.122.124v5.917a.124.124 0 0 0 .124.124h.72a.124.124 0 0 0 .124-.124h-.002V8.105a.124.124 0 0 0-.124-.124Zm1.691 0a.124.124 0 0 0-.124.124v5.917a.124.124 0 0 0 .124.124h.72a.124.124 0 0 0 .123-.124V8.105a.124.124 0 0 0-.122-.124Zm12.667 1.776a1.868 1.868 0 0 0-1.317.532 1.674 1.674 0 0 0-.531 1.254v2.48a.124.124 0 0 0 .123.123h.72a.124.124 0 0 0 .124-.124v-2.427c0-.752.5-1.113 1.314-.946a.13.13 0 0 0 .168-.142v-.495c0-.13-.014-.18-.1-.208a2.794 2.794 0 0 0-.501-.047Zm-4.626 0a2.193 2.193 0 0 0-1.732.849 2.355 2.355 0 0 0 0 2.678 2.13 2.131 0 0 0 1.732.849 2.21 2.21 0 0 0 1.234-.372v.53c0 .717-.627.848-1.03.873a4.73 4.73 0 0 1-.826-.045c-.11-.017-.188 0-.188.119v.636a.109.109 0 0 0 .114.103c.933.08 1.56.064 2.032-.206a1.537 1.537 0 0 0 .69-.875 2.928 2.928 0 0 0 .117-.874v-2.077h.002a2.245 2.245 0 0 0-.412-1.34 2.193 2.193 0 0 0-1.733-.848Zm-12.255.002a2.903 2.903 0 0 0-1.465.39.092.092 0 0 0-.045.08l.038.63a.112.112 0 0 0 .185.065c.627-.387 1.38-.459 1.764-.265a.67.67 0 0 1 .335.605v.092H1.832c-.45 0-1.83.167-1.83 1.434v.014a1.229 1.229 0 0 0 .45 1.017 1.768 1.768 0 0 0 1.118.32h2.118a.124.124 0 0 0 .124-.125v-2.51l-.002.004c0-.57-.127-1.004-.402-1.303-.274-.3-.827-.45-1.34-.45zm7.707 0c-1.28 0-1.84.858-2.02 1.585a2.44 2.44 0 0 0-.074.6 2.277 2.277 0 0 0 .412 1.338 2.198 2.198 0 0 0 1.733.85c.691.024 1.153-.093 1.506-.294a.196.196 0 0 0 .084-.212v-.558c0-.114-.069-.167-.167-.098a2.185 2.185 0 0 1-1.393.334 1.14 1.14 0 0 1-1.118-1.016h2.845a.117.117 0 0 0 .117-.116c.05-.778-.175-2.413-1.925-2.413Zm12.08 0a2.193 2.193 0 0 0-1.731.848 2.275 2.275 0 0 0-.412 1.34 2.275 2.275 0 0 0 .412 1.339 2.193 2.193 0 0 0 3.465 0 2.277 2.277 0 0 0 .412-1.34 2.277 2.277 0 0 0-.412-1.339 2.193 2.193 0 0 0-1.733-.848Zm-7.532.833c1.157 0 1.196 1.18 1.196 1.351 0 .171-.039 1.351-1.196 1.351-.517 0-.89-.378-1.047-.849a1.552 1.552 0 0 1 0-1.004c.157-.47.53-.849 1.047-.849zm-4.546.004a.86.86 0 0 1 .91.922H8.754a.968.968 0 0 1 1.024-.922zm12.078 0c.515-.012.89.378 1.048.848a1.553 1.553 0 0 1 0 1.003v.002c-.158.47-.531.837-1.048.848-.518.012-.89-.378-1.047-.848a1.552 1.552 0 0 1 0-1.005c.158-.47.53-.837 1.047-.848zM1.89 12.121h.99v1.246H1.63a.773.773 0 0 1-.444-.156.492.492 0 0 1-.21-.412c0-.226.153-.678.914-.678z"/></svg></span>
+        <span class="flogo mm"><svg viewBox="0 0 24 24"><path d="M19.829 22.075c-.064.192 2.63-2.76 2.63-2.76-.256-2.759-1.54-5.775-1.54-5.775-2.117-4.428-6.801-5.904-9.56-3.53-.129.065-.322.129-.45.193 2.118-2.952 6.93-2.695 10.075.963 0 0 1.412 1.732 2.438 4.363.257-.898.45-1.86.514-2.823-1.669-2.31-3.594-3.658-3.594-3.658-3.978-2.695-8.663-1.732-9.946 1.604-.129.193-.257.385-.321.578.385-3.594 4.684-5.84 9.176-4.3 0 0 2.182.835 4.428 2.631 0-.128-.064-.256-.128-.449-.257-.962-.578-1.86-1.027-2.695-2.567-1.155-4.877-1.347-4.877-1.347-4.877-.321-8.535 3.08-7.765 6.802v.513c-1.668-3.337.963-7.636 5.776-8.535 0 0 2.246-.385 5.005 0a11.844 11.844 0 0 0-2.374-1.989c-2.76.32-4.813 1.283-4.813 1.283-4.428 2.182-5.84 7.06-3.401 9.819.064.192.192.32.32.449-3.08-2.054-2.887-7.123.77-10.396 0 0 1.733-1.476 4.3-2.503C14.375.193 13.283 0 12.193 0 10.01 1.668 8.79 3.465 8.79 3.465c-2.759 4.171-1.604 9.113 1.99 10.268h.064c.128.064.192.128.32.192-3.657-.192-6.031-4.684-4.427-9.369 0 0 .77-2.053 2.374-4.171-.962.257-1.796.578-2.63 1.09-1.027 2.568-1.284 4.75-1.284 4.75-.321 4.94 3.016 8.599 6.61 7.893H12c.128 0 .257 0 .385-.065-3.273 1.669-7.444-1.026-8.406-5.903 0 0-.385-2.182 0-4.941-.77.77-1.476 1.604-2.054 2.63.321 2.696 1.284 4.685 1.284 4.685 2.181 4.492 6.994 5.968 9.754 3.401l.064-.064c.128-.064.256-.128.32-.257-1.989 3.145-6.994 3.016-10.203-.77 0 0-1.604-2.117-2.438-4.556 0-.064-.642 3.209-.642 3.209 1.604 1.925 3.658 3.529 3.658 3.529 3.979 2.695 8.663 1.668 9.946-1.668a1.39 1.39 0 0 0 .321-.514c-.385 3.594-4.684 5.84-9.176 4.236 0 0-1.99-.77-4.107-2.439 0 .064.064.193.064.257a15.14 15.14 0 0 0 1.091 2.823c2.438 1.027 4.62 1.22 4.62 1.22 4.877.32 8.47-3.08 7.765-6.674v-.514c1.54 3.337-1.09 7.508-5.84 8.47 0 0-2.117.386-4.748 0a11.229 11.229 0 0 0 2.117 1.798c2.76-.321 4.813-1.284 4.813-1.284 4.3-2.117 5.776-6.802 3.53-9.625-.065-.193-.193-.385-.321-.578 2.952 2.118 2.76 7.059-.899 10.267 0 0-1.796 1.476-4.427 2.567 1.026.321 2.117.578 3.208.642 2.246-1.733 3.594-3.658 3.594-3.658 2.76-4.17 1.604-9.112-1.925-10.267a1.04 1.04 0 0 0-.45-.257c3.722.193 6.032 4.685 4.428 9.37 0 0-.77 2.245-2.567 4.491.129 0 .257-.064.45-.128a17.58 17.58 0 0 0 2.566-.963c1.091-2.63 1.284-4.94 1.284-4.94.32-4.878-2.888-8.472-6.417-7.958-.129 0-.321-.064-.45-.064h-.128c3.273-1.412 7.316 1.219 8.214 5.968 0 0 .578 2.246.128 4.94-.064.386-.256.963-.577 1.54z"/></svg></span>
+        <span class="flogo am"><svg viewBox="0 0 793 350"><image href="assets/mp/amazon.png" width="793" height="350" filter="url(#cream)"/></svg></span><span class="flogo rf"><svg viewBox="0 10 1655 420"><image href="assets/mp/refurbed.png" width="1655" height="619" filter="url(#cream)"/></svg></span><span class="flogo ek"><svg viewBox="0 0 960 438"><image href="assets/mp/empik.jpg" width="960" height="438" filter="url(#lum)"/></svg></span>
+      </div>
+      </div>
+      <div class="zone">
+      <div class="fengine"><b>The engine:</b> EAN · XML · CSV · API · live monitoring · AI analysis &amp; reporting</div>
+      <div class="ftag">DATA-DRIVEN <span class="amb">STOCK</span> TRADING</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== S2: RIGHT WALL FLAT ===================== -->
+<section class="section" id="s2">
+  <div class="slab"><b>03</b> · Prawa ściana (płaska)</div>
+  <div class="wall">
+    <div class="pad">
+      <div class="flook">We are looking for:</div>
+      <div class="frows">
+        <div class="frow"><div class="h">FOR <span class="amb">SUPPLIERS</span></div><div class="s">we buy your overstock, clearance &amp; returns</div></div>
+        <div class="frow"><div class="h">FOR <span class="amb">SELLERS</span></div><div class="s">we sell it back at the market's best price</div></div>
+        <div class="frow"><div class="h">PRICED BY <span class="amb">DATA</span></div><div class="s">every deal priced by analytics, not guesswork</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== S3: WIDEO v1 ===================== -->
+<section class="section" id="s3">
+  <div class="slab"><b>04</b> · Demo na TV — <b style="color:var(--amber)">wideo v1</b> (kino Veo + dane)</div>
+  <div class="embed"><iframe src="demo-market-router-video.html" title="wideo v1" loading="lazy"></iframe></div>
+</section>
+
+<!-- ===================== S4: ANIMACJA BEZ WIDEO ===================== -->
+<section class="section" id="s4">
+  <div class="slab"><b>05</b> · Demo na TV — <b style="color:var(--amber)">animacja bez wideo</b> (mapa w kodzie)</div>
+  <div class="embed"><iframe src="demo-market-router.html" title="animacja" loading="lazy"></iframe></div>
+</section>
+
+<script>
+// ruch myszką — dokładnie jak w oryginalnym mockupie
+const scene=document.getElementById('scene');
+const room=document.getElementById('room');
+let txT=50,tyT=46,ryT=0,rxT=0, tx=50,ty=46,ry=0,rx=0;
+// opcjonalny preset kąta dla statycznych zrzutów (#left/#right); bez hasha = domyślnie na wprost
+const _PRE={left:[-15,3],right:[15,3]}; const _p=_PRE[location.hash.replace('#','')];
+if(_p){ txT=50-_p[0]*1.6; ryT=_p[0]; rxT=_p[1]; }
+scene.addEventListener('pointermove',e=>{
+  const r=scene.getBoundingClientRect();
+  const x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height;
+  txT=50+(x-0.5)*92; tyT=46+(y-0.5)*54; ryT=(x-0.5)*-26; rxT=(y-0.5)*12;
+});
+function reset(){ txT=50; tyT=46; ryT=0; rxT=0; }
+scene.addEventListener('pointerleave',reset);
+(function loop(){
+  const k=0.11;
+  tx+=(txT-tx)*k; ty+=(tyT-ty)*k; ry+=(ryT-ry)*k; rx+=(rxT-rx)*k;
+  scene.style.perspectiveOrigin=tx.toFixed(2)+'% '+ty.toFixed(2)+'%';
+  room.style.transform='translateZ(-40px) scale(1.16) rotateY('+ry.toFixed(2)+'deg) rotateX('+rx.toFixed(2)+'deg)';
+  requestAnimationFrame(loop);
+})();
+</script>
+<button type="button" class="designbtn" id="designbtn"></button>
+<script>
+  (function(){ var r=document.documentElement, b=document.getElementById('designbtn');
+    function l(){ b.textContent = r.getAttribute('data-theme')==='light' ? 'design v2 · jasny' : 'design v1 · ciemny'; }
+    l(); b.addEventListener('click', function(){
+      var n = r.getAttribute('data-theme')==='light' ? 'dark' : 'light';
+      r.setAttribute('data-theme', n);
+      try{ localStorage.setItem('ifa-design', n); }catch(e){}
+      l(); });
+  })();
+</script>
+</body>
+</html>
