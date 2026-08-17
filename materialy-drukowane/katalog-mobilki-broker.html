@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mobilki GSM — Wholesale Phones Catalog (IFA 2026)</title>
+<style>
+  :root{
+    --bg:#0A0B0E; --bg2:#14161D; --bg3:#101219;
+    --ink:#EDEAE0; --parch:#E7DCC2;
+    --amber:#FFB020; --teal:#2FE3C6;
+    --line:rgba(231,220,194,.14);
+    --mut:rgba(237,234,224,.60);
+    --disp:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --mono:"SF Mono","Menlo","Consolas",monospace;
+    /* Mobilki identity: teal-forward */
+    --accent:var(--teal); --accent2:var(--amber);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#26282e;color:var(--ink);font-family:var(--disp)}
+  .sheet{position:relative;width:210mm;height:297mm;margin:8mm auto;background:var(--bg);
+    overflow:hidden;padding:15mm 15mm;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+  .sheet::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(120% 70% at 0% 0%,rgba(47,227,198,.06),transparent 55%),
+               radial-gradient(120% 70% at 100% 100%,rgba(255,176,32,.04),transparent 52%)}
+  .sheet > *{position:relative;z-index:1}
+  .pglabel{position:absolute;top:4mm;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:6pt;color:rgba(237,234,224,.22);letter-spacing:.2em}
+
+  .wordmark{font-weight:800;letter-spacing:.1em}
+  .wordmark .g{color:var(--accent)}
+
+  .rhead{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);
+    font-size:7.5pt;color:var(--mut);letter-spacing:.1em;border-bottom:1px solid var(--line);padding-bottom:4mm;margin-bottom:10mm}
+  .rhead .wordmark{font-size:10pt}
+  .rfoot{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:7pt;
+    color:var(--mut);letter-spacing:.1em;border-top:1px solid var(--line);padding-top:4mm;margin-top:auto}
+  .rfoot .acc{color:var(--accent)}
+
+  .eyebrow{font-family:var(--mono);font-size:9pt;color:var(--accent);letter-spacing:.28em;text-transform:uppercase;margin-bottom:6mm}
+  h2{font-weight:800;font-size:24pt;text-transform:uppercase;letter-spacing:-.01em;line-height:1.02;margin-bottom:7mm}
+  h2 .acc{color:var(--accent)}
+  p.body{font-size:11pt;line-height:1.55;color:var(--parch);max-width:160mm}
+  p.body b{color:var(--ink)}
+
+  /* COVER */
+  .cover{justify-content:space-between;padding:20mm 16mm}
+  .cover .topbar{display:flex;justify-content:space-between;align-items:flex-start}
+  .cover .wordmark{font-size:20pt}
+  .cover .badge{text-align:right;font-family:var(--mono);font-size:8pt;color:var(--mut);line-height:1.6;letter-spacing:.08em}
+  .cover .badge b{color:var(--accent);display:block;font-size:9pt;letter-spacing:.14em}
+  .cover .hero{margin-top:auto}
+  .cover .kick{font-family:var(--mono);font-size:10pt;color:var(--accent);letter-spacing:.3em;text-transform:uppercase;margin-bottom:8mm}
+  .cover h1{font-weight:800;font-size:50pt;line-height:.95;letter-spacing:-.02em;text-transform:uppercase}
+  .cover h1 .acc{color:var(--accent)}
+  .cover .tag{font-size:13pt;color:var(--parch);margin-top:8mm}
+  .cover .cbottom{margin-top:14mm;display:flex;justify-content:space-between;align-items:flex-end;
+    border-top:1px solid var(--line);padding-top:6mm;font-family:var(--mono);font-size:8.5pt;color:var(--mut);letter-spacing:.1em}
+  .cover .cbottom .big{color:var(--accent);font-weight:600}
+  .cover .partof{font-family:var(--mono);font-size:7.5pt;color:var(--mut);letter-spacing:.1em}
+  .cover .partof b{color:var(--parch)}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;margin:8mm 0}
+  .kpi{background:var(--bg2);border:1px solid var(--line);border-radius:3mm;padding:6mm 5mm}
+  .kpi .n{font-weight:800;font-size:22pt;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .kpi .n.t{color:var(--accent)} .kpi .n.a{color:var(--accent2)}
+  .kpi .n .fill{color:var(--mut);font-size:13pt}
+  .kpi .l{font-family:var(--mono);font-size:7.5pt;color:var(--mut);margin-top:2.5mm;letter-spacing:.04em;line-height:1.35}
+
+  .toc{list-style:none;margin-top:4mm}
+  .toc li{display:flex;align-items:baseline;gap:5mm;padding:5mm 0;border-bottom:1px solid var(--line)}
+  .toc .n{font-family:var(--mono);font-size:10pt;color:var(--accent);width:12mm}
+  .toc .t{font-weight:800;font-size:14pt;text-transform:uppercase;letter-spacing:.02em;flex:1}
+  .toc .p{font-family:var(--mono);font-size:9pt;color:var(--mut)}
+
+  /* GRADING TABLE */
+  .grade{width:100%;border-collapse:collapse;margin-top:2mm;font-size:9.5pt}
+  .grade th{text-align:left;font-family:var(--mono);font-size:8pt;color:var(--accent);letter-spacing:.08em;
+    text-transform:uppercase;padding:4mm;border-bottom:2px solid var(--accent)}
+  .grade td{padding:4.5mm 4mm;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.4;color:var(--parch)}
+  .grade td.g{font-weight:800;font-size:14pt;color:var(--ink);width:20mm}
+  .grade tr td.g .badge{display:inline-block;font-family:var(--mono);font-size:7pt;color:var(--accent);
+    background:rgba(47,227,198,.1);border:1px solid rgba(47,227,198,.3);border-radius:1.5mm;padding:1mm 2mm;margin-top:2mm;letter-spacing:.04em}
+  .grade td b{color:var(--ink)}
+
+  .spec-row{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm;margin-top:6mm}
+  .spec{background:var(--bg3);border:1px solid var(--line);border-radius:3mm;padding:6mm}
+  .spec .n{font-weight:800;font-size:20pt;color:var(--accent);line-height:1}
+  .spec .n.a{color:var(--accent2)}
+  .spec .l{font-family:var(--mono);font-size:8pt;color:var(--mut);margin-top:2.5mm;line-height:1.4;letter-spacing:.03em}
+
+  /* PROCESS steps */
+  .proc{display:grid;grid-template-columns:repeat(2,1fr);gap:4mm;margin-top:4mm}
+  .pstep{background:var(--bg3);border:1px solid var(--line);border-radius:3mm;padding:6mm}
+  .pstep .h{display:flex;align-items:baseline;gap:3mm;margin-bottom:2.5mm}
+  .pstep .k{font-family:var(--mono);font-size:9pt;color:var(--accent2);font-weight:700}
+  .pstep h3{font-weight:800;font-size:11.5pt;text-transform:uppercase;letter-spacing:.02em}
+  .pstep p{font-size:9.5pt;line-height:1.45;color:var(--mut)}
+  .pstep p b{color:var(--parch)}
+
+  /* STOCK LIST format */
+  .stock{width:100%;border-collapse:collapse;margin-top:2mm;font-size:9.5pt;font-family:var(--mono)}
+  .stock th{text-align:left;font-size:8pt;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;
+    padding:3.5mm 3mm;border-bottom:2px solid var(--accent)}
+  .stock td{padding:3.5mm 3mm;border-bottom:1px solid var(--line);color:var(--parch)}
+  .stock td.model{color:var(--ink);font-family:var(--disp);font-weight:600}
+  .stock .gr{color:var(--accent);font-weight:700}
+  .stock .demo td{color:var(--mut);font-style:italic}
+
+  .terms{width:100%;border-collapse:collapse;margin-top:6mm;font-size:10pt}
+  .terms td{padding:4.5mm 4mm;border-bottom:1px solid var(--line);vertical-align:top}
+  .terms td.k{font-family:var(--mono);font-size:8.5pt;color:var(--accent);letter-spacing:.06em;width:46mm;text-transform:uppercase}
+  .terms td.v{color:var(--parch);line-height:1.4}
+  .terms td.v b{color:var(--ink)}
+  .terms td.v .fill{color:var(--accent2);font-family:var(--mono);font-size:8.5pt}
+
+  .note{font-family:var(--mono);font-size:8pt;color:var(--mut);line-height:1.5;margin-top:6mm;
+    border-left:2px solid var(--accent);padding-left:5mm;letter-spacing:.02em}
+  .note b{color:var(--parch)}
+
+  /* BACK COVER */
+  .backcover{justify-content:space-between;padding:20mm 16mm}
+  .backcover .big{font-weight:800;font-size:30pt;text-transform:uppercase;line-height:1.05;letter-spacing:-.01em}
+  .backcover .big .acc{color:var(--accent)}
+  .cta-card{background:linear-gradient(135deg,rgba(47,227,198,.13),rgba(255,176,32,.06));
+    border:1px solid rgba(47,227,198,.32);border-radius:3mm;padding:9mm;display:grid;grid-template-columns:1fr 34mm;gap:7mm;align-items:center;margin-top:auto}
+  .cta-card h3{font-weight:800;font-size:15pt;text-transform:uppercase;margin-bottom:4mm}
+  .cta-card h3 .acc{color:var(--accent)}
+  .cta-card .contact{font-family:var(--mono);font-size:9.5pt;color:var(--parch);line-height:1.8}
+  .cta-card .contact b{color:var(--accent)}
+  .qr{width:34mm;height:34mm;background:var(--ink);border-radius:2mm;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:7pt;color:#0A0B0E;text-align:center;padding:3mm}
+  .disclaimer{font-family:var(--mono);font-size:6.5pt;color:rgba(237,234,224,.38);line-height:1.6;margin-top:8mm;letter-spacing:.02em}
+
+  @media print{html,body{background:#fff}.sheet{margin:0;box-shadow:none;page-break-after:always}.pglabel{display:none}@page{size:A4;margin:0}}
+</style>
+<style id="design-v2">
+  /* ---- DESIGN v2 (jasny) — paleta z oferty detal. v1 (ciemny) zostaje domyślny. ----
+     Akcja/akcent w v2 = #0E9C86; drugi akcent to jego ciemniejszy wariant, żeby
+     drobne etykiety mono nie ginęły na kremowym tle. */
+  :root[data-theme="light"]{
+    --bg:#F4F1E9; --bg2:#FFFFFF; --bg3:#EDE8DB;
+    --ink:#15171E; --parch:#2A2E3A;
+    --amber:#0E9C86; --teal:#0B7C6B;
+    --line:#DED8C7;
+    --mut:#5A5D68;
+  }
+  :root[data-theme="light"] .qr{color:var(--bg)}            /* QR: jasny tekst na ciemnym polu */
+  :root[data-theme="light"] feFlood{flood-color:#15171E}    /* logotypy marketplace na ciemno */
+  :root[data-theme="light"]{background:#DED8C7}          /* tło poza arkuszem/ścianą */
+  :root[data-theme="light"] body{background:#DED8C7}
+  :root[data-theme="light"] .sheet,:root[data-theme="light"] .wall{background:var(--bg)}
+  .designbtn{position:fixed;right:14px;bottom:14px;z-index:999;cursor:pointer;
+    font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--mut);background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:8px 12px}
+  .designbtn:hover{color:var(--ink)}
+  @media print{.designbtn{display:none}}
+</style>
+<script>
+  (function(){ try{ var t=localStorage.getItem('ifa-design');
+    if(t) document.documentElement.setAttribute('data-theme',t); }catch(e){} })();
+</script>
+</head>
+<body>
+
+<!-- ===== P1 · COVER ===== -->
+<section class="sheet cover">
+  <span class="pglabel">CATALOG · COVER</span>
+  <div class="topbar">
+    <div class="wordmark">MOBILKI <span class="g">GSM</span></div>
+    <div class="badge"><b>IFA 2026</b>Hall H27E-17<br>Reseller Park<br>Berlin · 4–8 Sep</div>
+  </div>
+  <div class="hero">
+    <div class="kick">Wholesale phones · We buy &amp; we sell</div>
+    <h1>Graded.<br>Warranted.<br><span class="acc">In stock.</span></h1>
+    <p class="tag">Wholesale new &amp; refurbished smartphones — every unit graded, tested and warranted. We also buy: trade-in, buyback, overstock and returns.</p>
+  </div>
+  <div class="cbottom">
+    <span class="partof">Part of the <b>Monstelo</b> group · mobilki · gsm.pl</span>
+    <span class="big">gsm.pl</span>
+  </div>
+</section>
+
+<!-- ===== P2 · WHO WE ARE + TOC ===== -->
+<section class="sheet">
+  <span class="pglabel">CATALOG · P2</span>
+  <div class="rhead"><span class="wordmark">MOBILKI <span class="g">GSM</span></span><span>WHOLESALE PHONES · IFA 2026</span></div>
+
+  <div class="eyebrow">Who we are</div>
+  <h2>Trade phones<br>you can <span class="acc">trust</span></h2>
+  <p class="body">Mobilki GSM supplies resellers with <b>new and refurbished smartphones</b> at wholesale. Every refurbished unit is graded to a published standard, functionally tested, factory-reset and covered by warranty — so what you order is what you get.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n a">up to 12</div><div class="l">months<br>warranty</div></div>
+    <div class="kpi"><div class="n t">≥85%</div><div class="l">min. battery<br>health (refurb)</div></div>
+    <div class="kpi"><div class="n"><span class="fill">[point]</span></div><div class="l">functional<br>test steps</div></div>
+    <div class="kpi"><div class="n"><span class="fill">[RMA %]</span></div><div class="l">return<br>rate</div></div>
+  </div>
+
+  <div class="eyebrow" style="margin-top:6mm">Inside this catalog</div>
+  <ul class="toc">
+    <li><span class="n">01</span><span class="t">Grading standard</span><span class="p">p.3</span></li>
+    <li><span class="n">02</span><span class="t">Testing &amp; warranty</span><span class="p">p.4</span></li>
+    <li><span class="n">03</span><span class="t">Stock list &amp; buyback</span><span class="p">p.5</span></li>
+    <li><span class="n">04</span><span class="t">Trade with us</span><span class="p">p.6</span></li>
+  </ul>
+
+  <div class="rfoot"><span class="acc">GRADED · WARRANTED · IN STOCK</span><span>02</span></div>
+</section>
+
+<!-- ===== P3 · GRADING STANDARD ===== -->
+<section class="sheet">
+  <span class="pglabel">CATALOG · P3</span>
+  <div class="rhead"><span class="wordmark">MOBILKI <span class="g">GSM</span></span><span>01 · GRADING STANDARD</span></div>
+
+  <div class="eyebrow">Grading standard</div>
+  <h2>One scale.<br>No <span class="acc">surprises.</span></h2>
+  <p class="body">Cosmetic grades match functional performance — a fleet buyer's grade means the same thing every time.</p>
+
+  <table class="grade">
+    <tr><th>Grade</th><th>Cosmetic condition</th><th>Function &amp; battery</th></tr>
+    <tr>
+      <td class="g">A+<div class="badge">as new</div></td>
+      <td>No visible marks. Indistinguishable from new under normal use.</td>
+      <td><b>Fully functional.</b> Battery health ≥ 90%.</td>
+    </tr>
+    <tr>
+      <td class="g">A<div class="badge">excellent</div></td>
+      <td>Very light micro-marks, invisible at arm's length. No screen damage.</td>
+      <td><b>Fully functional.</b> Battery health ≥ 88%.</td>
+    </tr>
+    <tr>
+      <td class="g">B<div class="badge">good</div></td>
+      <td>Light visible signs of use — minor scratches, no cracks.</td>
+      <td><b>Fully functional.</b> Battery health ≥ 85%.</td>
+    </tr>
+    <tr>
+      <td class="g">C<div class="badge">fair</div></td>
+      <td>Clearly used — deeper scratches / marks, screen intact and clear.</td>
+      <td><b>Fully functional.</b> Battery health ≥ 80%.</td>
+    </tr>
+  </table>
+
+  <div class="note"><b>Grade thresholds shown are the proposed Mobilki standard</b> — align final battery-health cut-offs and cosmetic wording with your actual QC before print. New (sealed) units are sold as <b>Brand New</b>, separate from the refurbished grades above.</div>
+
+  <div class="rfoot"><span class="acc">GRADED · WARRANTED · IN STOCK</span><span>03</span></div>
+</section>
+
+<!-- ===== P4 · TESTING & WARRANTY ===== -->
+<section class="sheet">
+  <span class="pglabel">CATALOG · P4</span>
+  <div class="rhead"><span class="wordmark">MOBILKI <span class="g">GSM</span></span><span>02 · TESTING &amp; WARRANTY</span></div>
+
+  <div class="eyebrow">Every unit, before it ships</div>
+  <h2>Tested, wiped,<br><span class="acc">warranted</span></h2>
+
+  <div class="proc">
+    <div class="pstep"><div class="h"><span class="k">01</span><h3>Full diagnostics</h3></div><p>Multi-point functional test — screen, battery health, cameras, buttons, connectivity, sensors. <b>Report per unit.</b></p></div>
+    <div class="pstep"><div class="h"><span class="k">02</span><h3>Data wipe &amp; reset</h3></div><p>Factory reset and certified data erasure. <b>iCloud / FRP lock checked and cleared.</b></p></div>
+    <div class="pstep"><div class="h"><span class="k">03</span><h3>Grading</h3></div><p>Cosmetic grade assigned to the published A+/A/B/C standard, cross-checked against function.</p></div>
+    <div class="pstep"><div class="h"><span class="k">04</span><h3>Warranty</h3></div><p><b>Up to 12 months</b> warranty on refurbished units. Clear RMA process for trade buyers.</p></div>
+  </div>
+
+  <div class="spec-row">
+    <div class="spec"><div class="n">≥85%</div><div class="l">minimum battery<br>health (Grade C+)</div></div>
+    <div class="spec"><div class="n a">12 mo</div><div class="l">warranty on<br>refurbished</div></div>
+    <div class="spec"><div class="n"><span style="color:var(--mut);font-size:14pt">[point]</span></div><div class="l">functional test<br>steps <span style="color:var(--accent2)">[confirm]</span></div></div>
+  </div>
+
+  <div class="note"><b>Trust numbers to confirm:</b> exact functional test-step count, IMEI/blacklist check policy, RMA rate and warranty terms. These are the figures fleet buyers ask for — lock them with ops before this goes to print.</div>
+
+  <div class="rfoot"><span class="acc">GRADED · WARRANTED · IN STOCK</span><span>04</span></div>
+</section>
+
+<!-- ===== P5 · STOCK LIST & BUYBACK ===== -->
+<section class="sheet">
+  <span class="pglabel">CATALOG · P5</span>
+  <div class="rhead"><span class="wordmark">MOBILKI <span class="g">GSM</span></span><span>03 · STOCK &amp; BUYBACK</span></div>
+
+  <div class="eyebrow">How stock is listed</div>
+  <h2>Live stock,<br>clear <span class="acc">columns</span></h2>
+  <p class="body">Trade stock is quoted per model, grade, capacity and quantity — full live list on request or via QR.</p>
+
+  <table class="stock">
+    <tr><th>Model</th><th>Capacity</th><th>Grade</th><th>Qty</th><th>Color</th></tr>
+    <tr class="demo"><td class="model">iPhone 13</td><td>128 GB</td><td class="gr">A</td><td>—</td><td>Midnight</td></tr>
+    <tr class="demo"><td class="model">iPhone 12</td><td>64 GB</td><td class="gr">B</td><td>—</td><td>Black</td></tr>
+    <tr class="demo"><td class="model">Samsung S22</td><td>128 GB</td><td class="gr">A+</td><td>—</td><td>Graphite</td></tr>
+    <tr class="demo"><td class="model">Xiaomi 12</td><td>256 GB</td><td class="gr">C</td><td>—</td><td>Blue</td></tr>
+  </table>
+  <div class="note" style="margin-top:4mm"><b>Illustrative format only</b> — live models, quantities and pricing are shared per account. Not a price list.</div>
+
+  <div class="eyebrow" style="margin-top:8mm">Buyback &amp; trade-in</div>
+  <table class="terms">
+    <tr><td class="k">Buyback</td><td class="v">We buy graded stock and end-of-life fleets. <span class="fill">[terms / min. volume — confirm]</span></td></tr>
+    <tr><td class="k">Trade-in</td><td class="v">Trade your old inventory against new orders. <span class="fill">[terms — confirm]</span></td></tr>
+    <tr><td class="k">Volume</td><td class="v">Wholesale lots and single-SKU bulk. <span class="fill">[MOQ — confirm]</span></td></tr>
+  </table>
+
+  <div class="rfoot"><span class="acc">GRADED · WARRANTED · IN STOCK</span><span>05</span></div>
+</section>
+
+<!-- ===== P6 · BACK COVER / CTA ===== -->
+<section class="sheet backcover">
+  <span class="pglabel">CATALOG · BACK</span>
+  <div class="topbar" style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div class="wordmark" style="font-size:15pt">MOBILKI <span class="g">GSM</span></div>
+    <div class="badge" style="text-align:right;font-family:var(--mono);font-size:8pt;color:var(--mut);letter-spacing:.08em">Hall H27E-17 · Reseller Park</div>
+  </div>
+
+  <div style="margin-top:24mm">
+    <div class="eyebrow">Trade with us</div>
+    <div class="big">Your next<br>wholesale <span class="acc">order.</span></div>
+  </div>
+
+  <div class="cta-card">
+    <div>
+      <h3>Meet us at <span class="acc">stand H27E-17</span></h3>
+      <div class="contact">
+        <b>Wholesale &amp; buyback:</b> [name]<br>
+        [email] &nbsp;·&nbsp; WhatsApp [ ]<br>
+        IFA Berlin · 4–8 Sep 2026
+      </div>
+    </div>
+    <div class="qr">QR → live stock list</div>
+  </div>
+
+  <p class="disclaimer">All trademarks, brand names and model names (Apple, iPhone, Samsung, Xiaomi and others) are the property of their respective owners and are used for identification purposes only. Mobilki GSM is an independent wholesaler and is not affiliated with, authorised by, or endorsed by these brands. "Refurbished" units are pre-owned, professionally tested and graded; they are not new and are not sold as original-manufacturer refurbished unless explicitly stated. Grade thresholds, warranty terms and stock examples shown are illustrative and to be confirmed before print.</p>
+</section>
+
+<button type="button" class="designbtn" id="designbtn"></button>
+<script>
+  (function(){ var r=document.documentElement, b=document.getElementById('designbtn');
+    function l(){ b.textContent = r.getAttribute('data-theme')==='light' ? 'design v2 · jasny' : 'design v1 · ciemny'; }
+    l(); b.addEventListener('click', function(){
+      var n = r.getAttribute('data-theme')==='light' ? 'dark' : 'light';
+      r.setAttribute('data-theme', n);
+      try{ localStorage.setItem('ifa-design', n); }catch(e){}
+      l(); });
+  })();
+</script>
+</body>
+</html>

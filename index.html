@@ -1,72 +1,226 @@
-<title>MARKET ROUTER — IFA Berlin 2026 · Monstelo × Mobilki GSM</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IFA Berlin 2026 — Monstelo × Mobilki GSM · materiały v3</title>
+<meta name="robots" content="noindex">
 <style>
-  :root{--bg0:#0A0B0E;--bg1:#14161D;--line:#2A2E3A;--ink:#EDEAE0;--ink2:#E7DCC2;--mut:#8b8e99;
-    --amber:#FFB020;--teal:#2FE3C6;--grot:"Helvetica Neue",Helvetica,Arial,sans-serif;--fc:ui-monospace,Menlo,monospace}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:radial-gradient(120% 90% at 50% -10%,#181b22,var(--bg0));color:var(--ink);
-    font-family:var(--grot);min-height:100vh;padding:clamp(24px,5vw,72px)}
-  .wrap{max-width:980px;margin:0 auto}
-  .kick{font-family:var(--fc);font-size:13px;letter-spacing:.3em;color:var(--teal);text-transform:uppercase}
-  h1{font-size:clamp(36px,7vw,72px);font-weight:800;letter-spacing:-.01em;margin:.2em 0 .1em;line-height:.98}
-  h1 b{color:var(--amber)}
-  .verbs{font-family:var(--fc);letter-spacing:.34em;color:var(--mut);font-size:clamp(13px,2.4vw,18px);margin-bottom:6px}
-  .sub{color:var(--mut);font-size:15px;max-width:60ch;margin-bottom:40px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-  a.card{display:block;text-decoration:none;color:inherit;background:linear-gradient(180deg,var(--bg1),var(--bg0));
-    border:1px solid var(--line);border-radius:14px;padding:22px 22px;position:relative;overflow:hidden;
-    transition:border-color .2s,transform .2s}
-  a.card:hover{border-color:var(--teal);transform:translateY(-2px)}
-  a.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tag,var(--amber))}
-  .card .n{font-family:var(--fc);font-size:12px;color:var(--mut);letter-spacing:.14em}
-  .card h3{font-size:20px;font-weight:700;margin:.35em 0 .3em}
-  .card p{font-size:13.5px;color:var(--ink2);line-height:1.5}
-  .card .go{font-family:var(--fc);font-size:12px;color:var(--teal);margin-top:12px;letter-spacing:.1em}
-  footer{margin-top:44px;border-top:1px solid var(--line);padding-top:16px;color:var(--mut);font-family:var(--fc);font-size:12px;
-    display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:space-between}
+  :root{
+    --bg:#0A0B0E; --bg2:#14161D; --surf:#0C0D12;
+    --ink:#EDEAE0; --ink2:#E7DCC2; --mut:#8A8D98; --line:#23262F;
+    --teal:#2FE3C6; --amber:#FFB020; --red:#FF6B5A;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  }
+  :root[data-theme="light"]{
+    --bg:#F4F1E9; --bg2:#EDE8DB; --surf:#fff;
+    --ink:#15171E; --ink2:#3A3D48; --mut:#5A5D68; --line:#DED8C7;
+    --teal:#0E9C86; --amber:#B57A0C; --red:#C0392B;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans)}
+  .wrap{max-width:1080px;margin:0 auto;padding:48px 24px 96px}
+
+  header{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:40px}
+  .wordmark{font-weight:800;font-size:20px;letter-spacing:-.01em}
+  .wordmark .dot{color:var(--teal)}
+  .kick{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--mut);margin:22px 0 10px}
+  h1{font-size:clamp(30px,5vw,52px);line-height:1.02;font-weight:800;letter-spacing:-.02em;margin:0}
+  h1 .amb{color:var(--amber)}
+  .sub{color:var(--mut);font-size:15px;margin:14px 0 0;max-width:62ch;line-height:1.55}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:20px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+  .meta b{color:var(--ink);font-weight:600}
+
+  h2{font-size:13px;font-family:var(--mono);letter-spacing:.2em;text-transform:uppercase;
+    color:var(--teal);margin:44px 0 4px;font-weight:600}
+  .h2note{color:var(--mut);font-size:13px;margin:0 0 18px}
+
+  .grid{display:grid;gap:10px}
+  .row{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;
+    background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:14px 16px;
+    text-decoration:none;color:inherit;transition:border-color .15s,transform .15s}
+  a.row:hover{border-color:var(--teal);transform:translateY(-1px)}
+  .row .t{font-weight:600;font-size:15px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .row .d{color:var(--mut);font-size:13px;margin-top:4px;line-height:1.5}
+  .row .go{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--mut);white-space:nowrap}
+  a.row:hover .go{color:var(--teal)}
+
+  .tag{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    padding:3px 7px;border-radius:999px;border:1px solid var(--line);color:var(--mut)}
+  .tag.v3{color:var(--teal);border-color:var(--teal)}
+  .tag.old{color:var(--mut)}
+  .tag.warn{color:var(--amber);border-color:var(--amber)}
+  .tag.pdf{color:var(--ink2)}
+
+  .files{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .files a{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-decoration:none;
+    color:var(--ink2);border:1px solid var(--line);border-radius:6px;padding:4px 9px}
+  .files a:hover{border-color:var(--teal);color:var(--teal)}
+  .card{background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .card .t{font-weight:600;font-size:15px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .card .d{color:var(--mut);font-size:13px;margin-top:4px;line-height:1.5}
+
+  .note{border-left:2px solid var(--amber);background:var(--bg2);padding:12px 16px;border-radius:0 8px 8px 0;
+    color:var(--ink2);font-size:13px;line-height:1.6;margin:18px 0 0}
+  .note b{color:var(--amber)}
+
+  footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);
+    color:var(--mut);font-size:12px;line-height:1.7}
+  .designbtn{position:fixed;right:14px;bottom:14px;z-index:99;cursor:pointer;
+    font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--mut);background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:8px 12px}
+  .designbtn:hover{color:var(--ink)}
+  @media(max-width:640px){ .row{grid-template-columns:1fr} .row .go{display:none} }
 </style>
+<script>
+  (function(){ try{ var t=localStorage.getItem('ifa-design'); if(t) document.documentElement.setAttribute('data-theme',t);}catch(e){} })();
+</script>
+</head>
+<body>
 <div class="wrap">
-  <div class="kick">IFA Berlin 2026 · Reseller Park · H27E-17 · 4–8.09</div>
-  <div class="verbs">LAUNCH · SELL · RESELL</div>
-  <h1>MARKET <b>ROUTER</b></h1>
-  <p class="sub">Podgląd koncepcji stoiska Monstelo × Mobilki GSM — data-driven partner „od EAN do Europy". Kliknij, żeby zobaczyć.</p>
 
-  <div class="grid">
-    <a class="card" href="stoisko-mockup.html" style="--tag:var(--teal)">
-      <div class="n">01 · GŁÓWNY</div><h3>Mockup 3D + prezentacja</h3>
-      <p>Stoisko z perspektywy odwiedzającego (ruch myszką) + przewijanie: ściany, wideo, animacja.</p>
-      <div class="go">Otwórz →</div>
-    </a>
-    <a class="card" href="stoisko-rzut.html" style="--tag:var(--amber)">
-      <div class="n">02</div><h3>Rzut stoiska</h3>
-      <p>Realny układ organizatora: tylna ściana + TV, dwie boczne, lada. Co nasze, co organizatora.</p>
-      <div class="go">Otwórz →</div>
-    </a>
-    <a class="card" href="stoisko-sciany.html" style="--tag:var(--amber)">
-      <div class="n">03</div><h3>Ściany — płaskie</h3>
-      <p>Data Engine + Choose your path w proporcji do druku. Do zrzutu jako tekstura.</p>
-      <div class="go">Otwórz →</div>
-    </a>
-    <a class="card" href="stoisko-elewacja.html" style="--tag:var(--amber)">
-      <div class="n">04</div><h3>Elewacja / panele</h3>
-      <p>Panele złożone we wnętrze + rozłożone w realnych proporcjach.</p>
-      <div class="go">Otwórz →</div>
-    </a>
-    <a class="card" href="demo-market-router-video.html" style="--tag:var(--teal)">
-      <div class="n">05 · NA TV</div><h3>Demo — wideo v1</h3>
-      <p>Kino (mapa Veo) w tle + dokładne dane: cena zakupu, skan rynków, rekomendacje.</p>
-      <div class="go">Otwórz →</div>
-    </a>
-    <a class="card" href="demo-market-router.html" style="--tag:var(--teal)">
-      <div class="n">06 · NA TV</div><h3>Demo — animacja (kod)</h3>
-      <p>Mapa Europy rysowana w kodzie + ta sama narracja. Wariant bez wideo.</p>
-      <div class="go">Otwórz →</div>
-    </a>
+<header>
+  <div class="wordmark">MONSTELO<span class="dot">.</span> <span style="color:var(--mut);font-weight:400">× mobilki gsm.pl</span></div>
+  <div class="kick">IFA Berlin 2026 · Reseller Park · H27E-17 · 4–8 Sep</div>
+  <h1>Overstock in.<br>Best price <span class="amb">out.</span></h1>
+  <p class="sub">Wszystkie materiały w wariancie <b style="color:var(--ink)">v3 — broker nadwyżek</b>. Warianty A („Market router") i B („Win the market") zostają w archiwum na dole strony.</p>
+  <div class="meta">
+    <span><b>241</b> brands</span><span><b>28</b> EU markets</span>
+    <span><b>~8000</b> prices tracked</span><span><b>~80%</b> shipped in 24h</span>
   </div>
+</header>
 
-  <footer>
-    <span>MONSTELO × MOBILKI GSM</span>
-    <span>podgląd roboczy · dane KPI hero</span>
-    <span>2026</span>
-  </footer>
+<h2>Stoisko</h2>
+<p class="h2note">Wizualizacja dla zarządu i ściany jako baza do druku wielkoformatowego (2 × 3 × 2,5 m).</p>
+<div class="grid">
+  <a class="row" href="stoisko-wizualizacja-broker.html">
+    <div>
+      <div class="t">Wizualizacja 3D + prezentacja <span class="tag v3">v3</span></div>
+      <div class="d">Stoisko z perspektywy odwiedzającego — ruch myszką, przewijane sceny: ściany, wideo, animacja TV.</div>
+    </div>
+    <span class="go">Otwórz →</span>
+  </a>
+  <a class="row" href="stoisko-sciany-broker.html">
+    <div>
+      <div class="t">Ściany płaskie — do druku <span class="tag v3">v3</span> <span class="tag warn">tylko ciemny</span></div>
+      <div class="d">Lewa i prawa ściana w proporcji 3 × 2,5 m. Prawa: FOR SUPPLIERS / FOR SELLERS / PRICED BY DATA.</div>
+    </div>
+    <span class="go">Otwórz →</span>
+  </a>
+  <a class="row" href="demo-tv.html">
+    <div>
+      <div class="t">Demo TV — animacja <span class="tag old">wariant A</span> <span class="tag warn">ceny placeholder</span></div>
+      <div class="d">Pętla na pionowy ekran. Ceny w demo są zmyślone — do podmiany przed targami.</div>
+    </div>
+    <span class="go">Otwórz →</span>
+  </a>
 </div>
+
+<h2>Strony www</h2>
+<p class="h2note">Landing lead-gen na QR ze stoiska i strona firmowa na czas targów.</p>
+<div class="grid">
+  <a class="row" href="landing-broker/">
+    <div>
+      <div class="t">Landing lead-gen <span class="tag v3">v3</span> <span class="tag warn">formularz nie wysyła</span></div>
+      <div class="d">Dwie drogi: „You buy from us" (2 katalogi) i „You sell to us" (skup nadwyżek). Marka i HUB jako linki „also". Brakuje <code>FORM_ENDPOINT</code>, kontaktu i domeny.</div>
+    </div>
+    <span class="go">Otwórz →</span>
+  </a>
+  <a class="row" href="strona-ifa-broker.html">
+    <div>
+      <div class="t">Strona firmowa IFA <span class="tag v3">v3</span> <span class="tag warn">prototyp</span></div>
+      <div class="d">Hero v3 + „margin engine" (siedem zdarzeń przychodowych z jednego klienta). Ma jeszcze banner „nie publikować" i sekcje w głosie B.</div>
+    </div>
+    <span class="go">Otwórz →</span>
+  </a>
+</div>
+
+<h2>Materiały drukowane</h2>
+<p class="h2note">Makiety ekranowe (RGB). Do drukarni idzie PDF/X w CMYK ze spadami 3 mm — jeszcze niezrobione.</p>
+<div class="grid">
+  <div class="card">
+    <div class="t">Katalog B2B — Monstelo <span class="tag v3">v3</span> <span class="tag pdf">7 × A4</span></div>
+    <div class="d">Elektronika użytkowa. Line card 12 kategorii, bestsellery z realnej sprzedaży, warunki handlowe, skąd bierzemy stock.</div>
+    <div class="files">
+      <a href="materialy-drukowane/katalog-monstelo-broker.html">HTML</a>
+      <a href="materialy-drukowane/katalog-monstelo-broker.pdf">PDF</a>
+    </div>
+  </div>
+  <div class="card">
+    <div class="t">Katalog B2B — Mobilki GSM <span class="tag v3">v3</span> <span class="tag pdf">6 × A4</span></div>
+    <div class="d">Telefony nowe i odnowione. Grading A+/A/B/C, testy i gwarancja, lista stocku i buyback.</div>
+    <div class="files">
+      <a href="materialy-drukowane/katalog-mobilki-broker.html">HTML</a>
+      <a href="materialy-drukowane/katalog-mobilki.pdf">PDF (wersja A)</a>
+    </div>
+  </div>
+  <div class="card">
+    <div class="t">Ulotka — obsługa marki <span class="tag v3">v3</span> <span class="tag pdf">A4 dwustronna</span></div>
+    <div class="d">Dla właścicieli marek. Konsygnacja, sześć kanałów, Amazon-ready. Marża kanału jako wynagrodzenie.</div>
+    <div class="files">
+      <a href="materialy-drukowane/ulotka-obsluga-marki-broker.html">HTML</a>
+      <a href="materialy-drukowane/ulotka-obsluga-marki-broker.pdf">PDF</a>
+    </div>
+  </div>
+  <div class="card">
+    <div class="t">Ulotka — HUB logistyczny <span class="tag v3">v3</span> <span class="tag pdf">A4 dwustronna</span></div>
+    <div class="d">Magazyn, listing wielokanałowy, fulfilment cross-border. Skład celny i linia refurb oznaczone jako roadmap.</div>
+    <div class="files">
+      <a href="materialy-drukowane/ulotka-hub-logistyczny-broker.html">HTML</a>
+      <a href="materialy-drukowane/ulotka-hub-logistyczny-broker.pdf">PDF</a>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <b>Do domknięcia przed drukiem:</b> PDF/X CMYK + spady 3 mm · walidacja „50% ceny hurtowej" w katalogu Monstelo ·
+  liczby Mobilki (kroki testu, RMA %, MOQ, buyback) · progi baterii z QC · zgoda na logotypy marek
+  (<code>support@ifa-management.com</code>) · podmiana kontaktu i QR.
+</div>
+
+<h2>Archiwum — warianty A i B</h2>
+<p class="h2note">Zostawione świadomie: nic nie było nadpisywane przy przejściu na v3.</p>
+<div class="grid">
+  <a class="row" href="index-market-router.html">
+    <div>
+      <div class="t">Wariant A — „Market router" <span class="tag old">A</span></div>
+      <div class="d">Pierwotny hub: mockup 3D, rzut, ściany, elewacja, demo routera. „From EAN to Europe".</div>
+    </div>
+    <span class="go">Otwórz →</span>
+  </a>
+  <a class="row" href="stoisko-sciany.html">
+    <div>
+      <div class="t">Ściany — wariant A <span class="tag old">A</span></div>
+      <div class="d">Choose your path: have stock / want stock / have brand.</div>
+    </div>
+    <span class="go">Otwórz →</span>
+  </a>
+</div>
+
+<footer>
+  <b>Monstelo × Mobilki GSM</b> · IFA Berlin 2026 · Reseller Park · stoisko H27E-17 · 4–8 września 2026<br>
+  Liczby to dane operacyjne z ostatnich 12 miesięcy. Nazwy marek i marketplace'ów należą do ich właścicieli
+  i są używane opisowo — nie oznaczają afiliacji ani rekomendacji.<br>
+  Strona wewnętrzna, robocza. Nie linkować publicznie.
+</footer>
+
+</div>
+<button class="designbtn" id="db">design</button>
+<script>
+  (function(){
+    var b=document.getElementById('db'), r=document.documentElement;
+    function lab(){ b.textContent = r.getAttribute('data-theme')==='light' ? 'design v2 · jasny' : 'design v1 · ciemny'; }
+    lab();
+    b.addEventListener('click',function(){
+      var next = r.getAttribute('data-theme')==='light' ? 'dark' : 'light';
+      if(next==='light') r.setAttribute('data-theme','light'); else r.removeAttribute('data-theme');
+      try{ localStorage.setItem('ifa-design', next==='light'?'light':'dark'); }catch(e){}
+      lab();
+    });
+  })();
+</script>
+</body>
+</html>
