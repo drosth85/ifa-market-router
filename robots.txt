@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /materialy-drukowane/druk/
+Disallow: /linkedin/

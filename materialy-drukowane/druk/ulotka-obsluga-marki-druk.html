@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monstelo — Brand Management (A4 flyer)</title>
+<style>
+  /* ---- Black Book design system (from IFA DESIGN_GUIDELINES) ---- */
+  :root{
+    --bg:#0A0B0E; --bg2:#14161D; --bg3:#101219;
+    --ink:#EDEAE0; --parch:#E7DCC2;
+    --amber:#FFB020; --teal:#2FE3C6;
+    --line:rgba(231,220,194,.14);
+    --mut:rgba(237,234,224,.60);
+    --disp:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --mono:"SF Mono","Menlo","Consolas",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#26282e;color:var(--ink);font-family:var(--disp)}
+  /* A4 sheet: 210 x 297 mm */
+  .sheet{
+    position:relative;width:210mm;height:297mm;margin:8mm auto;
+    background:var(--bg);overflow:hidden;
+    padding:16mm 15mm;display:flex;flex-direction:column;
+    box-shadow:0 10px 40px rgba(0,0,0,.5);
+  }
+  .sheet::after{ /* subtle vignette */
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(120% 80% at 100% 0%,rgba(47,227,198,.06),transparent 60%),
+               radial-gradient(120% 80% at 0% 100%,rgba(255,176,32,.05),transparent 55%);
+  }
+  .sheet > *{position:relative;z-index:1}
+
+  /* header */
+  .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12mm}
+  .wordmark{font-weight:800;font-size:20pt;letter-spacing:.16em}
+  .wordmark .dot{color:var(--amber)}
+  .badge{text-align:right;font-family:var(--mono);font-size:7.5pt;color:var(--mut);line-height:1.5;letter-spacing:.06em}
+  .badge b{color:var(--teal);display:block;font-size:8.5pt;letter-spacing:.14em}
+
+  .eyebrow{font-family:var(--mono);font-size:9pt;color:var(--teal);letter-spacing:.28em;text-transform:uppercase;margin-bottom:6mm}
+
+  h1{font-weight:800;font-size:35pt;line-height:.98;letter-spacing:-.01em;text-transform:uppercase;color:var(--ink)}
+  h1 .amb{color:var(--amber)}
+  .lead{font-size:12.5pt;line-height:1.5;color:var(--parch);max-width:150mm;margin-top:7mm}
+
+  /* KPI tiles */
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm;margin-top:auto}
+  .kpi{background:var(--bg2);border:1px solid var(--line);border-radius:3mm;padding:7mm 6mm}
+  .kpi .n{font-weight:800;font-size:30pt;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .kpi .n.t{color:var(--teal)} .kpi .n.a{color:var(--amber)}
+  .kpi .l{font-family:var(--mono);font-size:8pt;color:var(--mut);margin-top:3mm;letter-spacing:.05em;line-height:1.4}
+
+  .subline{font-family:var(--mono);font-size:8.5pt;color:var(--mut);letter-spacing:.04em;margin-top:6mm;text-align:center}
+  .subline b{color:var(--parch)}
+
+  .footstrip{display:flex;justify-content:space-between;align-items:center;
+    border-top:1px solid var(--line);margin-top:8mm;padding-top:5mm;
+    font-family:var(--mono);font-size:8pt;letter-spacing:.14em}
+  .footstrip .tag{color:var(--teal);font-weight:600}
+  .footstrip .url{color:var(--mut)}
+
+  /* ---- BACK ---- */
+  h2{font-weight:800;font-size:22pt;text-transform:uppercase;letter-spacing:-.01em;margin-bottom:8mm}
+  .steps{display:flex;flex-direction:column;gap:5mm}
+  .step{display:grid;grid-template-columns:16mm 1fr;gap:5mm;align-items:start;
+    background:var(--bg3);border:1px solid var(--line);border-radius:3mm;padding:6mm}
+  .step .num{font-weight:800;font-size:24pt;color:var(--amber);line-height:1;font-variant-numeric:tabular-nums}
+  .step h3{font-weight:800;font-size:12.5pt;text-transform:uppercase;letter-spacing:.02em;margin-bottom:2.5mm}
+  .step p{font-size:10.5pt;line-height:1.45;color:var(--mut)}
+  .step p b{color:var(--parch);font-weight:600}
+
+  .why{margin-top:7mm}
+  .why .eyebrow{margin-bottom:4mm}
+  .why ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:4mm 8mm}
+  .why li{font-size:10pt;line-height:1.4;color:var(--parch);padding-left:6mm;position:relative}
+  .why li::before{content:"";position:absolute;left:0;top:2mm;width:3mm;height:3mm;background:var(--teal);border-radius:50%}
+
+  /* CTA */
+  .cta{margin-top:auto;background:linear-gradient(135deg,rgba(255,176,32,.14),rgba(47,227,198,.08));
+    border:1px solid rgba(255,176,32,.35);border-radius:3mm;padding:7mm;
+    display:grid;grid-template-columns:1fr 62mm;gap:6mm;align-items:center}
+  .cta h3{font-weight:800;font-size:16pt;text-transform:uppercase;line-height:1.05;margin-bottom:4mm}
+  .cta h3 .amb{color:var(--amber)}
+  .cta .contact{font-family:var(--mono);font-size:9pt;color:var(--parch);line-height:1.7;letter-spacing:.02em}
+  .cta .contact b{color:var(--teal)}
+
+  .disclaimer{font-family:var(--mono);font-size:6.5pt;color:rgba(237,234,224,.38);
+    line-height:1.5;margin-top:6mm;text-align:center;letter-spacing:.02em}
+
+  /* screen helper label */
+
+  @media print{
+    html,body{background:#fff}
+    .sheet{margin:0;box-shadow:none;page-break-after:always}
+    @page{size:A4;margin:0}
+  }
+
+  .askbox{border:1.2px solid var(--amber);border-radius:2mm;padding:4mm 5mm}
+  .ask-k{font-family:var(--mono);font-size:7pt;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--mut);margin-bottom:2mm}
+  .ask-mail{font-weight:800;font-size:12pt;letter-spacing:-.01em;line-height:1.1}
+  .ask-sub{font-family:var(--mono);font-size:6.8pt;color:var(--mut);margin-top:1.6mm;line-height:1.35}
+
+  .askbox{display:flex;gap:4mm;align-items:center}
+  .ask-txt{flex:1}
+  .qrsvg{width:26mm;height:26mm;flex:none;display:block;background:#E7DCC2;border-radius:1.2mm}
+
+  /* ---- OFICJALNE LOGOTYPY (monstelo.com / mobilkigsm.pl) ---- */
+  .lg{display:block}
+  .lg-monstelo{fill:var(--parch)}
+  .cover-lg.lg-monstelo{height:12mm;width:38.4mm}
+  .head-lg.lg-monstelo{height:9mm;width:28.8mm}
+  .cover-lg.lg-mobilki{height:10mm;width:33.6mm}
+  .lockup{display:flex;align-items:center;gap:6mm;margin-top:7mm;padding-top:4mm;
+    border-top:1px solid var(--line)}
+  .lockup .lg-monstelo{height:6mm;width:19.2mm}
+  .lockup .lg-mobilki-mark{height:5.4mm;width:25.5mm}
+  .lockup .sep{color:var(--mut);font-family:var(--mono);font-size:9pt}
+  .lockup .lkt{margin-left:auto;font-family:var(--mono);font-size:7.5pt;color:var(--mut);
+    letter-spacing:.1em;text-transform:uppercase;text-align:right;line-height:1.5}
+</style>
+<style id="design-v2">
+  /* ---- DESIGN v2 (jasny) — paleta z oferty detal. v1 (ciemny) zostaje domyślny. ----
+     Akcja/akcent w v2 = #0E9C86; drugi akcent to jego ciemniejszy wariant, żeby
+     drobne etykiety mono nie ginęły na kremowym tle. */
+  :root[data-theme="light"]{
+    --bg:#F4F1E9; --bg2:#FFFFFF; --bg3:#EDE8DB;
+    --ink:#15171E; --parch:#2A2E3A;
+    --amber:#0E9C86; --teal:#0B7C6B;
+    --line:#DED8C7;
+    --mut:#5A5D68;
+  }
+  :root[data-theme="light"] feFlood{flood-color:#15171E}    /* logotypy marketplace na ciemno */
+  :root[data-theme="light"]{background:#DED8C7}          /* tło poza arkuszem/ścianą */
+  :root[data-theme="light"] body{background:#DED8C7}
+  :root[data-theme="light"] .sheet,:root[data-theme="light"] .wall{background:var(--bg)}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="lg-monstelo" viewBox="0 0 320 100"><path d=" M 296.877 70.108 C 294.462 70.108 292.6 68.999 291.299 66.782 C 289.988 64.565 289.343 61.382 289.343 57.243 C 289.343 55.124 289.432 53.237 289.634 51.591 C 289.826 49.941 290.097 48.744 290.452 48.005 C 292.122 47.566 293.768 47.339 295.398 47.339 C 297.862 47.339 299.72 48.379 300.976 50.443 C 302.228 52.513 302.858 55.548 302.858 59.534 C 302.858 61.17 302.76 62.87 302.567 64.639 C 302.365 66.412 302.119 67.866 301.828 68.999 C 300.991 69.388 300.202 69.674 299.463 69.842 C 298.724 70.019 297.862 70.108 296.877 70.108 Z  M 295.694 78.75 C 301.942 78.75 306.81 76.942 310.288 73.325 C 313.762 69.704 315.501 64.663 315.501 58.204 C 315.501 44.999 309.121 38.397 296.364 38.397 C 292.422 38.397 288.993 39.234 286.086 40.914 C 283.174 42.59 280.952 44.999 279.395 48.157 C 277.838 51.316 277.069 55.001 277.069 59.234 C 277.069 65.841 278.612 70.743 281.691 73.946 C 284.771 77.149 289.432 78.75 295.694 78.75 Z  M 255.661 77.789 L 277.833 77.789 L 278.129 72.246 L 274.507 70.177 C 273.817 69.783 273.394 69.413 273.246 69.068 C 273.098 68.728 273.029 68.033 273.029 66.994 L 273.029 25.093 C 272.876 23.669 272.561 22.388 272.068 21.25 C 269.506 21.349 264.968 21.989 258.474 23.177 C 257.927 23.221 257.164 23.344 256.178 23.546 L 255.809 29.158 L 259.056 30.858 C 259.75 31.257 260.184 31.612 260.352 31.937 C 260.519 32.257 260.613 32.962 260.613 34.036 L 260.613 69.438 L 255.439 70.99 L 255.661 77.789 Z  M 232.449 55.696 C 232.35 52.882 232.819 50.276 233.858 47.857 C 235.139 47.463 236.494 47.265 237.923 47.265 C 239.648 47.265 240.988 47.694 241.954 48.556 C 242.904 49.419 243.437 50.788 243.535 52.661 L 232.449 55.696 Z  M 237.992 78.676 C 240.948 78.676 243.875 78.228 246.787 77.351 C 249.694 76.464 252.059 75.335 253.882 73.946 L 252.192 66.624 C 250.167 67.363 248.172 67.95 246.201 68.364 C 244.23 68.787 242.53 68.999 241.106 68.999 C 239.027 68.999 237.361 68.521 236.11 67.555 C 234.853 66.595 233.883 65.077 233.188 63.008 L 255.661 58.864 C 255.809 52.321 254.395 47.27 251.414 43.723 C 248.428 40.175 244.151 38.397 238.588 38.397 C 234.844 38.397 231.567 39.21 228.754 40.835 C 225.945 42.466 223.772 44.817 222.25 47.896 C 220.727 50.976 219.964 54.661 219.964 58.943 C 219.964 65.102 221.525 69.935 224.654 73.434 C 227.778 76.927 232.227 78.676 237.992 78.676 Z  M 207.449 78.75 C 209.464 78.75 211.573 78.474 213.765 77.942 C 215.953 77.405 217.939 76.71 219.717 75.863 L 218.835 68.329 C 215.923 68.772 213.652 68.999 212.026 68.999 C 210.104 68.999 208.808 68.605 208.148 67.812 C 207.483 67.028 207.153 65.447 207.153 63.087 L 207.153 47.857 L 219.574 47.857 L 219.574 39.136 L 207.153 39.136 L 207.153 30.779 L 202.866 30.267 L 189.563 42.392 L 189.563 47.778 L 194.736 47.778 L 194.736 65.742 C 194.736 70.127 195.766 73.399 197.841 75.542 C 199.9 77.681 203.103 78.75 207.449 78.75 Z  M 172.027 78.553 C 177.447 78.553 181.694 77.41 184.774 75.158 C 187.853 72.892 189.395 69.738 189.395 65.693 C 189.395 64.018 189.055 62.594 188.39 61.406 C 187.725 60.229 186.562 59.056 184.912 57.893 C 183.266 56.74 180.817 55.371 177.57 53.794 C 175.353 52.661 173.732 51.784 172.727 51.168 C 171.712 50.552 171.007 49.99 170.618 49.473 C 170.214 48.955 170.022 48.349 170.022 47.655 C 170.022 47.024 170.091 46.556 170.249 46.255 C 171.431 46.162 172.219 46.108 172.609 46.108 C 175.072 46.108 176.945 46.31 178.23 46.704 L 183.182 52.02 L 187.021 51.429 C 187.469 47.487 187.691 43.915 187.691 40.712 C 185.868 39.929 183.813 39.293 181.517 38.825 C 179.226 38.362 177.043 38.126 174.984 38.126 C 169.948 38.126 165.967 39.288 163.04 41.599 C 160.108 43.915 158.645 47.039 158.645 50.981 C 158.645 52.759 158.975 54.292 159.64 55.573 C 160.301 56.849 161.399 58.095 162.927 59.302 C 164.449 60.515 166.676 61.874 169.583 63.402 C 171.894 64.54 173.52 65.378 174.456 65.92 C 175.397 66.457 175.999 66.925 176.269 67.319 C 176.536 67.718 176.674 68.211 176.674 68.797 C 176.674 69.492 176.6 70.029 176.462 70.423 C 175.811 70.576 174.929 70.645 173.796 70.645 C 171.771 70.645 169.948 70.398 168.332 69.906 L 163.671 64.954 L 159.463 65.762 C 159.108 68.088 158.793 71.66 158.497 76.479 C 163.617 77.858 168.13 78.553 172.027 78.553 Z  M 110.906 77.71 L 132.339 77.71 L 132.63 72.167 L 129.013 70.108 C 128.363 69.714 127.973 69.344 127.826 68.999 C 127.673 68.649 127.604 67.96 127.604 66.925 L 127.604 49.044 C 130.314 48.502 132.551 48.226 134.329 48.226 C 136 48.226 137.172 48.473 137.833 48.965 C 138.498 49.458 138.902 50.153 139.06 51.035 C 139.202 51.931 139.281 53.479 139.281 55.696 L 139.281 69.659 L 135.665 70.689 L 136.034 77.71 L 156.428 77.71 L 156.728 72.167 L 153.176 70.108 C 152.486 69.714 152.062 69.344 151.915 68.999 C 151.767 68.649 151.698 67.96 151.698 66.925 L 151.698 52.439 C 151.698 43.077 147.781 38.397 139.942 38.397 C 138.266 38.397 136.478 38.658 134.586 39.17 C 132.689 39.697 130.235 40.643 127.234 42.023 C 126.988 40.791 126.663 39.658 126.269 38.618 C 123.416 38.717 118.755 39.412 112.305 40.688 L 110.679 40.983 L 110.457 46.526 L 113.704 48.305 C 114.345 48.694 114.739 49.049 114.892 49.374 C 115.04 49.695 115.114 50.399 115.114 51.473 L 115.114 69.369 L 110.536 70.689 L 110.906 77.71 Z  M 92.202 70.108 C 89.788 70.108 87.925 68.999 86.62 66.782 C 85.314 64.565 84.669 61.382 84.669 57.243 C 84.669 55.124 84.757 53.237 84.959 51.591 C 85.151 49.941 85.422 48.744 85.777 48.005 C 87.448 47.566 89.093 47.339 90.724 47.339 C 93.188 47.339 95.045 48.379 96.302 50.443 C 97.553 52.513 98.184 55.548 98.184 59.534 C 98.184 61.17 98.085 62.87 97.893 64.639 C 97.691 66.412 97.445 67.866 97.154 68.999 C 96.316 69.388 95.528 69.674 94.789 69.842 C 94.05 70.019 93.188 70.108 92.202 70.108 Z  M 91.02 78.75 C 97.267 78.75 102.135 76.942 105.614 73.325 C 109.088 69.704 110.827 64.663 110.827 58.204 C 110.827 44.999 104.446 38.397 91.69 38.397 C 87.748 38.397 84.319 39.234 81.412 40.914 C 78.5 42.59 76.273 44.999 74.721 48.157 C 73.164 51.316 72.395 55.001 72.395 59.234 C 72.395 65.841 73.932 70.743 77.012 73.946 C 80.091 77.149 84.757 78.75 91.02 78.75 Z  M 4.947 77.789 L 26.223 77.789 L 26.523 72.246 L 22.897 70.177 C 22.261 69.783 21.867 69.413 21.719 69.068 C 21.566 68.728 21.497 68.033 21.497 66.994 L 21.497 48.965 C 23.961 48.527 26.055 48.305 27.78 48.305 C 29.351 48.305 30.48 48.551 31.174 49.044 C 31.869 49.537 32.278 50.241 32.401 51.153 C 32.524 52.06 32.584 53.602 32.584 55.765 L 32.584 69.738 L 29.036 70.768 L 29.406 77.789 L 49.661 77.789 L 49.952 72.246 L 46.335 70.177 C 45.596 69.783 45.148 69.413 45 69.068 C 44.847 68.728 44.778 68.033 44.778 66.994 L 44.778 52.439 C 44.778 50.912 44.724 49.759 44.63 48.965 C 47.636 48.527 49.774 48.305 51.06 48.305 C 52.686 48.305 53.839 48.566 54.534 49.079 C 55.224 49.596 55.633 50.31 55.756 51.222 C 55.879 52.129 55.943 53.646 55.943 55.765 L 55.943 69.738 L 52.391 70.768 L 52.76 77.789 L 72.863 77.789 L 73.154 72.246 L 69.616 70.177 C 68.921 69.783 68.498 69.413 68.35 69.068 C 68.207 68.728 68.138 68.033 68.138 66.994 L 68.138 52.439 C 68.138 47.709 67.172 44.191 65.251 41.875 C 63.324 39.559 60.343 38.397 56.313 38.397 C 54.288 38.397 52.154 38.702 49.912 39.318 C 47.666 39.934 45.138 40.934 42.339 42.314 C 41.497 41.136 40.245 40.19 38.565 39.471 C 36.885 38.756 35.091 38.397 33.175 38.397 C 31.598 38.397 29.859 38.658 27.967 39.17 C 26.065 39.697 23.784 40.564 21.128 41.796 C 20.882 40.722 20.556 39.658 20.167 38.618 C 17.255 38.717 12.776 39.382 6.716 40.614 L 4.72 40.983 L 4.499 46.526 L 7.746 48.305 C 8.386 48.694 8.78 49.049 8.933 49.374 C 9.081 49.695 9.155 50.399 9.155 51.473 L 9.155 69.438 L 4.578 70.768 L 4.947 77.789 Z "/></symbol>
+  <filter id="creamlogo" x="0" y="0" width="100%" height="100%">
+    <feFlood flood-color="#E7DCC2" result="c"/>
+    <feComposite in="c" in2="SourceGraphic" operator="in"/>
+  </filter>
+</defs></svg>
+
+
+<!-- ============ FRONT ============ -->
+<section class="sheet">
+  <div class="top">
+    <svg class="lg lg-monstelo head-lg" viewBox="0 0 320 100" role="img" aria-label="Monstelo"><use href="#lg-monstelo"/></svg>
+    <div class="badge"><b>IFA 2026</b>Hall H27E-17<br>Reseller Park · Berlin</div>
+  </div>
+
+  <div class="eyebrow">For brands</div>
+  <h1>We grow<br>your brand.<br><span class="amb">You keep<br>the upside.</span></h1>
+  <p class="lead">We build your reach across Europe on <b style="color:var(--ink)">real demand data</b>. Our margin is the channel margin — we reinvest it into your growth instead of squeezing it out.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n">241</div><div class="l">brands<br>distributed</div></div>
+    <div class="kpi"><div class="n t">28</div><div class="l">EU markets<br>reached (B2B)</div></div>
+    <div class="kpi"><div class="n a">~80%</div><div class="l">orders<br>shipped in 24h</div></div>
+  </div>
+  <p class="subline"><b>8,000</b> products price-monitored &nbsp;·&nbsp; <b>6</b> sales channels &nbsp;·&nbsp; data-driven pricing</p>
+
+  <div class="footstrip">
+    <span class="tag">DATA-DRIVEN STOCK TRADING</span>
+    <span class="url">monstelo.com</span>
+  </div>
+</section>
+
+<!-- ============ BACK ============ -->
+<section class="sheet">
+  <div class="eyebrow">How we work</div>
+  <h2>A partner, not a<br>margin squeezer</h2>
+
+  <div class="steps">
+    <div class="step">
+      <div class="num">01</div>
+      <div>
+        <h3>Consignment onboarding</h3>
+        <p>Start with <b>no upfront risk</b>. You keep ownership of stock until it sells — a model already proven with our HOCO partnership.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">02</div>
+      <div>
+        <h3>Full-funnel selling</h3>
+        <p>Six channels — Allegro, MediaMarkt, amazon, Refurbed, Empik and our own store — with prices set by <b>live market data</b>, not guesswork.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">03</div>
+      <div>
+        <h3>Amazon-ready</h3>
+        <p>Brand Registry, A+ content and Stores capability <b>across 8 EU markets</b> — ready to deploy when you are.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="why">
+    <div class="eyebrow">Why Monstelo</div>
+    <ul>
+      <li>We earn from the channel margin — so your growth is our growth</li>
+      <li>Reach on proof: 28 EU markets already served B2B</li>
+      <li>Every listing priced against live market data</li>
+      <li>Operational speed: ~80% of orders out within 24h</li>
+    </ul>
+  </div>
+
+  <div class="cta">
+    <div>
+      <h3>Bring your brand to <span class="amb">stand H27E-17</span></h3>
+      <div class="contact">
+        IFA Berlin &middot; 4&ndash;8 Sep 2026<br>
+        <b>Office:</b><br>
+        +48 661 277 277<br>
+        info@monstelo.com
+      </div>
+    </div>
+    <div class="askbox"><div class="ask-txt"><div class="ask-k">Want the full offer?</div><div class="ask-mail">Scan the code</div></div><svg class="qrsvg" viewBox="0 0 45 45" role="img" aria-label="QR — request full offer"><path fill="#0A0B0E" d="M4 4h7v1h-7zM12 4h4v1h-4zM19 4h1v1h-1zM21 4h1v1h-1zM23 4h2v1h-2zM27 4h1v1h-1zM29 4h1v1h-1zM32 4h1v1h-1zM34 4h7v1h-7zM4 5h1v1h-1zM10 5h1v1h-1zM12 5h2v1h-2zM16 5h2v1h-2zM19 5h1v1h-1zM21 5h1v1h-1zM24 5h3v1h-3zM28 5h1v1h-1zM30 5h1v1h-1zM32 5h1v1h-1zM34 5h1v1h-1zM40 5h1v1h-1zM4 6h1v1h-1zM6 6h3v1h-3zM10 6h1v1h-1zM12 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h2v1h-2zM28 6h4v1h-4zM34 6h1v1h-1zM36 6h3v1h-3zM40 6h1v1h-1zM4 7h1v1h-1zM6 7h3v1h-3zM10 7h1v1h-1zM13 7h1v1h-1zM15 7h2v1h-2zM19 7h3v1h-3zM24 7h2v1h-2zM29 7h1v1h-1zM34 7h1v1h-1zM36 7h3v1h-3zM40 7h1v1h-1zM4 8h1v1h-1zM6 8h3v1h-3zM10 8h1v1h-1zM12 8h1v1h-1zM17 8h1v1h-1zM19 8h1v1h-1zM21 8h1v1h-1zM26 8h1v1h-1zM28 8h1v1h-1zM32 8h1v1h-1zM34 8h1v1h-1zM36 8h3v1h-3zM40 8h1v1h-1zM4 9h1v1h-1zM10 9h1v1h-1zM14 9h1v1h-1zM16 9h2v1h-2zM20 9h3v1h-3zM24 9h4v1h-4zM29 9h1v1h-1zM32 9h1v1h-1zM34 9h1v1h-1zM40 9h1v1h-1zM4 10h7v1h-7zM12 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM18 10h1v1h-1zM20 10h1v1h-1zM22 10h1v1h-1zM24 10h1v1h-1zM26 10h1v1h-1zM28 10h1v1h-1zM30 10h1v1h-1zM32 10h1v1h-1zM34 10h7v1h-7zM13 11h1v1h-1zM15 11h1v1h-1zM17 11h4v1h-4zM22 11h2v1h-2zM26 11h1v1h-1zM29 11h4v1h-4zM4 12h1v1h-1zM7 12h6v1h-6zM15 12h1v1h-1zM17 12h1v1h-1zM19 12h2v1h-2zM22 12h1v1h-1zM25 12h1v1h-1zM27 12h1v1h-1zM32 12h2v1h-2zM36 12h1v1h-1zM38 12h3v1h-3zM5 13h2v1h-2zM8 13h2v1h-2zM11 13h1v1h-1zM13 13h1v1h-1zM15 13h2v1h-2zM18 13h1v1h-1zM22 13h1v1h-1zM24 13h1v1h-1zM26 13h3v1h-3zM31 13h3v1h-3zM36 13h1v1h-1zM38 13h1v1h-1zM4 14h1v1h-1zM8 14h1v1h-1zM10 14h2v1h-2zM15 14h2v1h-2zM21 14h1v1h-1zM24 14h1v1h-1zM27 14h2v1h-2zM31 14h2v1h-2zM37 14h2v1h-2zM40 14h1v1h-1zM12 15h3v1h-3zM17 15h3v1h-3zM21 15h1v1h-1zM23 15h1v1h-1zM28 15h1v1h-1zM31 15h3v1h-3zM38 15h1v1h-1zM40 15h1v1h-1zM4 16h2v1h-2zM7 16h6v1h-6zM14 16h1v1h-1zM16 16h2v1h-2zM20 16h1v1h-1zM27 16h2v1h-2zM32 16h1v1h-1zM34 16h2v1h-2zM37 16h1v1h-1zM39 16h2v1h-2zM4 17h1v1h-1zM7 17h3v1h-3zM11 17h2v1h-2zM16 17h5v1h-5zM22 17h1v1h-1zM24 17h4v1h-4zM29 17h4v1h-4zM36 17h1v1h-1zM38 17h2v1h-2zM9 18h3v1h-3zM13 18h1v1h-1zM15 18h1v1h-1zM17 18h1v1h-1zM19 18h1v1h-1zM23 18h1v1h-1zM25 18h2v1h-2zM29 18h1v1h-1zM31 18h1v1h-1zM34 18h1v1h-1zM38 18h3v1h-3zM6 19h3v1h-3zM11 19h1v1h-1zM13 19h1v1h-1zM17 19h3v1h-3zM27 19h1v1h-1zM30 19h2v1h-2zM34 19h1v1h-1zM37 19h4v1h-4zM7 20h1v1h-1zM9 20h4v1h-4zM15 20h1v1h-1zM17 20h1v1h-1zM20 20h1v1h-1zM24 20h3v1h-3zM29 20h1v1h-1zM34 20h2v1h-2zM37 20h2v1h-2zM40 20h1v1h-1zM6 21h2v1h-2zM9 21h1v1h-1zM12 21h2v1h-2zM15 21h1v1h-1zM18 21h1v1h-1zM20 21h1v1h-1zM24 21h1v1h-1zM26 21h1v1h-1zM28 21h1v1h-1zM31 21h1v1h-1zM37 21h3v1h-3zM8 22h4v1h-4zM14 22h4v1h-4zM19 22h1v1h-1zM21 22h1v1h-1zM24 22h2v1h-2zM27 22h1v1h-1zM29 22h1v1h-1zM31 22h1v1h-1zM34 22h1v1h-1zM36 22h1v1h-1zM38 22h1v1h-1zM40 22h1v1h-1zM5 23h1v1h-1zM7 23h1v1h-1zM11 23h3v1h-3zM16 23h1v1h-1zM18 23h1v1h-1zM22 23h3v1h-3zM26 23h1v1h-1zM29 23h1v1h-1zM31 23h1v1h-1zM36 23h1v1h-1zM39 23h2v1h-2zM4 24h1v1h-1zM6 24h1v1h-1zM8 24h3v1h-3zM14 24h1v1h-1zM16 24h1v1h-1zM19 24h3v1h-3zM24 24h1v1h-1zM28 24h1v1h-1zM30 24h7v1h-7zM39 24h1v1h-1zM4 25h1v1h-1zM6 25h3v1h-3zM11 25h2v1h-2zM14 25h2v1h-2zM18 25h2v1h-2zM22 25h2v1h-2zM26 25h2v1h-2zM29 25h3v1h-3zM35 25h3v1h-3zM4 26h1v1h-1zM6 26h9v1h-9zM17 26h1v1h-1zM19 26h1v1h-1zM21 26h1v1h-1zM26 26h2v1h-2zM31 26h4v1h-4zM37 26h1v1h-1zM40 26h1v1h-1zM4 27h1v1h-1zM8 27h1v1h-1zM13 27h2v1h-2zM18 27h1v1h-1zM20 27h4v1h-4zM26 27h1v1h-1zM28 27h1v1h-1zM36 27h4v1h-4zM4 28h2v1h-2zM7 28h2v1h-2zM10 28h1v1h-1zM17 28h7v1h-7zM25 28h1v1h-1zM27 28h2v1h-2zM32 28h1v1h-1zM34 28h2v1h-2zM40 28h1v1h-1zM4 29h1v1h-1zM6 29h4v1h-4zM11 29h2v1h-2zM14 29h1v1h-1zM17 29h1v1h-1zM20 29h5v1h-5zM27 29h2v1h-2zM30 29h4v1h-4zM35 29h2v1h-2zM4 30h4v1h-4zM9 30h2v1h-2zM13 30h1v1h-1zM18 30h1v1h-1zM20 30h1v1h-1zM23 30h1v1h-1zM26 30h1v1h-1zM28 30h4v1h-4zM33 30h1v1h-1zM36 30h2v1h-2zM39 30h2v1h-2zM4 31h1v1h-1zM7 31h1v1h-1zM11 31h2v1h-2zM14 31h1v1h-1zM16 31h2v1h-2zM19 31h1v1h-1zM22 31h1v1h-1zM24 31h1v1h-1zM26 31h1v1h-1zM30 31h2v1h-2zM33 31h1v1h-1zM35 31h1v1h-1zM38 31h1v1h-1zM40 31h1v1h-1zM4 32h1v1h-1zM8 32h3v1h-3zM12 32h1v1h-1zM15 32h1v1h-1zM17 32h1v1h-1zM20 32h1v1h-1zM22 32h1v1h-1zM24 32h1v1h-1zM26 32h4v1h-4zM32 32h5v1h-5zM38 32h2v1h-2zM12 33h1v1h-1zM15 33h1v1h-1zM17 33h4v1h-4zM22 33h3v1h-3zM26 33h1v1h-1zM29 33h1v1h-1zM32 33h1v1h-1zM36 33h4v1h-4zM4 34h7v1h-7zM12 34h3v1h-3zM19 34h2v1h-2zM23 34h1v1h-1zM25 34h6v1h-6zM32 34h1v1h-1zM34 34h1v1h-1zM36 34h3v1h-3zM40 34h1v1h-1zM4 35h1v1h-1zM10 35h1v1h-1zM12 35h1v1h-1zM14 35h1v1h-1zM17 35h3v1h-3zM21 35h3v1h-3zM26 35h2v1h-2zM29 35h1v1h-1zM31 35h2v1h-2zM36 35h2v1h-2zM4 36h1v1h-1zM6 36h3v1h-3zM10 36h1v1h-1zM12 36h3v1h-3zM19 36h1v1h-1zM23 36h2v1h-2zM26 36h2v1h-2zM30 36h8v1h-8zM39 36h2v1h-2zM4 37h1v1h-1zM6 37h3v1h-3zM10 37h1v1h-1zM12 37h3v1h-3zM17 37h1v1h-1zM20 37h1v1h-1zM22 37h1v1h-1zM24 37h4v1h-4zM29 37h1v1h-1zM32 37h4v1h-4zM38 37h1v1h-1zM40 37h1v1h-1zM4 38h1v1h-1zM6 38h3v1h-3zM10 38h1v1h-1zM13 38h1v1h-1zM15 38h7v1h-7zM27 38h1v1h-1zM29 38h1v1h-1zM31 38h1v1h-1zM33 38h2v1h-2zM36 38h2v1h-2zM40 38h1v1h-1zM4 39h1v1h-1zM10 39h1v1h-1zM13 39h2v1h-2zM17 39h1v1h-1zM20 39h2v1h-2zM24 39h1v1h-1zM26 39h1v1h-1zM28 39h1v1h-1zM30 39h1v1h-1zM34 39h3v1h-3zM38 39h3v1h-3zM4 40h7v1h-7zM12 40h1v1h-1zM14 40h1v1h-1zM16 40h2v1h-2zM19 40h1v1h-1zM22 40h3v1h-3zM27 40h2v1h-2zM30 40h1v1h-1zM32 40h3v1h-3zM37 40h1v1h-1zM40 40h1v1h-1z"/></svg></div>
+  </div>
+
+  <div class="lockup"><svg class="lg lg-monstelo " viewBox="0 0 320 100" role="img" aria-label="Monstelo"><use href="#lg-monstelo"/></svg><span class="sep">·</span><svg class="lg lg-mobilki-mark" viewBox="0 0 359 76" role="img" aria-label="Mobilki GSM"><image href="data:image/png;base64,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" width="359" height="107" filter="url(#creamlogo)"/></svg><span class="lkt">IFA Berlin 2026 · Reseller Park<br>Hall H27E · stand 17</span></div>
+
+  <p class="disclaimer">All trademarks and brand names are the property of their respective owners. Monstelo is an independent distributor and is not affiliated with or endorsed by the brands referenced. Figures are trailing-12-month operational data.</p>
+</section>
+
+</body>
+</html>
