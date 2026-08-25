@@ -52,6 +52,24 @@
   .slot:hover{border-color:var(--mut)}
   .slot.on{border-color:var(--teal);background:var(--bg2);color:var(--teal)}
 
+  #step-dur{margin-top:16px}
+  #dur{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .dur{cursor:pointer;background:var(--surf);border:1px solid var(--line);border-radius:9px;color:var(--ink);
+    padding:11px 16px;font-family:var(--mono);font-size:14px;letter-spacing:.04em;transition:border-color .15s}
+  .dur:hover{border-color:var(--mut)}
+  .dur.on{border-color:var(--teal);background:var(--bg2);color:var(--teal)}
+  .dur-when{font-family:var(--mono);font-size:13px;color:var(--mut);margin-left:4px}
+
+  #people{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+  .person{text-align:left;cursor:pointer;background:var(--surf);border:1px solid var(--line);border-radius:9px;
+    color:var(--ink);padding:12px 14px;font-family:var(--sans);display:flex;flex-direction:column;gap:3px;
+    transition:border-color .15s}
+  .person:hover{border-color:var(--mut)}
+  .person.on{border-color:var(--teal);background:var(--bg2)}
+  .person .pn{font-size:14.5px;font-weight:700;line-height:1.2}
+  .person .pr{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--mut);line-height:1.35}
+  .person.on .pr{color:var(--teal)}
+
   .evening{margin-top:12px;background:var(--surf);border:1px solid var(--line);border-radius:9px;padding:14px 16px}
   .evening .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .evening-toggle{cursor:pointer;background:var(--bg2);border:1px solid var(--line);border-radius:8px;
@@ -115,6 +133,11 @@
       <h2>2 · Time</h2>
       <div id="slots"></div>
 
+      <div id="step-dur" hidden>
+        <h2>How long <span class="dur-when" id="dur-when"></span></h2>
+        <div id="dur"></div>
+      </div>
+
       <div class="evening">
         <div class="row">
           <button type="button" class="evening-toggle" id="evening-btn">Evening after the show</button>
@@ -129,8 +152,16 @@
     </section>
 
     <form id="form" novalidate>
+      <section id="step-person" hidden>
+        <h2>3 · Who you meet</h2>
+        <div id="people"></div>
+        <p class="hint" style="color:var(--mut);font-size:12.5px;margin:10px 0 0;line-height:1.5">
+          Pick a person or leave it to us — the invitation goes straight into their calendar.
+        </p>
+      </section>
+
       <section id="step-who" hidden>
-        <h2>3 · You</h2>
+        <h2>4 · You</h2>
         <div class="fields">
           <div class="two">
             <div><label for="f-name">Name</label><input id="f-name" autocomplete="name"></div>
@@ -154,6 +185,7 @@
   <div class="done" id="done" hidden>
     <h3>Booked.</h3>
     <div class="when" id="done-when"></div>
+    <div class="who" id="done-who" style="font-family:var(--mono);font-size:13px;color:var(--mut);letter-spacing:.05em;margin-bottom:6px"></div>
     <p>Stand H27E-17, Reseller Park. We sent a confirmation to your e-mail — if it is not there in a minute, check spam.</p>
     <a id="done-cal" href="#" target="_blank" rel="noopener">Add to Google Calendar</a>
   </div>

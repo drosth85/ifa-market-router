@@ -17,9 +17,27 @@ const DAYS = [
   { iso: "2026-09-08", dow: "Tue", d: "8", mon: "Sep" },
 ];
 
-// Show floor hours -> hourly slots. Confirm against the official IFA opening hours before print.
+// Show floor hours. Confirm against the official IFA opening hours before print.
 const DAY_START = 10;
 const DAY_END = 18;
+
+// Stand slots run on a 15-minute grid; the visitor then stretches the meeting to 30 or 45.
+const SLOT_MIN = 15;
+const DURATIONS = [15, 30, 45];
+
+/* Who is on the stand — the Monstelo catalog contact list.
+   `email` is used as the calendar guest, so the meeting lands in that person's calendar. */
+const PEOPLE = [
+  { id: "any",       name: "No preference",      role: "We put the right person at the table", email: "" },
+  { id: "mamcarczyk",name: "Michał Mamcarczyk",  role: "Key Account Manager · EN · PL", email: "mm@monstelo.com" },
+  { id: "tuchowska", name: "Nikola Tuchowska",   role: "Key Account Manager · EN · PL", email: "nikola.tuchowska@monstelo.com" },
+  { id: "tabak",     name: "Łukasz Tabak",       role: "Key Account Manager · PL",      email: "lukasz.tabak@monstelo.com" },
+  { id: "palka",     name: "Kamil Pałka",        role: "Key Account Manager · PL · CZ", email: "kamil.palka@monstelo.com" },
+  { id: "kocaba",    name: "Błażej Kócaba",      role: "Key Account Manager · PL",      email: "blazej.kocaba@monstelo.com" },
+  { id: "juszczyk",  name: "Sebastian Juszczyk", role: "Board member · sourcing · PL · EN", email: "sebastian@monstelo.com" },
+  { id: "drozd",     name: "Tomasz Drozd",       role: "Brand Growth Strategist · brands · PL · EN", email: "tomasz.drozd@monstelo.com" },
+];
+function personById(id) { return PEOPLE.find((p) => p.id === id) || null; }
 
 // Evening slots, for "after the show" meetings.
 const EVENING_START = 18;
@@ -27,6 +45,28 @@ const EVENING_END = 23;
 
 const TZ = "Europe/Berlin";
 
+function toMin(hhmm) { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; }
+function toHHMM(min) { return pad(Math.floor(min / 60)) + ":" + pad(min % 60); }
+function addMinutes(hhmm, min) { return toHHMM(toMin(hhmm) + min); }
+
+/* Start times on the 15-minute grid, from opening to closing. */
+function gridSlots(start, end, step) {
+  const out = [];
+  for (let m = start * 60; m < end * 60; m += step) out.push(toHHMM(m));
+  return out;
+}
+
+/* Durations that still fit before closing time. */
+function durationsFor(from, end) {
+  return DURATIONS.filter((d) => toMin(from) + d <= end * 60);
+}
+
+/* Two meetings clash when they overlap, not only when they start at the same minute. */
+function overlaps(aFrom, aTo, bFrom, bTo) {
+  return toMin(aFrom) < toMin(bTo) && toMin(bFrom) < toMin(aTo);
+}
+
+/* Kept for the hourly view of the day — one entry per full hour. */
 function hourlySlots(start, end) {
   const out = [];
   for (let h = start; h < end; h++) {
@@ -54,7 +94,9 @@ function gcalLink(b) {
     dates: start + "/" + end,
     ctz: TZ,
     location: b.place || "IFA Berlin, Reseller Park, stand H27E-17",
-    details: "Meeting with Monstelo × Mobilki GSM at IFA Berlin 2026.\nStand H27E-17, Reseller Park.",
+    details:
+      "Meeting with Monstelo × Mobilki GSM at IFA Berlin 2026.\nStand H27E-17, Reseller Park." +
+      (b.personName && b.person !== "any" ? "\nWith: " + b.personName : ""),
   });
   return "https://calendar.google.com/calendar/render?" + p.toString();
 }
@@ -66,14 +108,21 @@ function validate(b) {
   if (!b.email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(b.email)) err.push("email");
   if (!b.date || !DAYS.some((d) => d.iso === b.date)) err.push("date");
   if (!b.from || !b.to) err.push("slot");
+  if (b.from && b.to && toMin(b.to) <= toMin(b.from)) err.push("slot");
+  if (!b.evening && b.from && !DURATIONS.includes(toMin(b.to) - toMin(b.from))) err.push("duration");
+  if (!b.evening && b.to && toMin(b.to) > DAY_END * 60) err.push("duration");
+  if (!b.person || !personById(b.person)) err.push("person");
   if (b.evening && !b.place) err.push("place");
   return err;
 }
 
 /* ---------- browser ---------- */
-if (typeof document !== "undefined") {
+/* Wrapped in a function, not a bare block: WebKit (Safari, every iPhone on the show floor)
+   hoists function declarations out of a block but leaves the block's const bindings behind,
+   so `boot` threw "Can't find variable: $" and the page rendered empty. */
+if (typeof document !== "undefined") (function () {
   const $ = (id) => document.getElementById(id);
-  const state = { date: null, from: null, to: null, evening: false, place: "" };
+  const state = { date: null, from: null, to: null, dur: SLOT_MIN, evening: false, place: "", person: "any" };
 
   function renderDays() {
     $("days").innerHTML = DAYS.map(
@@ -96,12 +145,11 @@ if (typeof document !== "undefined") {
   }
 
   function renderSlots() {
-    const slots = hourlySlots(DAY_START, DAY_END);
-    $("slots").innerHTML = slots
-      .map((s) => `<button class="slot" data-from="${s.from}" data-to="${s.to}">${s.from}</button>`)
+    $("slots").innerHTML = gridSlots(DAY_START, DAY_END, SLOT_MIN)
+      .map((t) => `<button class="slot" data-from="${t}">${t}</button>`)
       .join("");
     $("slots").querySelectorAll(".slot").forEach((el) =>
-      el.addEventListener("click", () => pickSlot(el.dataset.from, el.dataset.to, false, el))
+      el.addEventListener("click", () => pickSlot(el.dataset.from, addMinutes(el.dataset.from, state.dur), false, el))
     );
     $("evening-times").innerHTML = eveningTimes(EVENING_START, EVENING_END)
       .map((t) => `<option value="${t}">${t}</option>`)
@@ -112,9 +160,48 @@ if (typeof document !== "undefined") {
   function clearSlotSelection() {
     document.querySelectorAll(".slot,.evening-toggle").forEach((x) => x.classList.remove("on"));
     $("evening-fields").hidden = true;
+    $("step-dur").hidden = true;
     state.from = state.to = null;
+    state.dur = SLOT_MIN;
     state.evening = false;
+    $("step-person").hidden = true;
     $("step-who").hidden = true;
+  }
+
+  /* 15 / 30 / 45 — only the lengths that still fit before closing time. */
+  function renderDurations() {
+    const opts = durationsFor(state.from, DAY_END);
+    if (!opts.includes(state.dur)) state.dur = opts[0];
+    state.to = addMinutes(state.from, state.dur);
+    $("dur").innerHTML = opts
+      .map((d) => `<button type="button" class="dur${d === state.dur ? " on" : ""}" data-min="${d}">${d} min</button>`)
+      .join("");
+    $("dur").querySelectorAll(".dur").forEach((el) =>
+      el.addEventListener("click", () => {
+        state.dur = Number(el.dataset.min);
+        state.to = addMinutes(state.from, state.dur);
+        $("dur").querySelectorAll(".dur").forEach((x) => x.classList.remove("on"));
+        el.classList.add("on");
+        $("dur-when").textContent = state.from + "–" + state.to;
+      })
+    );
+    $("dur-when").textContent = state.from + "–" + state.to;
+    $("step-dur").hidden = false;
+  }
+
+  function renderPeople() {
+    $("people").innerHTML = PEOPLE.map(
+      (p) => `<button type="button" class="person${p.id === state.person ? " on" : ""}" data-id="${p.id}">
+                <span class="pn">${p.name}</span><span class="pr">${p.role}</span>
+              </button>`
+    ).join("");
+    $("people").querySelectorAll(".person").forEach((el) =>
+      el.addEventListener("click", () => {
+        state.person = el.dataset.id;
+        $("people").querySelectorAll(".person").forEach((x) => x.classList.remove("on"));
+        el.classList.add("on");
+      })
+    );
   }
 
   function pickSlot(from, to, evening, el) {
@@ -124,8 +211,15 @@ if (typeof document !== "undefined") {
     state.to = to;
     state.evening = evening;
     $("evening-fields").hidden = !evening;
+    if (evening) {
+      $("step-dur").hidden = true;
+    } else {
+      renderDurations();
+    }
+    renderPeople();
+    $("step-person").hidden = false;
     $("step-who").hidden = false;
-    if (!evening) $("step-who").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (!evening) $("step-person").scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
   function bookingFromForm() {
@@ -138,6 +232,10 @@ if (typeof document !== "undefined") {
       date: state.date,
       from: state.from,
       to: state.to,
+      minutes: state.evening ? 60 : state.dur,
+      person: state.person,
+      personName: (personById(state.person) || {}).name || "",
+      personEmail: (personById(state.person) || {}).email || "",
       evening: state.evening,
       place: state.evening ? $("f-place").value.trim() : "",
       tz: TZ,
@@ -168,6 +266,10 @@ if (typeof document !== "undefined") {
         $("msg").textContent =
           err.includes("place")
             ? "Podaj miejsce spotkania wieczorem."
+            : err.includes("duration")
+            ? "Wybierz długość spotkania, która mieści się przed zamknięciem targów."
+            : err.includes("person")
+            ? "Wybierz osobę do spotkania."
             : "Uzupełnij imię i nazwisko, firmę i adres e-mail.";
         $("msg").className = "msg bad";
         return;
@@ -207,13 +309,16 @@ if (typeof document !== "undefined") {
     $("done").hidden = false;
     $("done-when").textContent =
       `${day.dow} ${day.d} ${day.mon} · ${b.from}–${b.to}` + (b.evening ? ` · ${b.place}` : "");
+    $("done-who").textContent =
+      b.person && b.person !== "any" ? `With ${b.personName}` : "We will assign the right person to your topic";
     $("done-cal").href = gcalLink(b);
   }
 
   document.addEventListener("DOMContentLoaded", boot);
-}
+})();
 
 /* ---------- node (tests) ---------- */
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { DAYS, hourlySlots, eveningTimes, validate, gcalLink, DAY_START, DAY_END, EVENING_START, EVENING_END };
+  module.exports = { DAYS, PEOPLE, personById, hourlySlots, gridSlots, durationsFor, overlaps, addMinutes, toMin,
+    eveningTimes, validate, gcalLink, DAY_START, DAY_END, EVENING_START, EVENING_END, SLOT_MIN, DURATIONS };
 }
