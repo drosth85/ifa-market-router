@@ -6,7 +6,7 @@
    The POST is a "simple request" (text/plain) on purpose: Apps Script does not answer
    CORS preflight, so any JSON content-type would fail in the browser. */
 
-const ENDPOINT = "[[BOOKING_ENDPOINT]]"; // paste the Apps Script /exec URL after deploying
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbzzy21Dqx2-Y7XI5HkhZIeCx7qLR7st2Ts53u37ZZT2bjoyKdtodERsHSZ8a_6d-gpalw/exec"; // paste the Apps Script /exec URL after deploying
 
 // Fair days. Booth H27E-17, Reseller Park.
 const DAYS = [
