@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monstelo — B2B Distribution Catalog (IFA 2026)</title>
+<style>
+  :root{
+    --bg:#0A0B0E; --bg2:#14161D; --bg3:#101219;
+    --ink:#EDEAE0; --parch:#E7DCC2;
+    --amber:#FFB020; --teal:#2FE3C6;
+    --line:rgba(231,220,194,.14);
+    --mut:rgba(237,234,224,.60);
+    --disp:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --mono:"SF Mono","Menlo","Consolas",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#26282e;color:var(--ink);font-family:var(--disp)}
+  .sheet{position:relative;width:210mm;height:297mm;margin:8mm auto;background:var(--bg);
+    overflow:hidden;padding:15mm 15mm;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+  .sheet::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(120% 70% at 100% 0%,rgba(47,227,198,.05),transparent 55%),
+               radial-gradient(120% 70% at 0% 100%,rgba(255,176,32,.045),transparent 52%)}
+  .sheet > *{position:relative;z-index:1}
+  .pglabel{position:absolute;top:4mm;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:6pt;color:rgba(237,234,224,.22);letter-spacing:.2em}
+
+  .wordmark{font-weight:800;letter-spacing:.16em}
+  .wordmark .dot{color:var(--amber)}
+
+  /* running header/footer for interior pages */
+  .rhead{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);
+    font-size:7.5pt;color:var(--mut);letter-spacing:.1em;border-bottom:1px solid var(--line);padding-bottom:4mm;margin-bottom:10mm}
+  .rhead .wordmark{font-size:10pt}
+  .rfoot{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:7pt;
+    color:var(--mut);letter-spacing:.1em;border-top:1px solid var(--line);padding-top:4mm;margin-top:auto}
+  .rfoot .teal{color:var(--teal)}
+
+  .eyebrow{font-family:var(--mono);font-size:9pt;color:var(--teal);letter-spacing:.28em;text-transform:uppercase;margin-bottom:6mm}
+  h2{font-weight:800;font-size:24pt;text-transform:uppercase;letter-spacing:-.01em;line-height:1.02;margin-bottom:7mm}
+  h2 .amb{color:var(--amber)}
+  p.body{font-size:11pt;line-height:1.55;color:var(--parch);max-width:160mm}
+  p.body b{color:var(--ink)}
+
+  /* ---- COVER ---- */
+  .cover{justify-content:space-between;padding:20mm 16mm}
+  .cover .topbar{display:flex;justify-content:space-between;align-items:flex-start}
+  .cover .wordmark{font-size:22pt}
+  .cover .badge{text-align:right;font-family:var(--mono);font-size:8pt;color:var(--mut);line-height:1.6;letter-spacing:.08em}
+  .cover .badge b{color:var(--teal);display:block;font-size:9pt;letter-spacing:.14em}
+  .cover .hero{margin-top:auto}
+  .cover .kick{font-family:var(--mono);font-size:10pt;color:var(--teal);letter-spacing:.3em;text-transform:uppercase;margin-bottom:8mm}
+  .cover h1{font-weight:800;font-size:52pt;line-height:.95;letter-spacing:-.02em;text-transform:uppercase}
+  .cover h1 .amb{color:var(--amber)}
+  .cover .tag{font-size:13pt;color:var(--parch);margin-top:8mm;letter-spacing:.02em}
+  .cover .cbottom{margin-top:14mm;display:flex;justify-content:space-between;align-items:flex-end;
+    border-top:1px solid var(--line);padding-top:6mm;font-family:var(--mono);font-size:8.5pt;color:var(--mut);letter-spacing:.1em}
+  .cover .cbottom .big{color:var(--amber);font-weight:600}
+
+  /* ---- TOC ---- */
+  .toc{list-style:none;margin-top:4mm}
+  .toc li{display:flex;align-items:baseline;gap:5mm;padding:5mm 0;border-bottom:1px solid var(--line)}
+  .toc .n{font-family:var(--mono);font-size:10pt;color:var(--amber);width:12mm}
+  .toc .t{font-weight:800;font-size:14pt;text-transform:uppercase;letter-spacing:.02em;flex:1}
+  .toc .p{font-family:var(--mono);font-size:9pt;color:var(--mut)}
+
+  /* KPI row */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;margin:8mm 0}
+  .kpi{background:var(--bg2);border:1px solid var(--line);border-radius:3mm;padding:6mm 5mm}
+  .kpi .n{font-weight:800;font-size:24pt;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .kpi .n.t{color:var(--teal)} .kpi .n.a{color:var(--amber)}
+  .kpi .l{font-family:var(--mono);font-size:7.5pt;color:var(--mut);margin-top:2.5mm;letter-spacing:.04em;line-height:1.35}
+
+  /* value pillars */
+  .pillars{display:grid;grid-template-columns:1fr 1fr;gap:5mm;margin-top:4mm}
+  .pill{background:var(--bg3);border:1px solid var(--line);border-radius:3mm;padding:7mm}
+  .pill h3{font-weight:800;font-size:13pt;text-transform:uppercase;letter-spacing:.02em;margin-bottom:3mm}
+  .pill h3 .k{color:var(--amber);font-family:var(--mono);font-size:10pt;margin-right:3mm}
+  .pill p{font-size:9.5pt;line-height:1.45;color:var(--mut)}
+  .pill p b{color:var(--parch)}
+
+  /* route to market diagram */
+  .route{display:flex;align-items:center;margin:10mm 0}
+  .node{flex:1;text-align:center}
+  .node .ic{font-weight:800;font-size:16pt;font-family:var(--mono);letter-spacing:.02em}
+  .node .lb{font-family:var(--mono);font-size:7.5pt;color:var(--mut);margin-top:2mm;letter-spacing:.05em;text-transform:uppercase}
+  .arr{color:var(--amber);font-size:17pt;padding:0 2mm;margin-bottom:6mm;font-weight:700}
+
+  .map-band{background:var(--bg2);border:1px solid var(--line);border-radius:3mm;padding:7mm;margin-top:2mm}
+  .map-band .eyebrow{margin-bottom:5mm}
+  .mkts{display:flex;flex-wrap:wrap;gap:3mm}
+  .mkt{font-family:var(--mono);font-size:8.5pt;color:var(--parch);border:1px solid var(--line);border-radius:2mm;padding:2mm 4mm;letter-spacing:.04em}
+  .mkt b{color:var(--teal);font-weight:700}
+
+  /* ---- LINE CARD (brands by category) ---- */
+  .cats{display:grid;grid-template-columns:1fr 1fr;gap:5mm 7mm;margin-top:3mm}
+  .cat{}
+  .cat .ch{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.5px solid var(--amber);padding-bottom:1.5mm;margin-bottom:2.5mm}
+  .cat .ch .name{font-weight:800;font-size:10pt;text-transform:uppercase;letter-spacing:.03em}
+  .cat .ch .cnt{font-family:var(--mono);font-size:7pt;color:var(--teal)}
+  .cat .brands{font-family:var(--mono);font-size:8pt;line-height:1.55;color:var(--parch);letter-spacing:.01em}
+  .cat .brands .more{color:var(--mut)}
+
+  /* ---- FLAGSHIP PRODUCTS ---- */
+  .prods{display:grid;grid-template-columns:1fr 1fr;gap:7mm;margin-top:8mm}
+  .pgrp .ph{display:flex;justify-content:space-between;align-items:baseline;
+    border-bottom:1.5px solid var(--teal);padding-bottom:1.5mm;margin-bottom:3mm}
+  .pgrp .ph .name{font-weight:800;font-size:10pt;text-transform:uppercase;letter-spacing:.03em}
+  .pgrp .ph .tag{font-family:var(--mono);font-size:6.8pt;color:var(--mut);letter-spacing:.06em;text-transform:uppercase}
+  .pgrp ul{list-style:none}
+  .pgrp li{font-size:9.3pt;line-height:1.5;color:var(--parch);padding:1mm 0;display:flex;gap:3mm}
+  .pgrp li b{color:var(--ink);font-weight:700;min-width:23mm;display:inline-block}
+  .pgrp li .m{color:var(--mut);font-family:var(--mono);font-size:7.4pt}
+
+  .note{font-family:var(--mono);font-size:8pt;color:var(--mut);line-height:1.5;margin-top:7mm;
+    border-left:2px solid var(--teal);padding-left:5mm;letter-spacing:.02em}
+  .note b{color:var(--parch)}
+
+  /* terms table */
+  .ask{margin-top:12mm;border:1px solid var(--line);border-left:2px solid var(--amber);border-radius:2mm;
+    padding:6mm 7mm;background:var(--bg2)}
+  .ask .k{font-family:var(--mono);font-size:8.5pt;color:var(--amber);letter-spacing:.14em;
+    text-transform:uppercase;margin-bottom:2.5mm}
+  .ask p{font-size:11.5pt;color:var(--ink);line-height:1.35;margin:0}
+  .ask p b{color:var(--teal)}
+  .terms{width:100%;border-collapse:collapse;margin-top:2mm;font-size:10pt}
+  .terms td{padding:5mm 4mm;border-bottom:1px solid var(--line);vertical-align:top}
+  .terms td.k{font-family:var(--mono);font-size:8.5pt;color:var(--teal);letter-spacing:.06em;width:52mm;text-transform:uppercase}
+  .terms td.v{color:var(--parch);line-height:1.4}
+  .terms td.v b{color:var(--ink)}
+
+  /* CTA back cover */
+  .backcover{justify-content:space-between;padding:20mm 16mm}
+  .backcover .big{font-weight:800;font-size:30pt;text-transform:uppercase;line-height:1.05;letter-spacing:-.01em}
+  .backcover .big .amb{color:var(--amber)}
+  .cta-card{background:linear-gradient(135deg,rgba(255,176,32,.13),rgba(47,227,198,.08));
+    border:1px solid rgba(255,176,32,.32);border-radius:3mm;padding:9mm;display:grid;grid-template-columns:1fr 34mm;gap:7mm;align-items:center;margin-top:auto}
+  .cta-card h3{font-weight:800;font-size:15pt;text-transform:uppercase;margin-bottom:4mm}
+  .cta-card h3 .amb{color:var(--amber)}
+  .cta-card .contact{font-family:var(--mono);font-size:9.5pt;color:var(--parch);line-height:1.8}
+  .cta-card .contact b{color:var(--teal)}
+  .qr{width:34mm;height:34mm;background:var(--ink);border-radius:2mm;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:7pt;color:#0A0B0E;text-align:center;padding:3mm}
+  .disclaimer{font-family:var(--mono);font-size:6.5pt;color:rgba(237,234,224,.38);line-height:1.6;margin-top:8mm;letter-spacing:.02em}
+
+  @media print{html,body{background:#fff}.sheet{margin:0;box-shadow:none;page-break-after:always}.pglabel{display:none}@page{size:A4;margin:0}}
+</style>
+<style id="design-v2">
+  /* ---- DESIGN v2 (jasny) — paleta z oferty detal. v1 (ciemny) zostaje domyślny. ----
+     Akcja/akcent w v2 = #0E9C86; drugi akcent to jego ciemniejszy wariant, żeby
+     drobne etykiety mono nie ginęły na kremowym tle. */
+  :root[data-theme="light"]{
+    --bg:#F4F1E9; --bg2:#FFFFFF; --bg3:#EDE8DB;
+    --ink:#15171E; --parch:#2A2E3A;
+    --amber:#0E9C86; --teal:#0B7C6B;
+    --line:#DED8C7;
+    --mut:#5A5D68;
+  }
+  :root[data-theme="light"] .qr{color:var(--bg)}            /* QR: jasny tekst na ciemnym polu */
+  :root[data-theme="light"] feFlood{flood-color:#15171E}    /* logotypy marketplace na ciemno */
+  :root[data-theme="light"]{background:#DED8C7}          /* tło poza arkuszem/ścianą */
+  :root[data-theme="light"] body{background:#DED8C7}
+  :root[data-theme="light"] .sheet,:root[data-theme="light"] .wall{background:var(--bg)}
+  .designbtn{position:fixed;right:14px;bottom:14px;z-index:999;cursor:pointer;
+    font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--mut);background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:8px 12px}
+  .designbtn:hover{color:var(--ink)}
+  @media print{.designbtn{display:none}}
+</style>
+<script>
+  (function(){ try{ var t=localStorage.getItem('ifa-design');
+    if(t) document.documentElement.setAttribute('data-theme',t); }catch(e){} })();
+</script>
+
+<style>
+  /* --- 4-page edition: compact bands carrying content from the dropped pages --- */
+  .cvstrip{margin-top:auto;border-top:1px solid var(--line);padding-top:6mm;display:grid;
+           grid-template-columns:repeat(4,1fr);gap:4mm}
+  .cvstrip .k{font-weight:800;font-size:19pt;line-height:1;letter-spacing:-.02em}
+  .cvstrip .k.t{color:var(--teal)} .cvstrip .k.a{color:var(--amber)}
+  .cvstrip .l{font-family:var(--mono);font-size:7pt;color:var(--mut);margin-top:2mm;line-height:1.35;letter-spacing:.04em}
+  .cvroute{font-family:var(--mono);font-size:8pt;letter-spacing:.14em;color:var(--mut);
+           margin-top:5mm;display:flex;gap:3mm;align-items:center;flex-wrap:wrap}
+  .cvroute b{color:var(--parch)} .cvroute .t{color:var(--teal)} .cvroute .a{color:var(--amber)}
+  .runners{margin-top:4mm;border:1px solid var(--line);border-radius:2.5mm;padding:5mm 5.5mm;background:var(--bg3)}
+  .runners .eyebrow{margin-bottom:3mm}
+  .runners .rg{display:grid;grid-template-columns:1fr 1fr;gap:2.2mm 7mm}
+  .runners .rl{font-family:var(--mono);font-size:7.4pt;line-height:1.45;color:var(--mut)}
+  .runners .rl b{color:var(--parch);font-weight:600;letter-spacing:.03em}
+  .enginebar{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm;margin:4.5mm 0 5mm}
+  .enginebar div{border-left:2px solid var(--teal);padding-left:4mm}
+  .enginebar h4{font-size:9.5pt;font-weight:800;text-transform:uppercase;letter-spacing:.02em;margin-bottom:1.5mm}
+  .enginebar p{font-family:var(--mono);font-size:7.4pt;line-height:1.45;color:var(--mut)}
+  .mktstrip{margin-top:7mm;border-top:1px solid var(--line);padding-top:5mm;
+            font-family:var(--mono);font-size:7.6pt;letter-spacing:.1em;color:var(--mut)}
+  .mktstrip b{color:var(--parch)}
+
+  /* p2 density: line card + runners must share one A4 */
+  #p-linecard .cats{gap:3.6mm 7mm;margin-top:2mm}
+  #p-linecard .cat .brands{font-size:7.4pt;line-height:1.42}
+  #p-linecard .cat .ch{padding-bottom:1.2mm;margin-bottom:2mm}
+  #p-linecard h2{margin-bottom:5mm}
+  #p-linecard .eyebrow{margin-bottom:4mm}
+  #p-linecard .note{margin-top:4mm;font-size:7.2pt;line-height:1.45}
+  .runners{padding:4mm 4.5mm;margin-top:3.5mm}
+  .runners .eyebrow{margin-bottom:2.5mm;font-size:8pt}
+  .runners .rg{gap:1.6mm 6mm}
+  .runners .rl{font-size:6.9pt;line-height:1.38}
+</style>
+</head>
+<body>
+
+<!-- ===== P1 · COVER ===== -->
+<section class="sheet cover">
+  <span class="pglabel">CATALOG · P1 · COVER</span>
+  <div class="topbar">
+    <div class="wordmark">MONSTELO<span class="dot">.</span></div>
+    <div class="badge"><b>IFA 2026</b>Hall H27E-17<br>Reseller Park<br>Berlin · 4–8 Sep</div>
+  </div>
+  <div class="hero">
+    <div class="kick">B2B Distribution</div>
+    <h1>From EAN<br>to <span class="amb">Europe</span></h1>
+    <p class="tag">Data-driven distribution across the EU — 241 brands, one route to market.</p>
+  </div>
+  <div class="cvroute">
+    <b>EAN</b> → <span class="t">DATA</span> → <b>6 CHANNELS</b> → <span class="a">28 EU MARKETS</span>
+  </div>
+
+  <div class="cvstrip">
+    <div><div class="k">241</div><div class="l">brands<br>distributed</div></div>
+    <div><div class="k t">28</div><div class="l">EU markets<br>reached B2B</div></div>
+    <div><div class="k a">~80%</div><div class="l">orders shipped<br>in 24h</div></div>
+    <div><div class="k">~11k</div><div class="l">active<br>EANs</div></div>
+  </div>
+
+  <div class="cbottom">
+    <span>LAUNCH · SELL · RESELL</span>
+    <span class="big">monstelo.com</span>
+  </div>
+</section>
+
+<!-- ===== P2 · WHO WE ARE + TOC ===== -->
+<section class="sheet" id="p-linecard">
+  <span class="pglabel">CATALOG · P2</span>
+  <div class="rhead"><span class="wordmark">MONSTELO<span class="dot">.</span></span><span>01 · BRAND PORTFOLIO</span></div>
+
+  <div class="eyebrow">Line card</div>
+  <h2>241 brands,<br><span class="amb">by category</span></h2>
+
+  <div class="cats">
+    <div class="cat">
+      <div class="ch"><span class="name">Mobiles</span><span class="cnt">new · eurospec</span></div>
+      <div class="brands">Apple · Samsung · Xiaomi · Nokia · Motorola · Huawei<br>Lenovo · Oppo · Realme · Honor · OnePlus · Blackview</div>
+    </div>
+    <div class="cat">
+      <div class="ch"><span class="name">Tablets &amp; Computers</span><span class="cnt">new · eurospec</span></div>
+      <div class="brands">Apple · Samsung · Huawei · Lenovo · Asus · Xiaomi<br>Toshiba · HOCO</div>
+    </div>
+    <div class="cat">
+      <div class="ch"><span class="name">Headphones &amp; Headsets</span><span class="cnt">featured</span></div>
+      <div class="brands">JBL · Sony · Sennheiser · Marshall · Philips · Xiaomi<br>Huawei · JVC · Audio-Technica · Creative<br>HyperX · Poly / Plantronics · Apple · Motorola</div>
+    </div>
+    <div class="cat">
+      <div class="ch"><span class="name">Speakers &amp; Sound systems</span><span class="cnt">featured</span></div>
+      <div class="brands">JBL · Marshall · Creative · Sony · Philips<br>Audio Pro · Soundcore</div>
+    </div>
+    <div class="cat">
+      <div class="ch"><span class="name">Consoles &amp; Gaming</span><span class="cnt">new · eurospec</span></div>
+      <div class="brands">Nintendo · PlayStation · Corsair · HyperX · Razer<br>SteelSeries · Asus</div>
+    </div>
+    <div class="cat">
+      <div class="ch"><span class="name">Wearables &amp; Smartwatches</span><span class="cnt">new · eurospec</span></div>
+      <div class="brands">Apple · Samsung · Huawei · Xiaomi · Realme</div>
+    </div>
+    <div class="cat">
+      <div class="ch"><span class="name">Chargers &amp; Power</span><span class="cnt">featured</span></div>
+      <div class="brands">Anker · Apple · Baseus · Belkin · Hama · Samsung<br>Huawei · Xiaomi · Oppo · HOCO · Jellico</div>
+    </div>
+    <div class="cat">
+      <div class="ch"><span class="name">Cases &amp; Covers</span><span class="cnt">featured</span></div>
+      <div class="brands">Spigen · Guess · Karl Lagerfeld · UNIQ · iDeal of Sweden<br>Tech-Protect · Puro · XQISIT · Beline · Spacecase · Tech 21<br>OtterBox · Nimmy · SBS · FC Barcelona<br>Apple · Samsung · Xiaomi · Huawei</div>
+    </div>
+    <div class="cat">
+      <div class="ch"><span class="name">Screen protection</span><span class="cnt">featured</span></div>
+      <div class="brands">Spigen · MyScreen · Tech-Protect · Beline<br>PanzerGlass · Spacecase</div>
+    </div>
+    <div class="cat">
+      <div class="ch"><span class="name">Accessories &amp; Lifestyle</span><span class="cnt">featured</span></div>
+      <div class="brands">PopSockets · SBS · Hama · Google · Guess<br>Karl Lagerfeld · Baseus · HOCO</div>
+    </div>
+    <div class="cat">
+      <div class="ch"><span class="name">Photo &amp; Imaging</span><span class="cnt">featured</span></div>
+      <div class="brands">Fujifilm · Instax</div>
+    </div>
+    <div class="cat">
+      <div class="ch"><span class="name">Parts &amp; Cables</span><span class="cnt">featured</span></div>
+      <div class="brands">Jellico · Hama · Baseus · HOCO · SBS · Apple<br>Samsung · OnePlus · Huawei · Motorola · Belkin<br>Incell · Freenet · + many more</div>
+    </div>
+  </div>
+
+  <div class="runners">
+    <div class="eyebrow">What actually moves — volume runners</div>
+    <div class="rg">
+      <div class="rl"><b>TWS &amp; wireless</b> JBL Wave 200/300 · Marshall Major V/IV · Sennheiser CX 300S · Sony WI-C310 · Philips TAH4209 · JVC HA-S22W</div>
+      <div class="rl"><b>Gaming &amp; PC audio</b> HyperX Cloud Earbuds II · Cloud Alpha · Creative Zen Air · Poly C3215</div>
+      <div class="rl"><b>Mobiles — entry</b> Nokia 105 / 106 / 225 4G · Motorola Moto E20 · Realme T200 Lite</div>
+      <div class="rl"><b>Charging &amp; power</b> Apple 20W USB-C · Baseus GaN5 Pro 65W · Hama Qi-FC 15S · HOCO J152 Pro</div>
+      <div class="rl"><b>Smart home &amp; wearables</b> Xiaomi Mi TV Stick 4K · Samsung SmartTag2 · Galaxy Fit3</div>
+      <div class="rl"><b>Protection &amp; lifestyle</b> Spigen Glas.tR · Guess &amp; K. Lagerfeld licensed · MyScreen · Tech-Protect</div>
+    </div>
+  </div>
+
+  <div class="note"><b>Featured selection</b> — brands in active rotation, new stock, EU spec; the runners above repeat month after month across our B2B accounts. Full line card of 241 brands and ~11,000 EANs: scan the QR on the back cover. <b>Ask for the current list</b> — pricing moves with the market.</div>
+
+  <div class="rfoot"><span class="teal">FROM EAN TO EUROPE</span><span>02</span></div>
+</section>
+
+<!-- ===== P5 · FLAGSHIP PRODUCTS ===== -->
+<section class="sheet">
+  <span class="pglabel">CATALOG · P3</span>
+  <div class="rhead"><span class="wordmark">MONSTELO<span class="dot">.</span></span><span>02 · BUYING FROM US</span></div>
+
+  <div class="eyebrow">Commercial terms</div>
+  <h2>Why buying from us <span class="amb">pays</span></h2>
+  <p class="body">Monstelo moves consumer electronics from <b>241 brands</b> across European markets — every listing priced against live demand data, not guesswork. We route stock to the channel and the country where it sells, and we ship fast. Prices, MOQ and payment terms are agreed per account — ask at the stand.</p>
+
+  <div class="enginebar">
+    <div><h4>Live pricing</h4><p>8,000 products price-monitored continuously — priced to win, not to guess.</p></div>
+    <div><h4>Multi-channel</h4><p>Allegro · MediaMarkt · amazon · Refurbed · Empik · own store — six channels, one feed.</p></div>
+    <div><h4>Cross-border</h4><p>~80% of orders out in 24h, ~35% same day, to 28 EU markets.</p></div>
+  </div>
+
+  <table class="terms">
+    <tr><td class="k">Top brands</td><td class="v"><b>The brands that actually sell.</b> Consumer electronics, audio, phones and accessories — 241 brands in rotation, ~11k active EANs.</td></tr>
+    <tr><td class="k">Best prices</td><td class="v"><b>Best brands, best prices.</b> On top brands we negotiate down to <b>50% of wholesale</b>. Ask for the current list — prices move with the market.</td></tr>
+    <tr><td class="k">Sourcing network</td><td class="v"><b>Tell us what you need — we will find it.</b> If it is not in our stock, it is in our network. Between us and our partners we source practically any product. Bring us a hard one.</td></tr>
+    <tr><td class="k">Buying volume</td><td class="v"><b>Bulk pricing without the bulk commitment.</b> We collect demand from the whole market and buy in very large quantities, so you get sharp prices against your MOQ instead of financing a container yourself.</td></tr>
+    <tr><td class="k">Logistics</td><td class="v"><b>~80% of orders out within 24h</b>, ~35% same day. B2B across 28 EU markets, shipped from one warehouse in Poland.</td></tr>
+  </table>
+
+  <div class="ask">
+    <div class="k">Ask us</div>
+    <p>Bring your shopping list to <b>stand H27E-17</b>. We quote against it on the spot — and whatever
+      is not on our shelf, we source from the network.</p>
+  </div>
+
+  <div class="rfoot"><span class="teal">FROM EAN TO EUROPE</span><span>03</span></div>
+</section>
+
+<!-- ===== P6 · BACK COVER / CTA ===== -->
+<section class="sheet backcover">
+  <span class="pglabel">CATALOG · P4 · BACK</span>
+  <div class="topbar" style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div class="wordmark" style="font-size:16pt">MONSTELO<span class="dot">.</span></div>
+    <div class="badge" style="text-align:right;font-family:var(--mono);font-size:8pt;color:var(--mut);letter-spacing:.08em">Hall H27E-17 · Reseller Park</div>
+  </div>
+
+  <div style="margin-top:24mm">
+    <div class="eyebrow">Work with us</div>
+    <div class="big">Bring your brand<br>to <span class="amb">Europe.</span></div>
+  </div>
+
+  <div class="cta-card">
+    <div>
+      <h3>Meet us at <span class="amb">stand H27E-17</span></h3>
+      <div class="contact">
+        <b>Brands &amp; retail:</b> [name] · [name]<br>
+        <b>Wholesale leads:</b> [name] · [name]<br>
+        [email] &nbsp;·&nbsp; WhatsApp [ ]<br>
+        IFA Berlin · 4–8 Sep 2026
+      </div>
+    </div>
+    <div class="qr">QR → full line card &amp; offer (PDF)</div>
+  </div>
+
+  <div class="mktstrip">
+    WHERE B2B SHIPS — TOP EU MARKETS: <b>SK · DE · GR · ES · GB · LT · NL · IT · FR</b> + 19 MORE
+  </div>
+
+  <p class="disclaimer">All trademarks, brand names and logos are the property of their respective owners. Monstelo is an independent distributor and is not affiliated with, authorised by, or endorsed by the brands referenced in this catalog. Brand names are used for identification purposes only (nominative fair use). Operational figures are trailing-12-month data; the featured brand selection is illustrative — the full portfolio is available on request. Channel names (Allegro, Ceneo, Skąpiec, Amazon) are third-party marketplaces referenced for identification only.</p>
+</section>
+
+<button type="button" class="designbtn" id="designbtn"></button>
+<script>
+  (function(){ var r=document.documentElement, b=document.getElementById('designbtn');
+    function l(){ b.textContent = r.getAttribute('data-theme')==='light' ? 'design v2 · jasny' : 'design v1 · ciemny'; }
+    l(); b.addEventListener('click', function(){
+      var n = r.getAttribute('data-theme')==='light' ? 'dark' : 'light';
+      r.setAttribute('data-theme', n);
+      try{ localStorage.setItem('ifa-design', n); }catch(e){}
+      l(); });
+  })();
+</script>
+</body>
+</html>
