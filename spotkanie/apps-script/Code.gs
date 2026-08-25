@@ -12,6 +12,9 @@
  */
 
 var CALENDAR_ID = 'primary';        // or a shared calendar id: 'xxx@group.calendar.google.com'
+// Spreadsheet that collects the bookings. Leave SHEET_ID empty only if this script is bound to
+// that sheet (Extensions -> Apps Script); a standalone project must open it by id.
+var SHEET_ID    = '1o1kKErUs80VT6lxddnEAw-UWHmCCUct1vGxAOe3uP38';
 var SHEET_NAME  = 'Bookings';
 var STAND       = 'IFA Berlin 2026 · Reseller Park · stand H27E-17';
 var NOTIFY      = '';               // optional: your address, to get a copy of every booking
@@ -129,7 +132,8 @@ function doGet() {
 }
 
 function getSheet() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = SHEET_ID ? SpreadsheetApp.openById(SHEET_ID) : SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) throw new Error('No spreadsheet: set SHEET_ID or bind the script to a sheet.');
   var sh = ss.getSheetByName(SHEET_NAME);
   if (!sh) {
     sh = ss.insertSheet(SHEET_NAME);
