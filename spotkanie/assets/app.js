@@ -161,7 +161,10 @@ if (typeof document !== "undefined") (function () {
       })
       .join("");
     $("slots").querySelectorAll(".slot:not([disabled])").forEach((el) =>
-      el.addEventListener("click", () => pickSlot(el.dataset.from, addMinutes(el.dataset.from, state.dur), false, el))
+      el.addEventListener("click", () => {
+        if (el.classList.contains("on")) { clearSlotSelection(); return; }  // click again = undo
+        pickSlot(el.dataset.from, addMinutes(el.dataset.from, state.dur), false, el);
+      })
     );
     $("evening-times").innerHTML = eveningTimes(EVENING_START, EVENING_END)
       .map((t) => `<option value="${t}">${t}</option>`)
@@ -172,6 +175,8 @@ if (typeof document !== "undefined") (function () {
   function clearSlotSelection() {
     document.querySelectorAll(".slot,.evening-toggle").forEach((x) => x.classList.remove("on"));
     $("evening-fields").hidden = true;
+    $("evening-block").hidden = false;
+    $("slots").hidden = false;
     $("step-dur").hidden = true;
     state.from = state.to = null;
     state.dur = SLOT_MIN;
@@ -234,6 +239,9 @@ if (typeof document !== "undefined") (function () {
     state.to = to;
     state.evening = evening;
     $("evening-fields").hidden = !evening;
+    // One choice at a time: an hour on the stand and an evening meeting are alternatives.
+    $("evening-block").hidden = !evening;
+    $("slots").hidden = evening;
     if (evening) {
       $("step-dur").hidden = true;
     } else {
