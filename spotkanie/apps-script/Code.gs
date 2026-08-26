@@ -35,7 +35,7 @@ var DAY_END_H   = 18;
    held in the open IFA space, so there is no limit on parallel meetings. */
 var ASSIGN_ORDER = ['juszczyk', 'mamcarczyk', 'tuchowska', 'tabak', 'kocaba', 'drozd', 'palka'];
 var MAX_PER_DAY = 60;               // total bookings accepted per calendar day
-var MAX_PER_MAIL = 3;               // bookings per e-mail address per calendar day
+var MAX_PER_MAIL = 5;              // successful bookings per e-mail address per calendar day
 var DIAG_KEY    = 'gw0zdz';     // ?diag=<DIAG_KEY>; anything else gets nothing
 // Spreadsheet that collects the bookings. Leave SHEET_ID empty only if this script is bound to
 // that sheet (Extensions -> Apps Script); a standalone project must open it by id.
