@@ -198,6 +198,28 @@ function handleBooking(b) {
   }
 }
 
+/**
+ * Run once from the editor during the fair week: a five-minute trigger keeps the web app warm,
+ * so no visitor pays the 15-second cold start. Run removeKeepWarm() when the fair is over.
+ */
+function installKeepWarm() {
+  removeKeepWarm();
+  ScriptApp.newTrigger('keepWarm').timeBased().everyMinutes(5).create();
+  return 'keepWarm installed';
+}
+
+function removeKeepWarm() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'keepWarm') ScriptApp.deleteTrigger(t);
+  });
+  return 'keepWarm removed';
+}
+
+/** Cheap warm-up: one cached calendar read, so the container stays alive. */
+function keepWarm() {
+  try { dayBusy(ASSIGN_ORDER[0], FAIR_DAYS[0], false); } catch (e) {}
+}
+
 /** Lets you sanity-check the deployment in a browser.
     ?diag=<DIAG_KEY>&date=2026-09-04&from=10:00&to=10:15&person=any tells you what the check sees.
     ?action=book&payload=<url-encoded JSON> books — this is the path the page uses. */

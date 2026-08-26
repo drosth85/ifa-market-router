@@ -369,7 +369,15 @@ if (typeof document !== "undefined") (function () {
     };
   }
 
+  /* Apps Script spins its container down when idle: the first call then takes 15-18 s.
+     A ping the moment the page opens wakes it while the visitor is still reading. */
+  function wakeBackend() {
+    if (ENDPOINT.startsWith("[[")) return;
+    try { fetch(ENDPOINT, { cache: "no-store" }).catch(() => {}); } catch (e) {}
+  }
+
   function boot() {
+    wakeBackend();
     const fixed = personFromQuery(location.search);
     if (fixed) {
       state.person = fixed.id;
