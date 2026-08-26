@@ -19,7 +19,7 @@
     --teal:#0E9C86; --amber:#B57A0C; --bad:#C0392B;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans)}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);overflow-x:hidden}
   .wrap{max-width:660px;margin:0 auto;padding:44px 22px 80px}
 
   .wordmark{font-weight:800;font-size:18px}
@@ -31,8 +31,9 @@
   h1 .amb{color:var(--amber)}
   .lead{color:var(--mut);font-size:15px;line-height:1.6;margin:14px 0 0}
 
+  h2{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
   h2 .tzhead{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--mut);
-    text-transform:uppercase;margin-left:10px}
+    text-transform:uppercase}
   h2{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;
     color:var(--teal);font-weight:600;margin:36px 0 12px}
 
@@ -147,7 +148,13 @@
   .designbtn{position:fixed;right:14px;bottom:14px;z-index:99;cursor:pointer;
     font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
     color:var(--mut);background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:8px 12px}
-  @media(max-width:480px){ .two{grid-template-columns:1fr} #days{grid-template-columns:repeat(3,1fr)} }
+  @media(max-width:560px){
+    #people{grid-template-columns:1fr}
+    .slot-grid{grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px}
+    .slot{padding:12px 4px;font-size:13.5px}
+    .legend{flex-wrap:wrap;gap:10px}
+  }
+  @media(max-width:480px){ .two{grid-template-columns:1fr} #days{grid-template-columns:repeat(5,1fr)} .day{padding:12px 2px} }
 </style>
 <script>
   (function(){ try{ var t=localStorage.getItem('ifa-design'); if(t) document.documentElement.setAttribute('data-theme',t);}catch(e){} })();
@@ -182,6 +189,7 @@
 
     <section id="step-time" hidden>
       <h2 id="h-time">3 · Time <span class="tzhead">all times Berlin · CEST</span></h2>
+      <p id="slots-status" hidden></p>
       <div id="slots"></div>
       <div class="legend"><span><i></i>free</span><span class="taken"><i></i>already booked</span></div>
 

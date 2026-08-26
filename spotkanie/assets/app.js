@@ -374,8 +374,8 @@ if (typeof document !== "undefined") (function () {
   /* Busy windows for one person — or, for "no preference", the hours where nobody is free. */
   async function loadBusy(date, person) {
     const people = await loadDay(date);
-    if (people === null) return null;
-    if (people === "legacy") {
+    if (people === null || people === "legacy") {
+      // Either an older deployment, or the day request failed — ask person by person instead.
       if (person !== "any") return legacyBusy(date, person);
       const crew = PEOPLE.filter((x) => x.id !== "any");
       const all = await Promise.all(crew.map((x) => legacyBusy(date, x.id)));
@@ -396,21 +396,27 @@ if (typeof document !== "undefined") (function () {
   }
 
   /* Paints the grid straight away, then dims what the calendar says is taken. */
+  function setSlotStatus(text, warn) {
+    const el = $("slots-status");
+    el.textContent = text || "";
+    el.classList.toggle("warn", !!warn);
+    el.hidden = !text;
+  }
+
   async function showSlotsFor(picked) {
     state.busy = [];
     $("step-time").hidden = false;
     renderSlots();
-    $("slots").classList.add("checking");
+    setSlotStatus("Checking free hours…", false);
     $("step-time").scrollIntoView({ behavior: motionPref(), block: "nearest" });
     const busy = await loadBusy(state.date, picked);
     if (state.person !== picked) return;   // they changed their mind while we waited
-    $("slots").classList.remove("checking");
     if (busy === null) {
-      // Availability unknown: leave the grid as it is rather than pretending everything is free.
-      $("slots").classList.add("unchecked");
+      // Availability unknown: leave the grid alone rather than pretending everything is free.
+      setSlotStatus("Could not check the calendar — book anyway, we confirm every meeting by e-mail.", true);
       return;
     }
-    $("slots").classList.remove("unchecked");
+    setSlotStatus("", false);
     state.busy = busy;
     renderSlots();
   }
