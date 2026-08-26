@@ -1,163 +1,193 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Book a meeting — Monstelo × Mobilki GSM · IFA Berlin 2026</title>
-<meta name="description" content="Book a slot at stand H27E-17, Reseller Park, IFA Berlin 2026.">
+<meta name="description" content="Book 15, 30 or 45 minutes with Monstelo at IFA Berlin 2026, Reseller Park, stand H27E-17.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,600;100,700;100,800&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#0A0B0E; --surf:#0C0D12; --bg2:#14161D;
-    --ink:#EDEAE0; --ink2:#E7DCC2; --mut:#8A8D98; --line:#23262F;
-    --teal:#2FE3C6; --amber:#FFB020; --bad:#FF6B5A;
-    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
-    --sans:"Helvetica Neue",Helvetica,Arial,sans-serif;
-  }
-  :root[data-theme="light"]{
-    --bg:#F4F1E9; --surf:#fff; --bg2:#EDE8DB;
-    --ink:#15171E; --ink2:#3A3D48; --mut:#5A5D68; --line:#DED8C7;
-    --teal:#0E9C86; --amber:#B57A0C; --bad:#C0392B;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);overflow-x:hidden}
-  .wrap{max-width:660px;margin:0 auto;padding:44px 22px 80px}
-
-  .wordmark{font-weight:800;font-size:18px}
-  .wordmark .dot{color:var(--teal)}
-  .wordmark .co{color:var(--mut);font-weight:400}
-  .kick{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;
-    color:var(--mut);margin:22px 0 10px}
-  h1{font-size:clamp(28px,5.5vw,42px);line-height:1.05;font-weight:800;letter-spacing:-.02em;margin:0}
-  h1 .amb{color:var(--amber)}
-  .lead{color:var(--mut);font-size:15px;line-height:1.6;margin:14px 0 0}
-
-  h2{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
-  h2 .tzhead{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--mut);
-    text-transform:uppercase}
-  h2{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;
-    color:var(--teal);font-weight:600;margin:36px 0 12px}
-
-  #days{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-  .day{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 6px;cursor:pointer;
-    background:var(--surf);border:1px solid var(--line);border-radius:9px;color:var(--ink);
-    font-family:var(--sans);transition:border-color .15s}
-  .day:hover{border-color:var(--mut)}
-  .day.on{border-color:var(--teal);background:var(--bg2)}
-  .day .dow{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
-  .day.on .dow{color:var(--teal)}
-  .day .dnum{font-size:22px;font-weight:800;line-height:1}
-  .day .mon{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
-
-  #slots-status{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
-    color:var(--mut);margin:0 0 10px;min-height:14px;line-height:1.5}
-  #slots-status.warn{color:var(--amber)}
-  #slots{display:block}
-  .slot-group{margin-bottom:16px}
-  .slot-group .sg-label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;
-    text-transform:uppercase;color:var(--mut);margin:0 0 8px}
-  .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
-  .legend{display:flex;gap:16px;align-items:center;font-family:var(--mono);font-size:10px;
-    letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-top:4px}
-  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;border:1px solid var(--line);
-    background:var(--surf);margin-right:6px;vertical-align:-1px}
-  .legend .taken i{opacity:.32}
-  .slot{padding:13px 6px;cursor:pointer;background:var(--surf);border:1px solid var(--line);
-    border-radius:9px;color:var(--ink);font-family:var(--mono);font-size:14px;letter-spacing:.04em;
-    transition:border-color .15s}
-  .slot:hover:not([disabled]){border-color:var(--mut)}
-  .slot[disabled]{opacity:.32;cursor:not-allowed;text-decoration:line-through}
-  #slots.checking{position:relative}
-  #slots.unchecked::after{content:"could not check availability — we will confirm by e-mail";
-    position:absolute;right:0;top:-22px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
-    text-transform:uppercase;color:var(--amber)}
-  #slots.unchecked{position:relative}
-  #slots.checking::after{content:"checking free hours…";position:absolute;right:0;top:-22px;
-    font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
-  .slot.on{border-color:var(--teal);background:var(--bg2);color:var(--teal)}
-  .day:focus-visible,.slot:focus-visible,.person:focus-visible,.dur:focus-visible,
-  .evening-toggle:focus-visible,button.send:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
-  input.bad,textarea.bad{border-color:var(--bad)}
-
-  #summary{margin-top:18px;padding:12px 14px;border:1px solid var(--line);border-left:2px solid var(--teal);
-    border-radius:8px;background:var(--surf);font-size:14px;line-height:1.5;color:var(--ink)}
-  #summary .tz{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
-
-  #step-dur{margin-top:16px}
-  #dur{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .dur{cursor:pointer;background:var(--surf);border:1px solid var(--line);border-radius:9px;color:var(--ink);
-    padding:11px 16px;font-family:var(--mono);font-size:14px;letter-spacing:.04em;transition:border-color .15s}
-  .dur:hover{border-color:var(--mut)}
-  .dur.on{border-color:var(--teal);background:var(--bg2);color:var(--teal)}
-  .dur-when{font-family:var(--mono);font-size:13px;color:var(--mut);margin-left:4px}
-
-  #people{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
-  .person{text-align:left;cursor:pointer;background:var(--surf);border:1px solid var(--line);border-radius:9px;
-    color:var(--ink);padding:12px 14px;font-family:var(--sans);display:flex;flex-direction:column;gap:3px;
-    transition:border-color .15s}
-  .person:hover{border-color:var(--mut)}
-  .person.on{border-color:var(--teal);background:var(--bg2)}
-  /* Author display rules (flex/grid) beat the browser's [hidden]{display:none} — without this
-     the "meeting with" box shows up empty and the slot grid never hides. */
+  *{box-sizing:border-box;margin:0;padding:0}
   [hidden]{display:none !important}
 
-  .withline{margin-top:22px;background:var(--surf);border:1px solid var(--teal);border-radius:10px;
-    padding:14px 16px;display:flex;flex-direction:column;gap:3px}
-  .withline .wl-k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
-  .withline .wl-n{font-size:17px;font-weight:800;line-height:1.2}
-  .withline .wl-r{font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--mut)}
+  :root{
+    --cover:#0A0B0E; --ledger:#171C24; --chalk:#E9E0CC; --mute:#7C8593; --line:#232833;
+    --paper:#E7DCC2; --paper-ink:#0A0B0E; --paper-accent:#0A7A68;
+    --teal:#2FE3C6; --amber:#FFB020; --bad:#FF6B5A;
+    --sans:Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --tk:96px;
+  }
+  :root[data-theme="light"]{
+    --cover:#F4F1E9; --ledger:#EDE8DB; --chalk:#15171E; --mute:#5A5D68; --line:#DED8C7;
+    --teal:#0E9C86; --amber:#B57A0C; --bad:#C0392B;
+  }
+  html,body{background:var(--cover);color:var(--chalk);font-family:var(--sans);overflow-x:hidden;
+    -webkit-text-size-adjust:100%}
+  body{min-height:100dvh;padding-bottom:calc(var(--tk) + env(safe-area-inset-bottom) + 12px)}
+  .wrap{max-width:720px;margin:0 auto;padding:18px 18px 26px}
+  ::selection{background:var(--paper);color:var(--paper-ink)}
 
-  .person .pn{font-size:14.5px;font-weight:700;line-height:1.2}
-  .person .pr{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--mut);line-height:1.35}
-  .person.on .pr{color:var(--teal)}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:12px;
+    font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+  .top .brand{color:var(--chalk);font-family:var(--sans);font-weight:800;font-size:12.5px;letter-spacing:.04em}
+  .themebtn{cursor:pointer;background:none;border:1px solid var(--line);border-radius:999px;
+    color:var(--mute);font-family:var(--mono);font-size:9px;letter-spacing:.1em;padding:5px 9px;text-transform:uppercase}
 
-  .evening{margin-top:12px;background:var(--surf);border:1px solid var(--line);border-radius:9px;padding:14px 16px}
-  .evening .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  .evening-toggle{cursor:pointer;background:var(--bg2);border:1px solid var(--line);border-radius:8px;
-    color:var(--ink);padding:11px 14px;font-family:var(--sans);font-size:14px;font-weight:600;
-    transition:border-color .15s}
-  .evening-toggle:hover{border-color:var(--mut)}
-  .evening-toggle.on{border-color:var(--amber);color:var(--amber)}
-  .evening .hint{color:var(--mut);font-size:12.5px;margin:10px 0 0;line-height:1.5}
+  h1{margin:20px 0 0;font-size:clamp(30px,8.6vw,52px);line-height:.94;font-weight:800;text-transform:uppercase;
+    font-variation-settings:'wdth' 100,'wght' 800;letter-spacing:-.015em;min-height:2.1em}
+  h1 .t{color:var(--teal)} h1 .a{color:var(--amber)}
+  .lead{margin-top:12px;color:var(--mute);font-size:14.5px;line-height:1.55;max-width:52ch}
+  .kpi{margin-top:12px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--mute);text-transform:uppercase}
 
-  label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--mut);margin:0 0 6px}
-  input,select,textarea{width:100%;background:var(--surf);border:1px solid var(--line);border-radius:8px;
-    color:var(--ink);font-family:var(--sans);font-size:15px;padding:12px 13px;outline:none}
+  h2{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);
+    font-weight:600;margin:30px 0 10px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+  h2 .tz{color:var(--mute);letter-spacing:.12em;font-size:9px}
+
+  .withline{margin-top:20px;background:var(--ledger);border:1px solid var(--teal);border-radius:10px;
+    padding:13px 15px;display:flex;flex-direction:column;gap:3px}
+  .withline .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
+  .withline .n{font-size:17px;font-weight:800}
+  .withline .r{font-family:var(--mono);font-size:10.5px;color:var(--mute)}
+
+  .sides{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .side{cursor:pointer;text-align:left;background:var(--ledger);border:1px solid var(--line);border-radius:9px;
+    padding:13px 14px;color:var(--chalk);font-family:var(--sans)}
+  .side .k{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;color:var(--mute);text-transform:uppercase}
+  .side .v{display:block;font-size:16px;font-weight:800;margin-top:4px}
+  .side .d{display:block;font-family:var(--mono);font-size:9.5px;color:var(--mute);margin-top:5px;line-height:1.45}
+  .side.on{border-color:var(--teal)}
+  .side.on .v{color:var(--teal)}
+
+  #days{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+  .day{cursor:pointer;background:var(--ledger);border:1px solid var(--line);border-radius:9px;color:var(--chalk);
+    padding:11px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:var(--sans)}
+  .day .dow{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+  .day .dnum{font-size:21px;font-weight:800;line-height:1}
+  .day .mon{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+  .day.on{background:var(--paper);border-color:var(--paper);color:var(--paper-ink)}
+  .day.on .dow,.day.on .mon{color:var(--paper-ink);opacity:.7}
+
+  #people{display:flex;flex-direction:column;gap:7px}
+  .p{cursor:pointer;display:flex;align-items:center;gap:11px;text-align:left;background:var(--ledger);
+    border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--chalk);font-family:var(--sans);min-height:56px}
+  .p.any{border-style:dashed}
+  .p.on{border-color:var(--teal)}
+  .p[disabled]{opacity:.4;cursor:not-allowed}
+  .p .ini{flex:none;width:34px;height:34px;border-radius:6px;background:var(--line);color:var(--chalk);
+    font-family:var(--mono);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .p.on .ini{background:var(--teal);color:#07100E}
+  .p.any .ini{background:transparent;border:1px dashed var(--mute);color:var(--mute);font-size:14px}
+  .p .txt{flex:1;min-width:0}
+  .p .nm{display:block;font-size:14.5px;font-weight:700;line-height:1.15}
+  .p .rl{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.05em;color:var(--mute);margin-top:2px}
+  .p .lg{display:flex;gap:3px;margin-top:5px}
+  .p .lg em{font-style:normal;font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:var(--mute);
+    border:1px solid var(--line);border-radius:3px;padding:1px 4px}
+  .p .lg em.y{border-color:var(--teal);color:var(--teal)}
+  .p .free{flex:none;text-align:right;font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;color:var(--mute);text-transform:uppercase}
+  .p .free b{display:block;font-size:15px;color:var(--chalk)}
+  .p.on .free b{color:var(--teal)}
+
+  #fresh{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);
+    margin:0 0 9px;min-height:13px;line-height:1.5}
+  #fresh.warn{color:var(--amber)}
+  .tgroup{margin-bottom:14px}
+  .tg{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--mute);margin-bottom:7px}
+  .hours{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px}
+  .h{cursor:pointer;background:var(--ledger);border:1px solid var(--line);border-radius:7px;color:var(--chalk);
+    font-family:var(--mono);font-size:13px;padding:12px 2px;min-height:44px}
+  .h.sel{background:var(--paper);border-color:var(--paper);color:var(--paper-ink);font-weight:700}
+  .h[disabled]{opacity:.32;cursor:not-allowed;text-decoration:line-through}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:9px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--mute);margin-top:2px}
+  .legend i{display:inline-block;width:9px;height:9px;border:1px solid var(--line);background:var(--ledger);
+    border-radius:2px;margin-right:5px;vertical-align:-1px}
+  .legend .tk i{opacity:.32}
+
+  #lens{display:flex;gap:7px}
+  .len{flex:1;cursor:pointer;background:var(--ledger);border:1px solid var(--line);border-radius:7px;
+    color:var(--chalk);font-family:var(--mono);font-size:12px;padding:11px 0;min-height:44px}
+  .len.sel{border-color:var(--teal);color:var(--teal)}
+  .len[disabled]{opacity:.32;cursor:not-allowed}
+  #len-note{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);
+    margin-top:7px;min-height:12px}
+
+  .evening{margin-top:14px;background:var(--ledger);border:1px solid var(--line);border-radius:9px;padding:13px 14px}
+  .evening .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+  .evening-toggle{cursor:pointer;background:var(--cover);border:1px solid var(--line);border-radius:7px;
+    color:var(--chalk);padding:11px 13px;font-family:var(--sans);font-size:13.5px;font-weight:700}
+  .evening-toggle:hover{border-color:var(--amber);color:var(--amber)}
+  .evening .hint{color:var(--mute);font-size:12px;line-height:1.5;margin-top:9px}
+
+  label{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--mute);margin:0 0 5px}
+  input,select,textarea{width:100%;background:var(--ledger);border:1px solid var(--line);border-radius:7px;
+    color:var(--chalk);font-family:var(--sans);font-size:16px;padding:12px 13px;outline:none}
   input:focus,select:focus,textarea:focus{border-color:var(--teal)}
+  input.bad,textarea.bad{border-color:var(--bad)}
   select{font-family:var(--mono);font-size:14px}
-  textarea{resize:vertical;min-height:74px}
-  .fields{display:grid;gap:14px}
-  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  textarea{resize:vertical;min-height:70px}
+  .fields{display:grid;gap:13px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:11px}
   .opt{text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:11px}
 
-  button.send{margin-top:18px;width:100%;padding:15px;cursor:pointer;border-radius:9px;
-    background:var(--teal);color:#07100E;border:0;font-family:var(--sans);font-size:15px;font-weight:700}
-  button.send:disabled{opacity:.55;cursor:default}
-  :root[data-theme="light"] button.send{color:#fff}
-
-  .msg{margin-top:12px;font-size:13.5px;line-height:1.5;min-height:1em}
+  .consent{display:flex;gap:10px;align-items:flex-start;margin-top:4px}
+  .consent input{width:20px;height:20px;flex:none;margin-top:2px;accent-color:var(--teal)}
+  .consent span{font-family:var(--sans);font-size:12px;line-height:1.5;color:var(--mute);text-transform:none;letter-spacing:0}
+  .consent a{color:var(--teal)}
+  .msg{margin-top:11px;font-size:13px;line-height:1.5;min-height:1em}
   .msg.bad{color:var(--bad)}
+  #closed{margin-top:14px;border:1px solid var(--amber);color:var(--amber);border-radius:9px;padding:12px;
+    font-family:var(--mono);font-size:11px;line-height:1.6}
 
-  .done{background:var(--surf);border:1px solid var(--teal);border-radius:11px;padding:26px 22px;text-align:center}
-  .done h3{margin:0 0 8px;font-size:22px;font-weight:800}
-  .done .when{font-family:var(--mono);font-size:15px;color:var(--teal);letter-spacing:.05em;margin-bottom:6px}
-  .done p{color:var(--mut);font-size:14px;line-height:1.6;margin:10px 0 18px}
-  .done a{display:inline-block;text-decoration:none;border:1px solid var(--line);border-radius:8px;
-    padding:12px 18px;color:var(--ink);font-size:14px;font-weight:600}
-  .done a:hover{border-color:var(--teal);color:var(--teal)}
+  /* ---------- kwit ---------- */
+  #ticket{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--ledger);
+    border-top:1px dashed var(--mute);box-shadow:0 -12px 30px rgba(0,0,0,.35);
+    padding:9px 14px calc(10px + env(safe-area-inset-bottom));
+    border-left:3px solid var(--teal)}
+  #ticket::before{content:"";position:absolute;left:0;right:0;top:-7px;height:7px;
+    background:radial-gradient(circle at 6px 0,transparent 0 5px,var(--ledger) 5px);
+    background-size:12px 7px}
+  #tk-ref{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--teal)}
+  #tk-fields{display:flex;flex-wrap:wrap;gap:3px 12px;margin-top:4px}
+  #tk-fields .f{cursor:pointer;background:none;border:0;padding:0;font-family:var(--mono);font-size:10.5px;
+    color:var(--chalk);letter-spacing:.02em}
+  #tk-fields .f .k{color:var(--mute)}
+  #tk-fields .f.e .v{color:var(--mute)}
+  #tk-cta{margin-top:8px;width:100%;cursor:pointer;border:0;border-radius:7px;padding:13px;
+    font-family:var(--sans);font-size:14.5px;font-weight:700;background:#1E242E;color:var(--mute);min-height:46px}
+  #tk-cta.go{background:var(--teal);color:#07100E}
+  :root[data-theme="light"] #tk-cta{background:#DFD9CB}
+  :root[data-theme="light"] #tk-cta.go{color:#fff}
+  #tk-cta:disabled{opacity:.6;cursor:default}
+  #ticket.stamped::after{content:"BOOKED";position:absolute;right:16px;top:12px;font-family:var(--mono);
+    font-weight:700;font-size:20px;letter-spacing:.2em;color:var(--teal);opacity:.22;transform:rotate(-6deg)}
+  body:has(#step-you:focus-within) #ticket{opacity:0;pointer-events:none}
 
-  footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);
-    color:var(--mut);font-size:12px;line-height:1.7}
-  .designbtn{position:fixed;right:14px;bottom:14px;z-index:99;cursor:pointer;
-    font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
-    color:var(--mut);background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:8px 12px}
+  .done{background:var(--paper);color:var(--paper-ink);border-radius:12px;padding:24px 20px;text-align:center}
+  .done .ref{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--paper-accent)}
+  .done h3{margin:8px 0 6px;font-size:26px;font-weight:800;text-transform:uppercase}
+  .done .when{font-family:var(--mono);font-size:13px;letter-spacing:.04em}
+  .done .who{font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;opacity:.7;margin-top:4px}
+  .done p{font-size:13.5px;line-height:1.6;margin:14px 0 16px;opacity:.8}
+  .done a{display:inline-block;text-decoration:none;border:1px solid var(--paper-ink);border-radius:8px;
+    padding:11px 17px;color:var(--paper-ink);font-size:13.5px;font-weight:700}
+
+  footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);color:var(--mute);
+    font-size:11.5px;line-height:1.7}
+  footer a{color:var(--mute)}
+
+  .day:focus-visible,.side:focus-visible,.p:focus-visible,.h:focus-visible,.len:focus-visible,
+  .evening-toggle:focus-visible,#tk-cta:focus-visible,#tk-fields .f:focus-visible,.themebtn:focus-visible{
+    outline:2px solid var(--teal);outline-offset:2px}
+
   @media(max-width:560px){
-    #people{grid-template-columns:1fr}
-    .slot-grid{grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px}
-    .slot{padding:12px 4px;font-size:13.5px}
-    .legend{flex-wrap:wrap;gap:10px}
+    .two{grid-template-columns:1fr}
+    .hours{grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:5px}
   }
-  @media(max-width:480px){ .two{grid-template-columns:1fr} #days{grid-template-columns:repeat(5,1fr)} .day{padding:12px 2px} }
 </style>
 <script>
   (function(){ try{ var t=localStorage.getItem('ifa-design'); if(t) document.documentElement.setAttribute('data-theme',t);}catch(e){} })();
@@ -166,107 +196,147 @@
 <body>
 <div class="wrap">
 
-  <div class="wordmark">MONSTELO<span class="dot">.</span> <span class="co">× mobilki gsm.pl</span></div>
-  <div class="kick">IFA Berlin 2026 · Reseller Park · H27E-17</div>
-  <h1>Book a slot at<br>the <span class="amb">stand.</span></h1>
-  <p class="lead">Overstock in, best price out. Pick an hour, tell us who you are — we keep the table free for you.</p>
+  <div class="top">
+    <span class="brand">MONSTELO<span style="color:var(--amber)">.</span> × mobilki gsm.pl</span>
+    <button type="button" class="themebtn" id="themebtn">theme</button>
+  </div>
+  <div class="top" style="margin-top:6px"><span>IFA Berlin 2026 · Reseller Park · stand H27E-17 · 4–8 Sep</span></div>
+
+  <h1>Overstock <span class="t">in.</span><br>Best price <span class="a">out.</span></h1>
+  <p class="lead">Book 15, 30 or 45 minutes at the stand. Tell us which side of the trade you are on
+    and we put the right person at the table.</p>
+  <div class="kpi">241 brands · 28 EU markets · ~8,000 prices tracked live</div>
+
+  <div class="withline" id="with-line" hidden>
+    <span class="k">Meeting with</span>
+    <span class="n" id="with-name"></span>
+    <span class="r" id="with-role"></span>
+  </div>
 
   <div id="form-wrap">
-    <div class="withline" id="with-line" hidden>
-      <span class="wl-k">Meeting with</span>
-      <span class="wl-n" id="with-name"></span>
-      <span class="wl-r" id="with-role"></span>
-    </div>
 
-    <h2>1 · Day</h2>
-    <div id="days"></div>
+    <section id="step-side">
+      <h2>Which side are you on?</h2>
+      <div class="sides" id="sides" role="radiogroup" aria-label="Which side are you on">
+        <button type="button" class="side" role="radio" aria-checked="false" data-side="sell">
+          <span class="k">I want stock</span><span class="v">We sell</span>
+          <span class="d">Top brands, sharp prices, ready to ship from Poland.</span>
+        </button>
+        <button type="button" class="side" role="radio" aria-checked="false" data-side="buy">
+          <span class="k">I have stock</span><span class="v">We buy</span>
+          <span class="d">Overstock, clearance, returns, open-box. Priced by live data.</span>
+        </button>
+      </div>
+    </section>
+
+    <section id="step-day" hidden>
+      <h2>Day</h2>
+      <div id="days" role="radiogroup" aria-label="Fair day"></div>
+    </section>
 
     <section id="step-person" hidden>
-        <h2>2 · Who you meet</h2>
-        <div id="people" role="radiogroup" aria-label="Who you meet"></div>
-        <p class="hint" style="color:var(--mut);font-size:12.5px;margin:10px 0 0;line-height:1.5">
-          Pick a person or leave it to us — we then show only the hours they still have free,
-          and the invitation goes straight into their calendar.
-        </p>
+      <h2>Who do you want to meet</h2>
+      <div id="people" role="radiogroup" aria-label="Who do you want to meet"></div>
     </section>
 
     <section id="step-time" hidden>
-      <h2 id="h-time">3 · Time <span class="tzhead">all times Berlin · CEST</span></h2>
-      <p id="slots-status" hidden></p>
-      <div id="slots" role="radiogroup" aria-label="Meeting time"></div>
-      <div class="legend"><span><i></i>free</span><span class="taken"><i></i>already booked</span></div>
+      <h2>Time <span class="tz">all times Berlin · CEST</span></h2>
+      <p id="fresh"></p>
+      <div id="times" role="radiogroup" aria-label="Meeting time"></div>
+      <div class="legend"><span><i></i>free</span><span class="tk"><i></i>already booked</span></div>
 
-      <div id="step-dur" hidden>
-        <h2>How long <span class="dur-when" id="dur-when"></span></h2>
-        <div id="dur"></div>
+      <div id="step-len" hidden>
+        <h2>How long</h2>
+        <div id="lens" role="radiogroup" aria-label="Meeting length"></div>
+        <p id="len-note"></p>
       </div>
 
-      <div class="evening" id="evening-block">
+      <div class="evening">
         <div class="row">
           <button type="button" class="evening-toggle" id="evening-btn">Evening after the show</button>
-          <select id="evening-times" aria-label="Evening time"></select>
+          <select id="evening-times" aria-label="Evening time">
+            <option>18:00</option><option>18:30</option><option>19:00</option><option>19:30</option>
+            <option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option>
+            <option>22:00</option><option>22:30</option><option>23:00</option>
+          </select>
         </div>
-        <div id="evening-fields" hidden style="margin-top:12px">
+        <div id="evening-where" hidden style="margin-top:12px">
           <label for="f-place">Where</label>
-          <input id="f-place" placeholder="Restaurant, bar, hotel lobby…" autocomplete="off">
+          <input id="f-place" maxlength="120" placeholder="Restaurant, bar, hotel lobby…" autocomplete="off">
         </div>
         <p class="hint">Dinner, a drink, a longer talk — tell us where and we will be there.</p>
       </div>
     </section>
 
     <form id="form" novalidate>
-      <section id="step-who" hidden>
-        <h2 id="h-you">4 · You</h2>
+      <section id="step-you" hidden>
+        <h2>Your details</h2>
         <div class="fields">
           <div class="two">
-            <div><label for="f-name">Name</label><input id="f-name" autocomplete="name"></div>
-            <div><label for="f-company">Company</label><input id="f-company" autocomplete="organization"></div>
+            <div><label for="f-name">Name</label><input id="f-name" maxlength="80" autocomplete="name"></div>
+            <div><label for="f-company">Company</label><input id="f-company" maxlength="80" autocomplete="organization"></div>
           </div>
           <div class="two">
-            <div><label for="f-email">Work e-mail</label><input id="f-email" type="email" autocomplete="email"></div>
-            <div><label for="f-phone">Phone <span class="opt">optional</span></label><input id="f-phone" type="tel" autocomplete="tel"></div>
+            <div><label for="f-email">Work e-mail</label><input id="f-email" type="email" maxlength="120" autocomplete="email"></div>
+            <div><label for="f-phone">Phone <span class="opt">optional</span></label><input id="f-phone" type="tel" maxlength="30" autocomplete="tel"></div>
           </div>
           <div>
             <label for="f-note">What do you want to talk about? <span class="opt">optional</span></label>
-            <textarea id="f-note" placeholder="Buying stock · selling us your surplus · brand store · logistics"></textarea>
+            <textarea id="f-note" maxlength="500" placeholder="Buying stock · selling us your surplus · brand store · logistics"></textarea>
           </div>
+          <label class="consent">
+            <input type="checkbox" id="f-consent">
+            <span>I agree that Monstelo may process my details to arrange this meeting at IFA 2026.
+              Controller: Import Eksport Sp. z o.o. Sp.k., Kraków. Data is kept for 90 days after the fair.
+              <a href="https://monstelo.com/privacy" target="_blank" rel="noopener">Privacy notice</a>.</span>
+          </label>
+          <label class="consent">
+            <input type="checkbox" id="f-marketing">
+            <span>Optional: you may also contact me with offers after the fair.</span>
+          </label>
         </div>
-        <div id="summary" hidden></div>
-        <button class="send" id="send" type="submit">Book the slot</button>
         <div class="msg" id="msg"></div>
+        <div id="closed" hidden>Booking is closed right now. Write to brands@monstelo.com — we will hold a slot for you.</div>
       </section>
     </form>
   </div>
 
   <div class="done" id="done" hidden>
-    <h3>Booked.</h3>
+    <div class="ref" id="done-ref"></div>
+    <h3>Meeting booked.</h3>
     <div class="when" id="done-when"></div>
-    <div class="who" id="done-who" style="font-family:var(--mono);font-size:13px;color:var(--mut);letter-spacing:.05em;margin-bottom:6px"></div>
-    <p>Stand H27E-17, Reseller Park. We sent a confirmation to your e-mail — if it is not there in a minute, check spam.</p>
-    <a id="done-cal" href="#" target="_blank" rel="noopener">Add to Google Calendar</a>
+    <div class="who" id="done-who"></div>
+    <p>Stand H27E-17, Reseller Park. A calendar invitation and a confirmation are on their way —
+      if they are not there in a minute, check spam.</p>
+    <a id="done-cal" href="#" target="_blank" rel="noopener">Add to my calendar</a>
   </div>
 
   <footer>
     Monstelo × Mobilki GSM · IFA Berlin 2026 · Reseller Park · stand H27E-17 · 4–8 September 2026<br>
-    We use your details to confirm this meeting. One follow-up, nothing else.
+    Questions before the fair: <a href="mailto:brands@monstelo.com">brands@monstelo.com</a> · +48 602 443 657
+    <noscript><br><b>JavaScript is off — write to brands@monstelo.com and we will book the slot for you.</b></noscript>
   </footer>
-
 </div>
 
-<button class="designbtn" id="db">design</button>
+<div id="ticket" aria-live="polite">
+  <div id="tk-ref">IFA-····-····-··</div>
+  <div id="tk-fields"></div>
+  <button type="button" id="tk-cta">Pick your side to start</button>
+</div>
+
+<script src="assets/app.js"></script>
 <script>
   (function(){
-    var b=document.getElementById('db'), r=document.documentElement;
-    function lab(){ b.textContent = r.getAttribute('data-theme')==='light' ? 'design v2 · jasny' : 'design v1 · ciemny'; }
-    lab();
-    b.addEventListener('click',function(){
-      var light = r.getAttribute('data-theme')!=='light';
-      if(light) r.setAttribute('data-theme','light'); else r.removeAttribute('data-theme');
-      try{ localStorage.setItem('ifa-design', light?'light':'dark'); }catch(e){}
-      lab();
+    var r=document.documentElement, b=document.getElementById('themebtn');
+    function label(){ b.textContent = r.getAttribute('data-theme')==='light' ? 'light' : 'dark'; }
+    label();
+    b.addEventListener('click', function(){
+      var n = r.getAttribute('data-theme')==='light' ? 'dark' : 'light';
+      r.setAttribute('data-theme', n);
+      try{ localStorage.setItem('ifa-design', n); }catch(e){}
+      label();
     });
   })();
 </script>
-<script src="assets/app.js"></script>
 </body>
 </html>

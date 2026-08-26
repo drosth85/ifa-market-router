@@ -49,7 +49,7 @@ ok(!A.overlaps("10:00", "10:15", "11:00", "11:15"), "rozłączne sloty bez koliz
 // lista osób ze stoiska
 ok(A.PEOPLE[0].id === "any", "pierwsza opcja to brak preferencji");
 ok(A.PEOPLE.length >= 7, "lista osób z katalogu Monstelo");
-ok(A.PEOPLE.slice(1).every(p => /@monstelo\.com$/.test(p.email)), "każda osoba ma firmowy mail");
+ok(A.PEOPLE.every(p => p.email === undefined), "klient nie zna adresow e-mail zalogi (zyja tylko na serwerze)");
 ok(A.PEOPLE.slice(1).every(p => p.role && p.name), "każda osoba ma imię i rolę");
 ok(new Set(A.PEOPLE.map(p => p.id)).size === A.PEOPLE.length, "identyfikatory osób unikalne");
 ok(A.personById("drozd").name === "Tomasz Drozd", "wyszukiwanie osoby po id");
@@ -84,7 +84,8 @@ ok(A.PEOPLE.filter(p=>p.id!=="any").every(p=>/^[a-z]{2}$/.test(p.slug)), "kazdy 
 
 // walidacja
 const good = { name: "Jan Kowalski", company: "Acme", email: "jan@acme.com",
-               date: "2026-09-05", from: "11:00", to: "11:15", person: "tabak", evening: false };
+               date: "2026-09-05", from: "11:00", to: "11:15", person: "tabak", evening: false,
+               consent: 1 };
 ok(A.validate(good).length === 0, "poprawna rezerwacja przechodzi");
 ok(A.validate({ ...good, email: "nie-mail" }).includes("email"), "zły e-mail odrzucony");
 ok(A.validate({ ...good, company: "" }).includes("company"), "brak firmy odrzucony");
@@ -96,10 +97,29 @@ ok(() => A.validate({ ...good, to: undefined }).includes("slot"), "brak godziny 
 ok(A.validate({ ...good, person: "" }).includes("person"), "brak wybranej osoby odrzucony");
 ok(A.validate({ ...good, person: "ktos-obcy" }).includes("person"), "osoba spoza listy odrzucona");
 ok(A.validate({ ...good, person: "any" }).length === 0, "brak preferencji jest poprawnym wyborem");
+ok(A.validate({ ...good, consent: 0 }).includes("consent"), "brak zgody RODO odrzucony");
 ok(A.validate({ ...good, to: "11:45" }).length === 0, "45 minut przechodzi");
 ok(A.validate({ ...good, to: "12:00" }).includes("duration"), "60 minut poza listą długości");
 ok(A.validate({ ...good, from: "17:45", to: "18:15" }).includes("duration"), "spotkanie po zamknięciu odrzucone");
 ok(A.validate({ ...good, from: "11:15", to: "11:00" }).includes("slot"), "koniec przed początkiem odrzucony");
+
+// kwit
+const st = { side: "buy", date: "2026-09-06", from: "13:15", dur: 30, person: "juszczyk" };
+ok(A.ticketRef(st) === "IFA-0906-1315-SJ", "numer kwitu z dnia, godziny i inicjalow");
+ok(A.ticketRef({}) === "IFA-····-····-AN", "pusty kwit ma kropki i AN");
+ok(A.ticketFields(st).length === 5, "kwit ma piec pol");
+ok(A.ticketFields({}).every(([, v]) => v.startsWith("·")), "puste pola kwitu to kropki");
+ok(A.nextStep({}, false).key === "side", "pierwszy krok to strona transakcji");
+ok(A.nextStep({ side: "buy" }, false).key === "date", "po stronie transakcji pytamy o dzien");
+ok(A.nextStep({ side: "buy", date: "2026-09-06" }, false).key === "person", "potem o osobe");
+ok(A.nextStep({ ...st, to: "13:45" }, false).key === "you", "z kompletem wyboru prosimy o dane");
+ok(A.nextStep({ ...st, to: "13:45" }, true).key === "go", "komplet danych odblokowuje rezerwacje");
+ok(A.nextStep({ side: "buy", date: "2026-09-06", person: "any", from: "19:00", evening: true }, true).key === "place",
+   "wieczor bez miejsca prosi o miejsce");
+
+// liczba wolnych kwadransow
+ok(A.freeQuarters([]) === 32, "pusty dzien to 32 kwadranse");
+ok(A.freeQuarters([["10:00","11:00"]]) === 28, "godzina zajeta zabiera cztery kwadranse");
 
 // link do kalendarza
 const link = A.gcalLink(good);
