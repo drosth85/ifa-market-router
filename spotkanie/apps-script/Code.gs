@@ -34,7 +34,8 @@ var DAY_END_H   = 18;
 /* "No preference" is assigned to the first free person in this order. Meetings can always be
    held in the open IFA space, so there is no limit on parallel meetings. */
 var ASSIGN_ORDER = ['juszczyk', 'mamcarczyk', 'tuchowska', 'tabak', 'kocaba', 'drozd', 'palka'];
-var MAX_PER_DAY = 60;               // total bookings accepted per calendar day
+var MAX_PER_DAY  = 150;             // przyjęte rezerwacje na dobę (224 sloty dziennie — 60 to był samo-DoS)
+var MAX_MAILS_DAY = 80;             // osobny budżet maili: darmowy Gmail daje 100/dobę
 var MAX_PER_MAIL = 5;              // successful bookings per e-mail address per calendar day
 var DIAG_KEY    = 'gw0zdz';     // ?diag=<DIAG_KEY>; anything else gets nothing
 // Spreadsheet that collects the bookings. Leave SHEET_ID empty only if this script is bound to
@@ -80,6 +81,8 @@ function handleBooking(b) {
       var seen = cache.get(nonceKey);
       if (seen) return ContentService.createTextOutput(seen).setMimeType(ContentService.MimeType.JSON);
     }
+
+    if (!bookingEnabled()) return json({ ok: false, reason: 'closed' });
 
     var missing = ['name', 'company', 'email', 'date', 'from', 'to'].filter(function (k) {
       return !b[k];
@@ -165,7 +168,10 @@ function handleBooking(b) {
       sheet.getRange(sheet.getLastRow(), ERROR_COL).setValue('calendar error: ' + calErr);
     }
 
+    var mailsSent = false;
     try {
+      if (!mailBudgetLeft(2)) throw new Error('mail budget spent');
+      mailsSent = true;
       MailApp.sendEmail({
         to: b.email,
         subject: 'Confirmed — ' + when + ' at IFA Berlin',
@@ -190,7 +196,8 @@ function handleBooking(b) {
           when + '\n' + place + '\n' + (withWhom || 'no preference') + '\n' +
           b.name + ' · ' + b.email + ' · ' + (b.phone || '-') + '\n' + (b.note || ''));
       }
-    } catch (mailErr) { /* the booking stands even if mail quota is spent */ }
+    } catch (mailErr) { mailsSent = false; /* rezerwacja stoi także bez maila */ }
+    floodCheck();
 
     // The freshly taken slot must disappear from the grid straight away.
     try {
@@ -201,7 +208,8 @@ function handleBooking(b) {
     } catch (e) {}
 
     countBooking(b.email);
-    var answer = JSON.stringify({ ok: true, booked: true, event: eventUrl, person: withWhom, assigned: assigned });
+    var answer = JSON.stringify({ ok: true, booked: true, event: eventUrl, person: withWhom,
+                                  assigned: assigned, mailed: mailsSent });
     if (nonceKey) { try { cache.put(nonceKey, answer, 900); } catch (e) {} }
     return ContentService.createTextOutput(answer).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
@@ -315,9 +323,53 @@ function countBooking(email) {
   props.setProperty(k.mail, String(Number(props.getProperty(k.mail) || 0) + 1));
 }
 
+/**
+ * B1: budżet maili jest twardszym sufitem niż liczba rezerwacji, więc ma własny licznik.
+ * Po jego wyczerpaniu rezerwacja nadal przechodzi — tylko potwierdzenie idzie później, ręcznie.
+ */
+function mailBudgetLeft(n) {
+  var props = PropertiesService.getScriptProperties();
+  var key = 'mails:' + Utilities.formatDate(new Date(), 'Europe/Berlin', 'yyyy-MM-dd');
+  var used = Number(props.getProperty(key) || 0);
+  if (used + n > MAX_MAILS_DAY) return false;
+  props.setProperty(key, String(used + n));
+  return true;
+}
+
+/** B5: alarm, gdy ktoś zalewa formularz — dziesięć rezerwacji w dziesięć minut to nie targi. */
+function floodCheck() {
+  var cache = CacheService.getScriptCache();
+  var n = Number(cache.get('flood') || 0) + 1;
+  cache.put('flood', String(n), 600);
+  if (n === 10 && NOTIFY) {
+    try {
+      MailApp.sendEmail(NOTIFY, 'IFA booking — 10 rezerwacji w 10 minut',
+        'Formularz przyjął 10 rezerwacji w ostatnich 10 minutach.\n' +
+        'Jeśli to nadużycie: Apps Script → Ustawienia projektu → Właściwości skryptu → ' +
+        'booking_enabled = no (wyłącza formularz natychmiast, bez wdrażania).');
+    } catch (e) {}
+  }
+}
+
 /** Stand meetings only — a private entry in a fallback calendar must not block a visitor. */
+/**
+ * Co liczy się jako zajętość (B2). Bez tych trzech wykluczeń jeden wpis „IFA Berlin 4-8 Sep"
+ * w kalendarzu handlowca kasuje go z siatki na wszystkie pięć dni targów.
+ *   - całodniowe: to ramy pobytu, nie spotkanie,
+ *   - oznaczone jako „wolny" (transparent): wpis informacyjny,
+ *   - zaproszenia odrzucone: nie idziemy tam.
+ */
+function blocksSlot(ev) {
+  try {
+    if (ev.isAllDayEvent()) return false;
+    if (ev.getTransparency && ev.getTransparency() === CalendarApp.EventTransparency.TRANSPARENT) return false;
+    if (ev.getMyStatus && ev.getMyStatus() === CalendarApp.GuestStatus.NO) return false;
+  } catch (e) { /* starsze API bywa kapryśne — w razie wątpliwości traktuj jako zajęte */ }
+  return true;
+}
+
 function standEvents(cal, from, to, isOwnCalendar) {
-  var events = cal.getEvents(from, to);
+  var events = cal.getEvents(from, to).filter(blocksSlot);
   if (isOwnCalendar) return events;
   return events.filter(function (ev) {
     return String(ev.getLocation() || '').indexOf('H27E-17') !== -1 ||
@@ -425,6 +477,11 @@ function ownsCalendar(cal) {
  * about as long as reading one, while seven HTTP round trips to Apps Script do not.
  * The page works out "no preference" from this map itself.
  */
+/**
+ * Dostępność całej załogi na jeden dzień (B4).
+ * Kalendarz, którego nie dało się odczytać, NIE trafia do `people` — klient traktuje brakującą
+ * osobę jako niedostępną, nigdy jako wolną. `generated_at` pozwala pokazać wiek danych.
+ */
 function freeBusyDay(date) {
   if (FAIR_DAYS.indexOf(String(date)) === -1) return { ok: false, reason: 'bad:date' };
   var people = {}, failed = [];
@@ -433,10 +490,21 @@ function freeBusyDay(date) {
     try {
       people[id] = dayBusy(id, date, false);
     } catch (err) {
-      failed.push(id);   // an unreadable calendar must not pass for "free"
+      failed.push(id);
     }
   }
-  return { ok: true, date: date, people: people, failed: failed };
+  return {
+    ok: true, date: date, people: people, failed: failed,
+    generated_at: Utilities.formatDate(new Date(), 'Europe/Berlin', "yyyy-MM-dd'T'HH:mm:ssXXX"),
+    booking_enabled: bookingEnabled()
+  };
+}
+
+/** B5: wyłącznik formularza bez wdrażania kodu — właściwość skryptu `booking_enabled` = "no". */
+function bookingEnabled() {
+  try {
+    return PropertiesService.getScriptProperties().getProperty('booking_enabled') !== 'no';
+  } catch (e) { return true; }
 }
 
 function spansOf(events) {
