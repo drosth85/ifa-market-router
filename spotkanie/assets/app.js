@@ -28,16 +28,31 @@ const DURATIONS = [15, 30, 45];
 /* Who is on the stand — the Monstelo catalog contact list.
    `email` is used as the calendar guest, so the meeting lands in that person's calendar. */
 const PEOPLE = [
-  { id: "any",       name: "No preference",      role: "We put the right person at the table", email: "" },
-  { id: "mamcarczyk",name: "Michał Mamcarczyk",  role: "Key Account Manager · EN · PL", email: "mm@monstelo.com" },
-  { id: "tuchowska", name: "Nikola Tuchowska",   role: "Key Account Manager · EN · PL", email: "nikola.tuchowska@monstelo.com" },
-  { id: "tabak",     name: "Łukasz Tabak",       role: "Key Account Manager · PL",      email: "lukasz.tabak@monstelo.com" },
-  { id: "palka",     name: "Kamil Pałka",        role: "Key Account Manager · PL · CZ", email: "kamil.palka@monstelo.com" },
-  { id: "kocaba",    name: "Błażej Kócaba",      role: "Key Account Manager · PL",      email: "blazej.kocaba@monstelo.com" },
-  { id: "juszczyk",  name: "Sebastian Juszczyk", role: "Board member · sourcing · PL · EN", email: "sebastian@monstelo.com" },
-  { id: "drozd",     name: "Tomasz Drozd",       role: "Brand Growth Strategist · brands · PL · EN", email: "tomasz.drozd@monstelo.com" },
+  { id: "any",       slug: "",   name: "No preference",      role: "We put the right person at the table", email: "" },
+  { id: "mamcarczyk",slug: "mm", name: "Michał Mamcarczyk",  role: "Key Account Manager · EN · PL", email: "mm@monstelo.com" },
+  { id: "tuchowska", slug: "nt", name: "Nikola Tuchowska",   role: "Key Account Manager · EN · PL", email: "nikola.tuchowska@monstelo.com" },
+  { id: "tabak",     slug: "lt", name: "Łukasz Tabak",       role: "Key Account Manager · PL",      email: "lukasz.tabak@monstelo.com" },
+  { id: "palka",     slug: "kp", name: "Kamil Pałka",        role: "Key Account Manager · PL · CZ", email: "kamil.palka@monstelo.com" },
+  { id: "kocaba",    slug: "bk", name: "Błażej Kócaba",      role: "Key Account Manager · PL",      email: "blazej.kocaba@monstelo.com" },
+  { id: "juszczyk",  slug: "sj", name: "Sebastian Juszczyk", role: "Board member · sourcing · PL · EN", email: "sebastian@monstelo.com" },
+  { id: "drozd",     slug: "td", name: "Tomasz Drozd",       role: "Brand Growth Strategist · brands · PL · EN", email: "tomasz.drozd@monstelo.com" },
 ];
 function personById(id) { return PEOPLE.find((p) => p.id === id) || null; }
+
+/* Personal links to hand to a customer: …/spotkanie/?td, ?p=td or ?person=drozd.
+   The whole "who you meet" step then disappears and the grid shows that person's free hours. */
+function personFromQuery(search) {
+  const q = String(search || "").replace(/^\?/, "");
+  if (!q) return null;
+  const keys = q.split("&").map((part) => decodeURIComponent(part.split("=").pop() || "").toLowerCase())
+    .concat(q.split("&").map((part) => decodeURIComponent(part.split("=")[0] || "").toLowerCase()));
+  for (const k of keys) {
+    if (!k) continue;
+    const hit = PEOPLE.find((p) => p.id !== "any" && (p.slug === k || p.id === k));
+    if (hit) return hit;
+  }
+  return null;
+}
 
 // Evening slots, for "after the show" meetings.
 const EVENING_START = 18;
@@ -143,11 +158,15 @@ if (typeof document !== "undefined") (function () {
         state.date = el.dataset.iso;
         $("days").querySelectorAll(".day").forEach((x) => x.classList.remove("on"));
         el.classList.add("on");
+        clearSlotSelection();
+        if (state.fixedPerson) {
+          showSlotsFor(state.person);
+          return;
+        }
         renderPeople();
         prefetchBusy(state.date);
         $("step-person").hidden = false;
         $("step-time").hidden = true;
-        clearSlotSelection();
         $("step-person").scrollIntoView({ behavior: "smooth", block: "nearest" });
       })
     );
@@ -212,22 +231,12 @@ if (typeof document !== "undefined") (function () {
               </button>`
     ).join("");
     $("people").querySelectorAll(".person").forEach((el) =>
-      el.addEventListener("click", async () => {
+      el.addEventListener("click", () => {
         state.person = el.dataset.id;
         $("people").querySelectorAll(".person").forEach((x) => x.classList.remove("on"));
         el.classList.add("on");
-        const picked = state.person;
         clearSlotSelection();
-        state.busy = [];
-        $("step-time").hidden = false;
-        renderSlots();                       // grid is usable immediately
-        $("slots").classList.add("checking");
-        $("step-time").scrollIntoView({ behavior: "smooth", block: "nearest" });
-        const busy = await loadBusy(state.date, picked);
-        if (state.person !== picked) return; // they changed their mind while we waited
-        state.busy = busy;
-        $("slots").classList.remove("checking");
-        renderSlots();
+        showSlotsFor(state.person);
       })
     );
   }
@@ -300,6 +309,20 @@ if (typeof document !== "undefined") (function () {
     PEOPLE.forEach((p) => loadBusy(date, p.id));
   }
 
+  /* Paints the grid straight away, then dims what the calendar says is taken. */
+  async function showSlotsFor(picked) {
+    state.busy = [];
+    $("step-time").hidden = false;
+    renderSlots();
+    $("slots").classList.add("checking");
+    $("step-time").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    const busy = await loadBusy(state.date, picked);
+    if (state.person !== picked) return;   // they changed their mind while we waited
+    state.busy = busy;
+    $("slots").classList.remove("checking");
+    renderSlots();
+  }
+
   function bookingFromForm() {
     return {
       name: $("f-name").value,
@@ -322,6 +345,18 @@ if (typeof document !== "undefined") (function () {
   }
 
   function boot() {
+    const fixed = personFromQuery(location.search);
+    if (fixed) {
+      state.person = fixed.id;
+      state.fixedPerson = true;
+      $("step-person").hidden = true;
+      $("with-line").hidden = false;
+      $("with-name").textContent = fixed.name;
+      $("with-role").textContent = fixed.role;
+      $("h-time").textContent = "2 · Time";
+      $("h-you").textContent = "3 · You";
+      document.title = "Book a slot with " + fixed.name + " — IFA 2026";
+    }
     renderDays();
 
     $("evening-btn").addEventListener("click", () => {
@@ -403,6 +438,6 @@ if (typeof document !== "undefined") (function () {
 
 /* ---------- node (tests) ---------- */
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { DAYS, PEOPLE, personById, hourlySlots, gridSlots, durationsFor, overlaps, isFree, addMinutes, toMin,
+  module.exports = { DAYS, PEOPLE, personById, personFromQuery, hourlySlots, gridSlots, durationsFor, overlaps, isFree, addMinutes, toMin,
     eveningTimes, validate, gcalLink, DAY_START, DAY_END, EVENING_START, EVENING_END, SLOT_MIN, DURATIONS };
 }

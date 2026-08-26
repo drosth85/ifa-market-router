@@ -59,6 +59,17 @@ ok(!A.isFree("10:45", 30, busy), "dluzsze spotkanie wchodzace w zajetosc odrzuco
 ok(A.isFree("10:45", 15, busy), "krotsze spotkanie przed zajetoscia przechodzi");
 ok(A.isFree("09:00", 45, []), "brak zajetosci = wszystko wolne");
 
+// linki personalne
+ok(A.personFromQuery("?td").id === "drozd", "?td wybiera Tomasza Drozda");
+ok(A.personFromQuery("?p=td").id === "drozd", "?p=td dziala tak samo");
+ok(A.personFromQuery("?person=drozd").id === "drozd", "pelne id tez dziala");
+ok(A.personFromQuery("?lt").id === "tabak", "?lt to Lukasz Tabak");
+ok(A.personFromQuery("") === null, "brak parametru = wybor osoby jak dotad");
+ok(A.personFromQuery("?xx") === null, "nieznany skrot ignorowany");
+ok(A.personFromQuery("?any") === null, "'any' nie jest linkiem personalnym");
+ok(new Set(A.PEOPLE.filter(p=>p.slug).map(p=>p.slug)).size === A.PEOPLE.filter(p=>p.slug).length, "skroty unikalne");
+ok(A.PEOPLE.filter(p=>p.id!=="any").every(p=>/^[a-z]{2}$/.test(p.slug)), "kazdy handlowiec ma dwuliterowy skrot");
+
 // walidacja
 const good = { name: "Jan Kowalski", company: "Acme", email: "jan@acme.com",
                date: "2026-09-05", from: "11:00", to: "11:15", person: "tabak", evening: false };

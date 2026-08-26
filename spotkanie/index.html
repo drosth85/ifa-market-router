@@ -70,6 +70,12 @@
     transition:border-color .15s}
   .person:hover{border-color:var(--mut)}
   .person.on{border-color:var(--teal);background:var(--bg2)}
+  .withline{margin-top:22px;background:var(--surf);border:1px solid var(--teal);border-radius:10px;
+    padding:14px 16px;display:flex;flex-direction:column;gap:3px}
+  .withline .wl-k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
+  .withline .wl-n{font-size:17px;font-weight:800;line-height:1.2}
+  .withline .wl-r{font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--mut)}
+
   .person .pn{font-size:14.5px;font-weight:700;line-height:1.2}
   .person .pr{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--mut);line-height:1.35}
   .person.on .pr{color:var(--teal)}
@@ -130,6 +136,12 @@
   <p class="lead">Overstock in, best price out. Pick an hour, tell us who you are — we keep the table free for you.</p>
 
   <div id="form-wrap">
+    <div class="withline" id="with-line" hidden>
+      <span class="wl-k">Meeting with</span>
+      <span class="wl-n" id="with-name"></span>
+      <span class="wl-r" id="with-role"></span>
+    </div>
+
     <h2>1 · Day</h2>
     <div id="days"></div>
 
@@ -143,7 +155,7 @@
     </section>
 
     <section id="step-time" hidden>
-      <h2>3 · Time</h2>
+      <h2 id="h-time">3 · Time</h2>
       <div id="slots"></div>
 
       <div id="step-dur" hidden>
@@ -166,7 +178,7 @@
 
     <form id="form" novalidate>
       <section id="step-who" hidden>
-        <h2>4 · You</h2>
+        <h2 id="h-you">4 · You</h2>
         <div class="fields">
           <div class="two">
             <div><label for="f-name">Name</label><input id="f-name" autocomplete="name"></div>
