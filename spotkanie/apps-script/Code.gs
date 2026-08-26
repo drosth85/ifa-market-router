@@ -175,6 +175,9 @@ function handleBooking(b) {
       }
     } catch (mailErr) { /* the booking stands even if mail quota is spent */ }
 
+    // The freshly taken slot must disappear from the grid straight away.
+    try { CacheService.getScriptCache().remove('fb:' + b.date + ':' + pid); } catch (e) {}
+
     return json({ ok: true, booked: true, event: eventUrl, person: withWhom });
   } catch (err) {
     return json({ ok: false, reason: String(err) });
@@ -298,6 +301,10 @@ function freeBusy(date, person) {
   try {
     if (FAIR_DAYS.indexOf(String(date)) === -1) return { ok: false, reason: 'bad:date' };
     var pid = PEOPLE[person] ? person : 'any';
+    var cache = CacheService.getScriptCache();
+    var key = 'fb:' + date + ':' + pid;
+    var hit = cache.get(key);
+    if (hit) return JSON.parse(hit);
     var cal = calendarFor(pid);
     var dayStart = new Date(date + 'T' + pad2(DAY_START_H) + ':00:00');
     var dayEnd   = new Date(date + 'T' + pad2(DAY_END_H) + ':00:00');
@@ -313,7 +320,9 @@ function freeBusy(date, person) {
     });
     // With no personal calendar and no chosen person, only a full stand blocks a slot.
     if (pid === 'any' && !CALENDARS[pid]) spans = fullWindows(spans);
-    return { ok: true, date: date, person: pid, busy: spans };
+    var res = { ok: true, date: date, person: pid, busy: spans };
+    cache.put(key, JSON.stringify(res), 120);   // two minutes; a new booking clears it anyway
+    return res;
   } catch (err) {
     return { ok: false, reason: String(err) };
   }

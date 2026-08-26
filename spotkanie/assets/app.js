@@ -144,6 +144,7 @@ if (typeof document !== "undefined") (function () {
         $("days").querySelectorAll(".day").forEach((x) => x.classList.remove("on"));
         el.classList.add("on");
         renderPeople();
+        prefetchBusy(state.date);
         $("step-person").hidden = false;
         $("step-time").hidden = true;
         clearSlotSelection();
@@ -210,12 +211,18 @@ if (typeof document !== "undefined") (function () {
         state.person = el.dataset.id;
         $("people").querySelectorAll(".person").forEach((x) => x.classList.remove("on"));
         el.classList.add("on");
+        const picked = state.person;
         clearSlotSelection();
+        state.busy = [];
         $("step-time").hidden = false;
-        $("slots").innerHTML = `<p class="hint" style="grid-column:1/-1;color:var(--mut);font-size:13px;margin:0">Sprawdzam wolne terminy…</p>`;
-        state.busy = await loadBusy(state.date, state.person);
-        renderSlots();
+        renderSlots();                       // grid is usable immediately
+        $("slots").classList.add("checking");
         $("step-time").scrollIntoView({ behavior: "smooth", block: "nearest" });
+        const busy = await loadBusy(state.date, picked);
+        if (state.person !== picked) return; // they changed their mind while we waited
+        state.busy = busy;
+        $("slots").classList.remove("checking");
+        renderSlots();
       })
     );
   }
@@ -248,18 +255,41 @@ if (typeof document !== "undefined") (function () {
   }
 
   /* Availability of the chosen person for that day. A failure must not block booking —
-     an empty list means "show everything", and the server still refuses a taken slot. */
-  async function loadBusy(date, person) {
-    if (ENDPOINT.startsWith("[[")) return [];
-    try {
-      const r = await fetch(`${ENDPOINT}?action=free&date=${encodeURIComponent(date)}&person=${encodeURIComponent(person)}`);
-      const t = await r.text();
-      if (!t.trim().startsWith("{")) return [];
-      const out = JSON.parse(t);
-      return out.ok && Array.isArray(out.busy) ? out.busy : [];
-    } catch (e) {
-      return [];
-    }
+     an empty list means "show everything", and the server still refuses a taken slot.
+     Answers are cached per day+person and prefetched for the whole crew, so picking a
+     person feels instant even though Apps Script needs a second or two to answer. */
+  const busyCache = new Map();
+
+  function loadBusy(date, person) {
+    const key = date + "|" + person;
+    if (busyCache.has(key)) return busyCache.get(key);
+    const p = (async () => {
+      if (ENDPOINT.startsWith("[[")) return [];
+      try {
+        const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+        const timer = ctl ? setTimeout(() => ctl.abort(), 6000) : null;
+        const r = await fetch(
+          `${ENDPOINT}?action=free&date=${encodeURIComponent(date)}&person=${encodeURIComponent(person)}`,
+          ctl ? { signal: ctl.signal } : {}
+        );
+        if (timer) clearTimeout(timer);
+        const t = await r.text();
+        if (!t.trim().startsWith("{")) return [];
+        const out = JSON.parse(t);
+        return out.ok && Array.isArray(out.busy) ? out.busy : [];
+      } catch (e) {
+        busyCache.delete(key);   // a hiccup must not be cached as "everything free"
+        return [];
+      }
+    })();
+    busyCache.set(key, p);
+    return p;
+  }
+
+  /* Warm the cache for everybody the moment a day is picked — by the time the visitor
+     has read the names, the answer is usually already in. */
+  function prefetchBusy(date) {
+    PEOPLE.forEach((p) => loadBusy(date, p.id));
   }
 
   function bookingFromForm() {
