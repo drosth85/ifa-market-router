@@ -222,6 +222,17 @@ if (typeof document !== "undefined") (function () {
     if (!evening) $("step-person").scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
+  /* Returns the parsed answer, or null when Google handed us an HTML error page. */
+  async function fetchBooking(url) {
+    try {
+      const r = await fetch(url);
+      const t = await r.text();
+      return t.trim().startsWith("{") ? JSON.parse(t) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   function bookingFromForm() {
     return {
       name: $("f-name").value,
@@ -282,9 +293,12 @@ if (typeof document !== "undefined") (function () {
       try {
         if (ENDPOINT.startsWith("[[")) throw new Error("no-endpoint");
         /* GET, not POST: Apps Script answers a POST with a 302 and WebKit re-issues it as a GET
-           on /exec, so the booking never runs while the page still sees {"ok":true}. */
-        const r = await fetch(ENDPOINT + "?action=book&payload=" + encodeURIComponent(JSON.stringify(b)));
-        const out = await r.json();
+           on /exec, so the booking never runs while the page still sees {"ok":true}.
+           Google also serves an occasional HTML 404 instead of the script output — one retry. */
+        const url = ENDPOINT + "?action=book&payload=" + encodeURIComponent(JSON.stringify(b));
+        let out = await fetchBooking(url);
+        if (!out) out = await fetchBooking(url);
+        if (!out) throw new Error("network");
         if (!out.ok) throw new Error(out.reason || "failed");
         if (!out.booked) throw new Error("stale-backend");
         showDone(b);
@@ -299,6 +313,8 @@ if (typeof document !== "undefined") (function () {
             ? "Ten slot właśnie został zajęty. Wybierz inny."
             : e.message === "stale-backend"
             ? "Backend jest w starej wersji — rezerwacja nie została zapisana. Napisz do nas."
+            : e.message === "network"
+            ? "Google nie odpowiedział. Spróbuj jeszcze raz za chwilę."
             : "Nie udało się wysłać. Spróbuj ponownie albo napisz do nas.";
       }
     });
