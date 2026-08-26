@@ -23,7 +23,7 @@ var CALENDARS = {
   palka:      '0bced86f57a91ba4f011212e7382ada3985b7469674ca361d8bf77037698a6ba@group.calendar.google.com',
   kocaba:     '81f2cdc0628f9e9ec4d7aaee6960f96b7b48c6d44f440f4ed290ab17479a1d3b@group.calendar.google.com',
   juszczyk:   '91b2b8c65cbb32720ef0bab92775359c3e00c86355d8220510c5c7768b519b4e@group.calendar.google.com',
-  drozd:      ''    // empty = CALENDAR_ID, i.e. the account's own calendar
+  drozd:      '94c71ef01b994e14c9f6a2d6c14c373c4cbb2e4d9e9b988ab443ad5a9ed2da63@group.calendar.google.com'
 };
 
 /* Abuse limits. The endpoint is public and anonymous by necessity, and every booking sends mail
