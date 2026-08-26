@@ -49,7 +49,7 @@ function doPost(e) {
     var sheet = getSheet();
 
     // Evening meetings are off-site, so they never collide with the stand schedule.
-    if (!b.evening && isTaken(sheet, b.date, b.from, b.to, pid)) {
+    if (!b.evening && isTaken(b.date, b.from, b.to, pid)) {
       return json({ ok: false, reason: 'taken' });
     }
 
@@ -126,9 +126,26 @@ function doPost(e) {
   }
 }
 
-/** Lets you sanity-check the deployment in a browser. */
-function doGet() {
-  return json({ ok: true, service: 'ifa-booking' });
+/** Lets you sanity-check the deployment in a browser.
+    ?diag=1&date=2026-09-04&from=10:00&to=10:15&person=any tells you what the collision check sees. */
+function doGet(e) {
+  var p = (e && e.parameter) || {};
+  if (!p.diag) return json({ ok: true, service: 'ifa-booking' });
+  try {
+    var date = p.date || '2026-09-04', from = p.from || '10:00', to = p.to || '10:15';
+    var pid = PEOPLE[p.person] ? p.person : 'any';
+    var cal = CalendarApp.getCalendarById(CALENDAR_ID) || CalendarApp.getDefaultCalendar();
+    var events = cal.getEvents(new Date(date + 'T' + from + ':00'), new Date(date + 'T' + to + ':00'));
+    return json({
+      ok: true,
+      sheetRows: getSheet().getLastRow() - 1,
+      calendar: cal.getName(),
+      eventsInWindow: events.map(function (ev) { return ev.getTitle(); }),
+      taken: isTaken(date, from, to, pid)
+    });
+  } catch (err) {
+    return json({ ok: false, reason: String(err) });
+  }
 }
 
 function getSheet() {
@@ -152,30 +169,34 @@ function toMin(hhmm) {
 function minutesBetween(from, to) { return toMin(to) - toMin(from); }
 
 /**
+ * Availability is read from the CALENDAR, not from the sheet: the calendar also knows about
+ * meetings somebody added by hand, and it is what the crew actually looks at.
  * Meetings are 15/30/45 minutes on a 15-minute grid, so a clash is an overlap,
- * not an identical start time.
- *   - a named person: busy if any of their stand meetings overlaps,
- *   - no preference:  busy only when every table is already taken in that window.
+ * not an identical start time — getEvents(from, to) returns exactly the overlapping ones.
+ *   - a named person: busy when they are a guest of an overlapping stand meeting,
+ *   - no preference:  busy only when every table is taken in that window.
  */
-function isTaken(sheet, date, from, to, pid) {
-  var last = sheet.getLastRow();
-  if (last < 2) return false;
-  var rows = sheet.getRange(2, 2, last - 1, 8).getValues(); // date..person_email
-  var overlapping = 0;
-  for (var i = 0; i < rows.length; i++) {
-    var d = rows[i][0] instanceof Date
-      ? Utilities.formatDate(rows[i][0], 'Europe/Berlin', 'yyyy-MM-dd')
-      : String(rows[i][0]).trim();
-    if (d !== date) continue;
-    if (String(rows[i][4]).trim() === 'evening') continue;
-    var f = fmtTime(rows[i][1]);
-    var t = fmtTime(rows[i][2]);
-    if (!(toMin(f) < toMin(to) && toMin(from) < toMin(t))) continue; // no overlap
-    overlapping++;
-    var rowPerson = String(rows[i][6]).trim();
-    if (pid !== 'any' && rowPerson === PEOPLE[pid].name) return true;
+function isTaken(date, from, to, pid) {
+  var cal = CalendarApp.getCalendarById(CALENDAR_ID) || CalendarApp.getDefaultCalendar();
+  var events = cal.getEvents(new Date(date + 'T' + from + ':00'),
+                             new Date(date + 'T' + to + ':00'));
+  // Only our stand meetings count — private entries in the same calendar must not block a visitor.
+  var ours = events.filter(function (ev) {
+    return String(ev.getLocation() || '').indexOf('H27E-17') !== -1 ||
+           String(ev.getTitle() || '').indexOf('(IFA)') !== -1;
+  });
+  if (pid === 'any') return ours.length >= STAND_TABLES;
+
+  var email = String(PEOPLE[pid].email || '').toLowerCase();
+  if (!email) return false;
+  for (var i = 0; i < ours.length; i++) {
+    var guests = ours[i].getGuestList();
+    for (var j = 0; j < guests.length; j++) {
+      if (String(guests[j].getEmail()).toLowerCase() === email) return true;
+    }
+    if (String(ours[i].getTitle()).indexOf(PEOPLE[pid].name) !== -1) return true;
   }
-  return pid === 'any' && overlapping >= STAND_TABLES;
+  return false;
 }
 
 /** The sheet may hand back a Date for a time cell, depending on how it was typed. */
