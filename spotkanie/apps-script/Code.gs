@@ -537,3 +537,96 @@ function json(o) {
   return ContentService.createTextOutput(JSON.stringify(o))
     .setMimeType(ContentService.MimeType.JSON);
 }
+
+
+/* ==========================================================================
+   MOST DO BACKENDU PHP (ifa.monstelo.com)
+   Wyzwalacz co minutę czyta 7 kalendarzy RAZ dla całego tygodnia i wypycha zajętość.
+   Podpis HMAC ze znacznikiem czasu — sam sekret w nagłówku dałoby się odtworzyć z logów.
+   ========================================================================== */
+
+var PHP_BASE = 'https://ifa.monstelo.com/api';
+
+function syncKey_() {
+  return PropertiesService.getScriptProperties().getProperty('sync_key') || '';
+}
+
+function sign_(ts, body) {
+  var raw = Utilities.computeHmacSha256Signature(ts + '.' + body, syncKey_());
+  return raw.map(function (b) { return ('0' + (b & 0xFF).toString(16)).slice(-2); }).join('');
+}
+
+/** Czy jesteśmy w oknie, w którym warto odświeżać (dni targowe, 9:00-19:00 Berlin). */
+function inFairWindow_() {
+  var now = new Date();
+  var day = Utilities.formatDate(now, 'Europe/Berlin', 'yyyy-MM-dd');
+  var hour = Number(Utilities.formatDate(now, 'Europe/Berlin', 'HH'));
+  return FAIR_DAYS.indexOf(day) !== -1 && hour >= 9 && hour < 19;
+}
+
+/** Zajętość całej załogi na wszystkie dni targowe — jeden odczyt kalendarza na osobę. */
+function collectBusy_() {
+  var days = {};
+  FAIR_DAYS.forEach(function (d) { days[d] = {}; });
+  var from = new Date(FAIR_DAYS[0] + 'T00:00:00');
+  var to   = new Date(FAIR_DAYS[FAIR_DAYS.length - 1] + 'T23:59:59');
+  ASSIGN_ORDER.forEach(function (pid) {
+    try {
+      var cal = calendarFor(pid);
+      var events = cal.getEvents(from, to).filter(blocksSlot);
+      if (!CALENDARS[pid]) {
+        events = events.filter(function (ev) {
+          return String(ev.getLocation() || '').indexOf('H27E-17') !== -1 ||
+                 String(ev.getTitle() || '').indexOf('(IFA)') !== -1;
+        });
+      }
+      FAIR_DAYS.forEach(function (d) { days[d][pid] = []; });   // odczyt się udał — publikujemy stan
+      events.forEach(function (ev) {
+        var d = Utilities.formatDate(ev.getStartTime(), 'Europe/Berlin', 'yyyy-MM-dd');
+        if (days[d]) days[d][pid].push([fmtTime(ev.getStartTime()), fmtTime(ev.getEndTime())]);
+      });
+    } catch (err) {
+      // Kalendarz nieczytelny: NIE publikujemy dla niego nic — backend zostawi poprzedni stan.
+    }
+  });
+  return days;
+}
+
+function pushBusy() {
+  if (!inFairWindow_() && !PropertiesService.getScriptProperties().getProperty('force_push')) return;
+  var body = JSON.stringify({ days: collectBusy_() });
+  var ts = String(Math.floor(new Date().getTime() / 1000));
+  var res = UrlFetchApp.fetch(PHP_BASE + '/push.php', {
+    method: 'post', contentType: 'application/json',
+    headers: { 'X-Sync-Ts': ts, 'X-Sync-Sig': sign_(ts, body) },
+    payload: body, muteHttpExceptions: true
+  });
+  var ts2 = String(Math.floor(new Date().getTime() / 1000));
+  UrlFetchApp.fetch(PHP_BASE + '/retry.php', {
+    method: 'get', headers: { 'X-Sync-Ts': ts2, 'X-Sync-Sig': sign_(ts2, 'retry') },
+    muteHttpExceptions: true
+  });
+  return res.getContentText();
+}
+
+/** Uruchom RAZ z edytora po wklejeniu kodu i ustawieniu właściwości `sync_key`. */
+function installPush() {
+  removePush();
+  ScriptApp.newTrigger('pushBusy').timeBased().everyMinutes(1).create();
+  return 'push installed';
+}
+
+function removePush() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'pushBusy') ScriptApp.deleteTrigger(t);
+  });
+  return 'push removed';
+}
+
+/** Ręczny test: wypycha niezależnie od okna targowego i pokazuje odpowiedź backendu. */
+function pushBusyNow() {
+  PropertiesService.getScriptProperties().setProperty('force_push', '1');
+  var out = pushBusy();
+  PropertiesService.getScriptProperties().deleteProperty('force_push');
+  return out;
+}
