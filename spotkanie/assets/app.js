@@ -312,22 +312,17 @@ if (typeof document !== "undefined") (function () {
 
   const dayCache = new Map();   // date -> promise of { person_id: busy[] } or null
 
-  /* One request per day for the whole crew. Seven separate calls to Apps Script were the reason
-     "no preference" felt slow: it had to wait for the slowest of seven round trips. */
+  /* Availability is best effort. One request per day, one retry, then we stop trying:
+     the grid stays usable and the server refuses a taken slot at booking time anyway.
+     Everything fancier than this (per-person routes, layered caches, fallbacks) cost more
+     in failure modes than it ever saved a visitor. */
   async function fetchDayOnce(date) {
     try {
-      const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
-      const timer = ctl ? setTimeout(() => ctl.abort(), 12000) : null;
       const r = await fetch(`${ENDPOINT}?action=free&date=${encodeURIComponent(date)}`);
-      if (timer) clearTimeout(timer);
       const t = await r.text();
-      if (!t.trim().startsWith("{")) return null;    // Google served an HTML error page
+      if (!t.trim().startsWith("{")) return null;
       const out = JSON.parse(t);
-      if (out.ok && out.people) return out.people;
-      /* An older deployment answers per person only. Say so, so we can ask the old way
-         instead of telling the visitor we cannot check anything. */
-      if (out.ok) return "legacy";
-      return null;
+      return out.ok && out.people ? out.people : null;
     } catch (e) {
       return null;
     }
@@ -336,52 +331,19 @@ if (typeof document !== "undefined") (function () {
   function loadDay(date) {
     if (dayCache.has(date)) return dayCache.get(date);
     const p = (async () => {
-      if (ENDPOINT.startsWith("[[")) return {};
-      let people = await fetchDayOnce(date);
-      if (people === null) people = await fetchDayOnce(date);   // one retry
-      return people;
+      if (ENDPOINT.startsWith("[[")) return null;
+      const first = await fetchDayOnce(date);
+      return first !== null ? first : await fetchDayOnce(date);
     })();
     dayCache.set(date, p);
-    p.then((v) => { if (v === null) dayCache.delete(date); });  // never cache "unknown"
+    p.then((v) => { if (v === null) dayCache.delete(date); });
     return p;
   }
 
-  /* One person, asked the old way — used when the deployed script predates the day endpoint. */
-  const legacyCache = new Map();
-  function legacyBusy(date, person) {
-    const key = date + "|" + person;
-    if (legacyCache.has(key)) return legacyCache.get(key);
-    const p = (async () => {
-      for (let attempt = 0; attempt < 2; attempt++) {
-        try {
-          const r = await fetch(
-            `${ENDPOINT}?action=free&date=${encodeURIComponent(date)}&person=${encodeURIComponent(person)}`
-          );
-          const t = await r.text();
-          if (t.trim().startsWith("{")) {
-            const out = JSON.parse(t);
-            if (out.ok && Array.isArray(out.busy)) return out.busy;
-          }
-        } catch (e) { /* try once more */ }
-      }
-      return null;
-    })();
-    legacyCache.set(key, p);
-    p.then((v) => { if (v === null) legacyCache.delete(key); });
-    return p;
-  }
-
-  /* Busy windows for one person — or, for "no preference", the hours where nobody is free. */
+  /* Busy windows for one person — or, for "no preference", hours where nobody is free. */
   async function loadBusy(date, person) {
     const people = await loadDay(date);
-    if (people === null || people === "legacy") {
-      // Either an older deployment, or the day request failed — ask person by person instead.
-      if (person !== "any") return legacyBusy(date, person);
-      const crew = PEOPLE.filter((x) => x.id !== "any");
-      const all = await Promise.all(crew.map((x) => legacyBusy(date, x.id)));
-      if (all.some((x) => x === null)) return null;
-      return allBusyQuarters(all);
-    }
+    if (people === null) return null;
     if (person === "any") {
       const lists = PEOPLE.filter((x) => x.id !== "any").map((x) => people[x.id]).filter(Boolean);
       return lists.length ? allBusyQuarters(lists) : [];
@@ -389,8 +351,6 @@ if (typeof document !== "undefined") (function () {
     return people[person] || [];
   }
 
-  /* Warm the cache for everybody the moment a day is picked — by the time the visitor
-     has read the names, the answer is usually already in. */
   function prefetchBusy(date) {
     loadDay(date);
   }
@@ -412,8 +372,8 @@ if (typeof document !== "undefined") (function () {
     const busy = await loadBusy(state.date, picked);
     if (state.person !== picked) return;   // they changed their mind while we waited
     if (busy === null) {
-      // Availability unknown: leave the grid alone rather than pretending everything is free.
-      setSlotStatus("Could not check the calendar — book anyway, we confirm every meeting by e-mail.", true);
+      // Calendar unreachable: show every hour. The server still refuses a slot that is taken.
+      setSlotStatus("", false);
       return;
     }
     setSlotStatus("", false);

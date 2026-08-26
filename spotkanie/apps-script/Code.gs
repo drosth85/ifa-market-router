@@ -243,9 +243,7 @@ function doGet(e) {
       return json({ ok: false, reason: 'bad payload: ' + err });
     }
   }
-  if (p.action === 'free') {
-    return json(p.person ? freeBusy(p.date, p.person) : freeBusyDay(p.date));
-  }
+  if (p.action === 'free') return json(freeBusyDay(p.date));
   if (p.diag !== DIAG_KEY) return json({ ok: true, service: 'ifa-booking' });
   try {
     var date = p.date || '2026-09-04', from = p.from || '10:00', to = p.to || '10:15';
@@ -439,24 +437,6 @@ function freeBusyDay(date) {
     }
   }
   return { ok: true, date: date, people: people, failed: failed };
-}
-
-function freeBusy(date, person) {
-  try {
-    if (FAIR_DAYS.indexOf(String(date)) === -1) return { ok: false, reason: 'bad:date' };
-    var pid = PEOPLE[person] ? person : 'any';
-    var spans;
-    if (pid === 'any') {
-      // Busy only where every colleague is busy — one free person keeps the slot open.
-      // The page normally works this out itself from the individual answers; this is the fallback.
-      spans = allBusyWindows(ASSIGN_ORDER.map(function (id) { return dayBusy(id, date, false); }));
-    } else {
-      spans = dayBusy(pid, date, false);
-    }
-    return { ok: true, date: date, person: pid, busy: spans };
-  } catch (err) {
-    return { ok: false, reason: String(err) };
-  }
 }
 
 function spansOf(events) {
