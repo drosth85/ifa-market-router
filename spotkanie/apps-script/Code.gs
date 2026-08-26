@@ -200,6 +200,7 @@ function handleBooking(b) {
       c.remove('day:' + b.date + ':' + pid);
     } catch (e) {}
 
+    countBooking(b.email);
     var answer = JSON.stringify({ ok: true, booked: true, event: eventUrl, person: withWhom, assigned: assigned });
     if (nonceKey) { try { cache.put(nonceKey, answer, 900); } catch (e) {} }
     return ContentService.createTextOutput(answer).setMimeType(ContentService.MimeType.JSON);
@@ -291,17 +292,27 @@ function clean(v, max) {
   return String(v == null ? '' : v).replace(/[\r\n\t\u0000-\u001F]+/g, ' ').trim().slice(0, max);
 }
 
-/** Daily caps, kept in script properties. Protects the Gmail quota from a flood. */
-function underLimit(email) {
-  var props = PropertiesService.getScriptProperties();
+/**
+ * Daily caps, kept in script properties. They protect the Gmail quota from a flood.
+ * Only meetings that actually happened count: a visitor who lands on a taken slot twice
+ * must not burn through their allowance.
+ */
+function limitKeys(email) {
   var today = Utilities.formatDate(new Date(), 'Europe/Berlin', 'yyyy-MM-dd');
-  var total = Number(props.getProperty('count:' + today) || 0);
-  if (total >= MAX_PER_DAY) return { ok: false, reason: 'limit:day' };
-  var perMail = Number(props.getProperty('mail:' + today + ':' + email.toLowerCase()) || 0);
-  if (perMail >= MAX_PER_MAIL) return { ok: false, reason: 'limit:email' };
-  props.setProperty('count:' + today, String(total + 1));
-  props.setProperty('mail:' + today + ':' + email.toLowerCase(), String(perMail + 1));
+  return { day: 'count:' + today, mail: 'mail:' + today + ':' + String(email).toLowerCase() };
+}
+
+function underLimit(email) {
+  var props = PropertiesService.getScriptProperties(), k = limitKeys(email);
+  if (Number(props.getProperty(k.day) || 0) >= MAX_PER_DAY) return { ok: false, reason: 'limit:day' };
+  if (Number(props.getProperty(k.mail) || 0) >= MAX_PER_MAIL) return { ok: false, reason: 'limit:email' };
   return { ok: true };
+}
+
+function countBooking(email) {
+  var props = PropertiesService.getScriptProperties(), k = limitKeys(email);
+  props.setProperty(k.day, String(Number(props.getProperty(k.day) || 0) + 1));
+  props.setProperty(k.mail, String(Number(props.getProperty(k.mail) || 0) + 1));
 }
 
 /** Stand meetings only — a private entry in a fallback calendar must not block a visitor. */
