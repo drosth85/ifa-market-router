@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deal Ticket — pełny przepływ z wyborem osoby</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,700;100,800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0A0B0E; --panel:#14161D; --ink:#EDEAE0; --mut:#8A8D98; --line:#23262F; --teal:#2FE3C6;
+    --sans:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--sans);overflow-x:hidden}
+  .wrap{max-width:1280px;margin:0 auto;padding:34px 20px 70px}
+  .kick{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--teal)}
+  h1{font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-.02em;margin:10px 0 12px}
+  .lead{color:var(--mut);font-size:15px;line-height:1.6;max-width:78ch}
+
+  .screens{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:34px}
+  @media(max-width:1000px){.screens{grid-template-columns:1fr}}
+  .col h3{font-size:15px;font-weight:800;margin-bottom:4px}
+  .col .note{font-family:var(--mono);font-size:11px;color:var(--mut);line-height:1.6;margin-bottom:12px}
+
+  /* ---------- telefon: Deal Ticket ---------- */
+  .ph{background:#0E1116;color:#E9E0CC;border:1px solid var(--line);border-radius:20px;overflow:hidden;
+      height:660px;display:flex;flex-direction:column;font-family:Archivo,var(--sans);font-size:12px}
+  .ph .bar{height:24px;display:flex;align-items:center;justify-content:space-between;padding:0 11px;
+    font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;color:#7C8593}
+  .ph .body{flex:1;padding:12px 13px 0;overflow:hidden}
+  .hero{font-size:21px;font-weight:800;line-height:.98;text-transform:uppercase;font-variation-settings:'wdth' 100,'wght' 800}
+  .sub{font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;color:#7C8593;margin-top:7px}
+  .lbl{font-family:var(--mono);font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:#7C8593;margin:13px 0 6px}
+
+  .sides{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .side{background:#171C24;border:1px solid #23262F;border-radius:7px;padding:9px}
+  .side.on{border-color:#2FE3C6;background:#11201E}
+  .side .k{font-family:var(--mono);font-size:7.5px;letter-spacing:.16em;color:#7C8593}
+  .side .v{font-size:12.5px;font-weight:700;margin-top:3px}
+  .side.on .v{color:#2FE3C6}
+
+  .days{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+  .days b{background:#171C24;border:1px solid #23262F;border-radius:6px;text-align:center;padding:7px 0;
+    font-family:var(--mono);font-size:9px;font-weight:400;line-height:1.5}
+  .days b em{display:block;font-style:normal;font-size:14px;font-weight:700}
+  .days b.sel{background:#E9E0CC;color:#0E1116;border-color:#E9E0CC}
+
+  /* wybór osoby — pole WITH kwitu rozwinięte */
+  .who{display:flex;flex-direction:column;gap:6px}
+  .p{background:#171C24;border:1px solid #23262F;border-radius:7px;padding:8px 9px;display:flex;gap:9px;align-items:center}
+  .p.on{border-color:#2FE3C6;background:#11201E}
+  .p.any{border-style:dashed}
+  .p .ini{width:30px;height:30px;flex:none;border-radius:5px;background:#23262F;color:#E9E0CC;
+    font-family:var(--mono);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .p.on .ini{background:#2FE3C6;color:#07100E}
+  .p.any .ini{background:transparent;border:1px dashed #3A4150;color:#7C8593;font-size:13px}
+  .p .nm{font-size:12.5px;font-weight:700;line-height:1.15}
+  .p .rl{font-family:var(--mono);font-size:7.5px;letter-spacing:.06em;color:#7C8593;margin-top:2px}
+  .p .lg{display:flex;gap:3px;margin-top:4px}
+  .p .lg em{font-style:normal;font-family:var(--mono);font-size:7px;letter-spacing:.08em;
+    border:1px solid #2A303B;color:#7C8593;border-radius:2px;padding:1px 3px}
+  .p .lg em.y{border-color:#2FE3C6;color:#2FE3C6}
+  .p .free{margin-left:auto;text-align:right;font-family:var(--mono);font-size:8px;letter-spacing:.06em;color:#7C8593}
+  .p .free b{display:block;font-size:13px;color:#E9E0CC}
+  .p.on .free b{color:#2FE3C6}
+
+  .hours{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+  .hours b{font-family:var(--mono);font-size:10px;font-weight:400;text-align:center;padding:8px 0;
+    border:1px solid #23262F;border-radius:5px}
+  .hours b.sel{background:#E9E0CC;color:#0E1116;border-color:#E9E0CC;font-weight:700}
+  .hours b.taken{opacity:.3;text-decoration:line-through}
+  .len{display:flex;gap:5px;margin-top:7px}
+  .len b{flex:1;text-align:center;font-family:var(--mono);font-size:9.5px;font-weight:400;padding:7px 0;
+    border:1px solid #23262F;border-radius:5px}
+  .len b.sel{border-color:#2FE3C6;color:#2FE3C6}
+  .len b.off{opacity:.32}
+  .hint{font-family:var(--mono);font-size:8px;letter-spacing:.05em;color:#7C8593;margin-top:6px}
+
+  /* kwit */
+  .tk{margin-top:auto;background:#171C24;border-top:1px dashed #3A4150;border-left:2px solid #2FE3C6;
+      padding:9px 11px 11px;position:relative}
+  .tk .ref{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:#2FE3C6}
+  .tk .fl{font-family:var(--mono);font-size:9.5px;line-height:1.7;margin-top:5px}
+  .tk .fl span{color:#7C8593}
+  .tk .cta{margin-top:8px;text-align:center;padding:9px;border-radius:6px;font-size:11.5px;font-weight:700}
+  .tk .cta.go{background:#2FE3C6;color:#07100E}
+  .tk .cta.wait{background:#1D242E;color:#7C8593}
+  .tk .stamp{position:absolute;right:10px;bottom:42px;font-family:var(--mono);font-weight:700;font-size:16px;
+    letter-spacing:.2em;color:#2FE3C6;opacity:.22;transform:rotate(-6deg)}
+
+  .facts{margin-top:36px;border-top:1px solid var(--line);padding-top:20px;display:grid;
+    grid-template-columns:repeat(3,1fr);gap:22px}
+  @media(max-width:1000px){.facts{grid-template-columns:1fr}}
+  .facts h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+  .facts p{color:var(--mut);font-size:13px;line-height:1.65}
+  .facts b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kick">IFA 2026 · kierunek przyjęty</div>
+  <h1>Deal Ticket — pełny przepływ z wyborem osoby</h1>
+  <p class="lead">Wybór osoby jest w tym kierunku polem kwitu, nie osobnym ekranem. Kwit ma cztery pola
+    — <b>SIDE</b>, <b>DAY</b>, <b>WITH</b>, <b>TIME</b> — i każde z nich jest przyciskiem, który rozwija
+    swój krok i cofa do niego bez przewijania. „Anyone free" stoi na górze listy jako pełnoprawny wybór,
+    a nie jako brak wyboru.</p>
+
+  <div class="screens">
+
+    <!-- EKRAN 1 -->
+    <div class="col">
+      <h3>1 · Strona transakcji i dzień</h3>
+      <div class="note">Kwit jest pusty i pokazuje kropkami, czego brakuje.<br>Przycisk mówi, co zrobić dalej.</div>
+      <div class="ph">
+        <div class="bar"><span>14:32</span><span>IFA BERLIN · H27E-17</span></div>
+        <div class="body">
+          <div class="hero">Overstock in.<br>Best price out.</div>
+          <div class="sub">BOOK 15 MIN AT THE STAND · BERLIN TIME</div>
+          <div class="lbl">Which side are you on?</div>
+          <div class="sides">
+            <div class="side on"><div class="k">I HAVE STOCK</div><div class="v">We buy</div></div>
+            <div class="side"><div class="k">I WANT STOCK</div><div class="v">We sell</div></div>
+          </div>
+          <div class="lbl">Day</div>
+          <div class="days">
+            <b>FRI<em>4</em></b><b>SAT<em>5</em></b><b class="sel">SUN<em>6</em></b><b>MON<em>7</em></b><b>TUE<em>8</em></b>
+          </div>
+          <div class="tk">
+            <div class="ref">IFA-0906-····-··</div>
+            <div class="fl">SIDE buy · DAY 6 SEP · TIME <span>·····</span> · LEN <span>··</span><br>
+              WITH <span>············</span> · YOU <span>············</span></div>
+            <div class="cta wait">Pick who you want to meet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EKRAN 2 -->
+    <div class="col">
+      <h3>2 · Osoba — albo ktokolwiek wolny</h3>
+      <div class="note">Przy każdym nazwisku: rola, języki i ile kwadransów<br>ma jeszcze wolnych tego dnia. Liczby liczymy z kalendarzy.</div>
+      <div class="ph">
+        <div class="bar"><span>14:32</span><span>IFA BERLIN · H27E-17</span></div>
+        <div class="body">
+          <div class="lbl">Who do you want to meet · Sunday 6 Sep</div>
+          <div class="who">
+            <div class="p any on">
+              <span class="ini">◆</span>
+              <div><div class="nm">Anyone free</div>
+                <div class="rl">WE ASSIGN THE FIRST COLLEAGUE FREE</div></div>
+              <div class="free"><b>28</b>SLOTS</div>
+            </div>
+            <div class="p">
+              <span class="ini">SJ</span>
+              <div><div class="nm">Sebastian Juszczyk</div>
+                <div class="rl">BOARD MEMBER · SOURCING</div>
+                <div class="lg"><em class="y">EN</em><em class="y">PL</em><em>CZ</em></div></div>
+              <div class="free"><b>6</b>FREE</div>
+            </div>
+            <div class="p">
+              <span class="ini">TD</span>
+              <div><div class="nm">Tomasz Drozd</div>
+                <div class="rl">BRAND GROWTH · RETAIL</div>
+                <div class="lg"><em class="y">EN</em><em class="y">PL</em><em>CZ</em></div></div>
+              <div class="free"><b>2</b>FREE</div>
+            </div>
+            <div class="p">
+              <span class="ini">NT</span>
+              <div><div class="nm">Nikola Tuchowska</div>
+                <div class="rl">KEY ACCOUNT MANAGER</div>
+                <div class="lg"><em class="y">EN</em><em class="y">PL</em><em>CZ</em></div></div>
+              <div class="free"><b>9</b>FREE</div>
+            </div>
+            <div class="p">
+              <span class="ini">KP</span>
+              <div><div class="nm">Kamil Pałka</div>
+                <div class="rl">KEY ACCOUNT MANAGER</div>
+                <div class="lg"><em>EN</em><em class="y">PL</em><em class="y">CZ</em></div></div>
+              <div class="free"><b>11</b>FREE</div>
+            </div>
+            <div class="p">
+              <span class="ini">ŁT</span>
+              <div><div class="nm">Łukasz Tabak</div>
+                <div class="rl">KEY ACCOUNT MANAGER</div>
+                <div class="lg"><em>EN</em><em class="y">PL</em><em>CZ</em></div></div>
+              <div class="free"><b>0</b>FULL</div>
+            </div>
+          </div>
+          <div class="tk">
+            <div class="ref">IFA-0906-····-AN</div>
+            <div class="fl">SIDE buy · DAY 6 SEP · TIME <span>·····</span> · LEN <span>··</span><br>
+              WITH anyone free · YOU <span>············</span></div>
+            <div class="cta wait">Pick a time to continue</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EKRAN 3 -->
+    <div class="col">
+      <h3>3 · Godzina, długość, rezerwacja</h3>
+      <div class="note">Niedostępna długość nie znika — jest wygaszona z powodem.<br>Po zapisie kwit dostaje stempel.</div>
+      <div class="ph">
+        <div class="bar"><span>14:32</span><span>IFA BERLIN · H27E-17</span></div>
+        <div class="body">
+          <div class="lbl">Time · with Sebastian J. · Sunday 6 Sep</div>
+          <div class="hint" style="margin:0 0 8px">MORNING</div>
+          <div class="hours">
+            <b>10:00</b><b class="taken">10:15</b><b>10:30</b><b>10:45</b>
+            <b class="taken">11:00</b><b class="taken">11:15</b><b>11:30</b><b>11:45</b>
+          </div>
+          <div class="hint" style="margin:10px 0 6px">AFTERNOON</div>
+          <div class="hours">
+            <b>13:00</b><b class="sel">13:15</b><b>13:30</b><b class="taken">13:45</b>
+            <b>14:00</b><b>14:15</b><b class="taken">14:30</b><b>14:45</b>
+          </div>
+          <div class="lbl">How long</div>
+          <div class="len"><b>15 min</b><b class="sel">30 min</b><b class="off">45 min</b></div>
+          <div class="hint">45 MIN RUNS INTO 13:45 — TAKEN</div>
+          <div class="tk">
+            <div class="stamp">BOOKED</div>
+            <div class="ref">IFA-0906-1315-SJ</div>
+            <div class="fl">SIDE buy · DAY 6 SEP · TIME 13:15 · LEN 30<br>
+              WITH Sebastian Juszczyk · YOU <span>············</span></div>
+            <div class="cta go">Add your details ▸</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="facts">
+    <div>
+      <h4>Wybór osoby w gramatyce kwitu</h4>
+      <p>Pole <b>WITH</b> jest przyciskiem: dotknięcie rozwija listę, ponowne dotknięcie po wyborze wraca
+        do niej bez przewijania. Przy linku imiennym (<b>?td</b>) krok znika, a pole jest wypełnione
+        i zablokowane — kwit od początku mówi „WITH Tomasz Drozd".</p>
+    </div>
+    <div>
+      <h4>„Anyone free" jako pełny wybór</h4>
+      <p>Stoi na górze, ma własny znak <b>◆</b> zamiast inicjałów i przerywaną ramkę, więc czytelnie różni
+        się od osoby. Pokazuje sumę wolnych kwadransów całej siódemki, bo to jego przewaga.
+        Jest zaznaczony domyślnie — i od razu otwiera listę godzin, bez klikania w podświetlony kafelek.</p>
+    </div>
+    <div>
+      <h4>Liczby wolnych slotów</h4>
+      <p>Liczymy je z tej samej mapy zajętości, którą strona już pobiera dla wybranego dnia — zero
+        dodatkowych zapytań. Osoba bez wolnych godzin pokazuje <b>0 · FULL</b> i jest nieaktywna,
+        zamiast wpuszczać gościa w ślepą uliczkę.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>
