@@ -65,6 +65,39 @@ node test-logic.js
 51 asercji: zakres dni, siatka 15-minutowa, długości spotkań przy zamknięciu, wykrywanie nachodzenia,
 lista osób, walidacja formularza, poprawność linku do Google Calendar.
 
+
+## Bezpieczeństwo
+
+Adres `/exec` jest publiczny i anonimowy — inaczej gość targowy nie zarezerwuje. Nikt przez niego
+nie wejdzie na konto Google, nie zobaczy Dysku ani nie zmieni skryptu: to wymaga zalogowania jako
+właściciel. Skrypt nie ma `eval`, a jedyny dokument, jaki otwiera, jest zaszyty w `SHEET_ID`.
+
+Realnym ryzykiem jest **nadużycie**, nie włamanie — każda rezerwacja wysyła maila z konta właściciela
+(darmowy Gmail: 100/dobę). Dlatego backend:
+- przyjmuje wyłącznie **daty targowe** (`FAIR_DAYS`), siatkę 15-minutową, długości 15/30/45
+  i godziny 10:00–18:00 (wieczorne osobno, maks. 3 h),
+- **przycina i czyści** wszystkie pola (bez znaków sterujących i nowych linii — żadnych zabaw
+  z nagłówkami maila), e-mail musi przejść walidację,
+- **limituje**: `MAX_PER_DAY` (60 rezerwacji na dobę) i `MAX_PER_MAIL` (3 na adres na dobę),
+  licznik trzymany w Script Properties,
+- **`?diag` wymaga klucza** (`DIAG_KEY`) — bez niego endpoint nie zdradza nic poza „żyję".
+
+Czego to nie załatwia: ktoś uparty nadal może wysłać do 60 fałszywych rezerwacji dziennie z różnych
+adresów. Na pięć dni targów to akceptowalne; gdyby zaczęło się dziać, wyłącz wdrożenie jednym
+kliknięciem (Deploy → Manage deployments → Archive).
+
+## Osobne kalendarze dla handlowców
+
+W `apps-script/Code.gs` jest mapa `CALENDARS`. Załóż w Kalendarzu Google (na tym samym koncie)
+po jednym kalendarzu na osobę, skopiuj ich ID (Ustawienia kalendarza → Zintegruj kalendarz →
+Identyfikator kalendarza) i wklej przy odpowiednich `id`. Wtedy:
+- spotkanie powstaje **od razu w kalendarzu tej osoby**, nie w Twoim głównym,
+- zajętość liczona jest z **jej** kalendarza — także dla spotkań dopisanych ręcznie,
+- pusty wpis w mapie = kalendarz z `CALENDAR_ID` (obecne zachowanie).
+
+Udostępnij każdy kalendarz właściwej osobie („wprowadzanie zmian w wydarzeniach"), żeby widziała
+go u siebie w telefonie.
+
 ## Limity, o których warto wiedzieć
 
 - Gmail przez Apps Script: 100 maili/dobę na koncie darmowym. Na targach spokojnie wystarczy.
