@@ -173,6 +173,7 @@ if (typeof document !== "undefined") (function () {
         $("days").querySelectorAll(".day").forEach((x) => x.classList.remove("on"));
         el.classList.add("on");
         clearSlotSelection();
+        prefetchBusy(state.date);
         if (state.fixedPerson) {
           showSlotsFor(state.person);
           return;
@@ -289,52 +290,53 @@ if (typeof document !== "undefined") (function () {
      an empty list means "show everything", and the server still refuses a taken slot.
      Answers are cached per day+person and prefetched for the whole crew, so picking a
      person feels instant even though Apps Script needs a second or two to answer. */
-  const busyCache = new Map();
+  const dayCache = new Map();   // date -> promise of { person_id: busy[] } or null
 
-  /* One call. Returns null — not [] — when the answer did not arrive: "unknown" must never be
-     mistaken for "everything free", or taken hours light up again after a hiccup. */
-  async function fetchBusyOnce(date, person) {
+  /* One request per day for the whole crew. Seven separate calls to Apps Script were the reason
+     "no preference" felt slow: it had to wait for the slowest of seven round trips. */
+  async function fetchDayOnce(date) {
     try {
       const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
-      const timer = ctl ? setTimeout(() => ctl.abort(), 8000) : null;
-      const r = await fetch(
-        `${ENDPOINT}?action=free&date=${encodeURIComponent(date)}&person=${encodeURIComponent(person)}`,
-        ctl ? { signal: ctl.signal } : {}
-      );
+      const timer = ctl ? setTimeout(() => ctl.abort(), 12000) : null;
+      const r = await fetch(`${ENDPOINT}?action=free&date=${encodeURIComponent(date)}`);
       if (timer) clearTimeout(timer);
       const t = await r.text();
-      if (!t.trim().startsWith("{")) return null;      // Google served an HTML error page
+      if (!t.trim().startsWith("{")) return null;    // Google served an HTML error page
       const out = JSON.parse(t);
-      return out.ok && Array.isArray(out.busy) ? out.busy : null;
+      return out.ok && out.people ? out.people : null;
     } catch (e) {
       return null;
     }
   }
 
-  function loadBusy(date, person) {
-    const key = date + "|" + person;
-    if (busyCache.has(key)) return busyCache.get(key);
+  function loadDay(date) {
+    if (dayCache.has(date)) return dayCache.get(date);
     const p = (async () => {
-      if (ENDPOINT.startsWith("[[")) return [];
-      if (person === "any") {
-        const crew = PEOPLE.filter((x) => x.id !== "any");
-        const all = await Promise.all(crew.map((x) => loadBusy(date, x.id)));
-        if (all.some((x) => x === null)) return null;  // partial knowledge is no knowledge
-        return allBusyQuarters(all);
-      }
-      let busy = await fetchBusyOnce(date, person);
-      if (busy === null) busy = await fetchBusyOnce(date, person);   // one retry
-      return busy;
+      if (ENDPOINT.startsWith("[[")) return {};
+      let people = await fetchDayOnce(date);
+      if (people === null) people = await fetchDayOnce(date);   // one retry
+      return people;
     })();
-    busyCache.set(key, p);
-    p.then((v) => { if (v === null) busyCache.delete(key); });       // never cache "unknown"
+    dayCache.set(date, p);
+    p.then((v) => { if (v === null) dayCache.delete(date); });  // never cache "unknown"
     return p;
+  }
+
+  /* Busy windows for one person — or, for "no preference", the hours where nobody is free. */
+  async function loadBusy(date, person) {
+    const people = await loadDay(date);
+    if (people === null) return null;
+    if (person === "any") {
+      const lists = PEOPLE.filter((x) => x.id !== "any").map((x) => people[x.id]).filter(Boolean);
+      return lists.length ? allBusyQuarters(lists) : [];
+    }
+    return people[person] || [];
   }
 
   /* Warm the cache for everybody the moment a day is picked — by the time the visitor
      has read the names, the answer is usually already in. */
   function prefetchBusy(date) {
-    PEOPLE.filter((p) => p.id !== "any").forEach((p) => loadBusy(date, p.id));
+    loadDay(date);
   }
 
   /* Paints the grid straight away, then dims what the calendar says is taken. */

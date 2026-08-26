@@ -243,7 +243,9 @@ function doGet(e) {
       return json({ ok: false, reason: 'bad payload: ' + err });
     }
   }
-  if (p.action === 'free') return json(freeBusy(p.date, p.person));
+  if (p.action === 'free') {
+    return json(p.person ? freeBusy(p.date, p.person) : freeBusyDay(p.date));
+  }
   if (p.diag !== DIAG_KEY) return json({ ok: true, service: 'ifa-booking' });
   try {
     var date = p.date || '2026-09-04', from = p.from || '10:00', to = p.to || '10:15';
@@ -384,7 +386,7 @@ function dayBusy(pid, date, fresh) {
     new Date(date + 'T' + pad2(DAY_END_H) + ':00:00'),
     !!CALENDARS[pid]
   ));
-  cache.put(key, JSON.stringify(spans), 120);
+  cache.put(key, JSON.stringify(spans), 45);
   return spans;
 }
 
@@ -420,6 +422,25 @@ function ownsCalendar(cal) {
  * What the page needs to grey out taken slots: the busy windows of one person on one fair day.
  * Returned as ["HH:MM","HH:MM"] pairs clipped to the stand hours.
  */
+/**
+ * One request per day, not one per person: reading seven calendars in a single execution takes
+ * about as long as reading one, while seven HTTP round trips to Apps Script do not.
+ * The page works out "no preference" from this map itself.
+ */
+function freeBusyDay(date) {
+  if (FAIR_DAYS.indexOf(String(date)) === -1) return { ok: false, reason: 'bad:date' };
+  var people = {}, failed = [];
+  for (var i = 0; i < ASSIGN_ORDER.length; i++) {
+    var id = ASSIGN_ORDER[i];
+    try {
+      people[id] = dayBusy(id, date, false);
+    } catch (err) {
+      failed.push(id);   // an unreadable calendar must not pass for "free"
+    }
+  }
+  return { ok: true, date: date, people: people, failed: failed };
+}
+
 function freeBusy(date, person) {
   try {
     if (FAIR_DAYS.indexOf(String(date)) === -1) return { ok: false, reason: 'bad:date' };
