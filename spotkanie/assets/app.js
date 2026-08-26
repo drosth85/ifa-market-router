@@ -28,7 +28,7 @@ const DURATIONS = [15, 30, 45];
 /* Who is on the stand — the Monstelo catalog contact list.
    `email` is used as the calendar guest, so the meeting lands in that person's calendar. */
 const PEOPLE = [
-  { id: "any",       slug: "",   name: "No preference",      role: "We put the right person at the table", email: "" },
+  { id: "any",       slug: "",   name: "No preference",      role: "We assign the first colleague who is free", email: "" },
   { id: "mamcarczyk",slug: "mm", name: "Michał Mamcarczyk",  role: "Key Account Manager · EN · PL", email: "mm@monstelo.com" },
   { id: "tuchowska", slug: "nt", name: "Nikola Tuchowska",   role: "Key Account Manager · EN · PL", email: "nikola.tuchowska@monstelo.com" },
   { id: "tabak",     slug: "lt", name: "Łukasz Tabak",       role: "Key Account Manager · PL",      email: "lukasz.tabak@monstelo.com" },
@@ -403,6 +403,7 @@ if (typeof document !== "undefined") (function () {
         if (!out) throw new Error("network");
         if (!out.ok) throw new Error(out.reason || "failed");
         if (!out.booked) throw new Error("stale-backend");
+        if (out.assigned && out.person) { b.personName = out.person; b.assigned = true; }
         showDone(b);
       } catch (e) {
         btn.disabled = false;
@@ -428,8 +429,11 @@ if (typeof document !== "undefined") (function () {
     $("done").hidden = false;
     $("done-when").textContent =
       `${day.dow} ${day.d} ${day.mon} · ${b.from}–${b.to}` + (b.evening ? ` · ${b.place}` : "");
-    $("done-who").textContent =
-      b.person && b.person !== "any" ? `With ${b.personName}` : "We will assign the right person to your topic";
+    $("done-who").textContent = b.assigned
+      ? `With ${b.personName} — the colleague free at that hour`
+      : b.person && b.person !== "any"
+      ? `With ${b.personName}`
+      : "We will assign the right person to your topic";
     $("done-cal").href = gcalLink(b);
   }
 

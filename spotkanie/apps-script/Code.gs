@@ -31,6 +31,9 @@ var CALENDARS = {
 var FAIR_DAYS   = ['2026-09-04', '2026-09-05', '2026-09-06', '2026-09-07', '2026-09-08'];
 var DAY_START_H = 10;               // stand hours; evening meetings are handled separately
 var DAY_END_H   = 18;
+/* "No preference" is assigned to the first free person in this order. Meetings can always be
+   held in the open IFA space, so there is no limit on parallel meetings. */
+var ASSIGN_ORDER = ['juszczyk', 'mamcarczyk', 'tuchowska', 'tabak', 'kocaba', 'drozd', 'palka'];
 var MAX_PER_DAY = 60;               // total bookings accepted per calendar day
 var MAX_PER_MAIL = 3;               // bookings per e-mail address per calendar day
 var DIAG_KEY    = 'zmien-mnie';     // ?diag=<DIAG_KEY>; anything else gets nothing
@@ -41,7 +44,6 @@ var SHEET_NAME  = 'Bookings';
 var STAND       = 'IFA Berlin 2026 · Reseller Park · stand H27E-17';
 var NOTIFY      = '';               // optional: your address, to get a copy of every booking
 var ERROR_COL   = 16;               // last column of the row written below
-var STAND_TABLES = 2;               // parallel meetings possible when no person was chosen
 
 /* The stand crew — kept here as well, so a tampered payload cannot invite strangers. */
 var PEOPLE = {
@@ -99,14 +101,21 @@ function handleBooking(b) {
     if (!limit.ok) return json({ ok: false, reason: limit.reason });
 
     var pid = PEOPLE[b.person] ? b.person : 'any';
-    var person = PEOPLE[pid];
-
-    var sheet = getSheet();
+    var assigned = false;
 
     // Evening meetings are off-site, so they never collide with the stand schedule.
-    if (!b.evening && isTaken(b.date, b.from, b.to, pid)) {
-      return json({ ok: false, reason: 'taken' });
+    if (!b.evening) {
+      if (pid === 'any') {
+        var free = firstFree(b.date, b.from, b.to);
+        if (!free) return json({ ok: false, reason: 'taken' });
+        pid = free;
+        assigned = true;
+      } else if (isTaken(b.date, b.from, b.to, pid)) {
+        return json({ ok: false, reason: 'taken' });
+      }
     }
+    var person = PEOPLE[pid];
+    var sheet = getSheet();
 
     var when = b.date + ' ' + b.from + '–' + b.to;
     var place = b.evening ? b.place : STAND;
@@ -178,7 +187,7 @@ function handleBooking(b) {
     // The freshly taken slot must disappear from the grid straight away.
     try { CacheService.getScriptCache().remove('fb:' + b.date + ':' + pid); } catch (e) {}
 
-    return json({ ok: true, booked: true, event: eventUrl, person: withWhom });
+    return json({ ok: true, booked: true, event: eventUrl, person: withWhom, assigned: assigned });
   } catch (err) {
     return json({ ok: false, reason: String(err) });
   }
@@ -293,15 +302,7 @@ function isTaken(date, from, to, pid) {
   var start = new Date(date + 'T' + from + ':00');
   var end   = new Date(date + 'T' + to + ':00');
 
-  if (pid === 'any') {
-    // The stand is full when STAND_TABLES meetings run at once, wherever they are booked.
-    var busy = 0, cals = crewCalendars();
-    for (var c = 0; c < cals.length; c++) {
-      busy += standEvents(cals[c], start, end, ownsCalendar(cals[c])).length;
-      if (busy >= STAND_TABLES) return true;
-    }
-    return false;
-  }
+  if (pid === 'any') return !firstFree(date, from, to);
 
   var cal = calendarFor(pid);
   var events = standEvents(cal, start, end, !!CALENDARS[pid]);
@@ -317,6 +318,16 @@ function isTaken(date, from, to, pid) {
     if (String(events[i].getTitle()).indexOf(PEOPLE[pid].name) !== -1) return true;
   }
   return false;
+}
+
+/** The first colleague in ASSIGN_ORDER with nothing in that window, or null when all are busy. */
+function firstFree(date, from, to) {
+  for (var i = 0; i < ASSIGN_ORDER.length; i++) {
+    var pid = ASSIGN_ORDER[i];
+    if (!PEOPLE[pid]) continue;
+    if (!isTaken(date, from, to, pid)) return pid;
+  }
+  return null;
 }
 
 /** True when this calendar belongs to one person (not the shared fallback). */
@@ -361,15 +372,18 @@ function freeBusy(date, person) {
   }
 }
 
-/** Quarter-hours in which at least STAND_TABLES meetings run at once. */
-function fullWindows(spans) {
+function spansOf(events) {
+  return events.map(function (ev) { return [fmtTime(ev.getStartTime()), fmtTime(ev.getEndTime())]; });
+}
+
+/** Quarter-hours in which nobody from the crew is free. */
+function allBusyWindows(perPerson) {
   var out = [];
   for (var m = DAY_START_H * 60; m < DAY_END_H * 60; m += 15) {
-    var n = 0;
-    for (var i = 0; i < spans.length; i++) {
-      if (toMin(spans[i][0]) < m + 15 && m < toMin(spans[i][1])) n++;
-    }
-    if (n >= STAND_TABLES) out.push([hhmm(m), hhmm(m + 15)]);
+    var everyoneBusy = perPerson.length > 0 && perPerson.every(function (spans) {
+      return spans.some(function (w) { return toMin(w[0]) < m + 15 && m < toMin(w[1]); });
+    });
+    if (everyoneBusy) out.push([hhmm(m), hhmm(m + 15)]);
   }
   return out;
 }

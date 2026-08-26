@@ -19,8 +19,10 @@ Po stronie Google jedno zgłoszenie daje trzy rzeczy:
 3. mail potwierdzający do gościa (+ kopia do wybranej osoby i na adres z `NOTIFY`).
 
 **Kolizje liczone są jako nachodzenie przedziałów, nie identyczny start.** Osoba wybrana z listy jest
-zajęta, jeśli jakiekolwiek jej spotkanie na stoisku nachodzi na wybrany czas. „No preference" blokuje
-się dopiero, gdy w danym oknie zajęte są wszystkie stoliki (`STAND_TABLES`, domyślnie 2).
+zajęta, jeśli jakiekolwiek jej spotkanie nachodzi na wybrany czas. **„No preference" jest wolne,
+dopóki wolna jest choć jedna osoba** — backend przydziela wtedy pierwszą wolną wg `ASSIGN_ORDER`
+(Sebastian → Michał → Nikola → Łukasz → Błażej → Tomasz → Kamil) i zakłada spotkanie w JEJ kalendarzu.
+Nie ma limitu równoległych spotkań: rozmowę zawsze można odbyć we wspólnej przestrzeni IFA.
 Spotkania wieczorne nie blokują niczego, bo są poza stoiskiem.
 
 **Lista osób** jest w dwóch miejscach i musi się zgadzać: `assets/app.js` (`PEOPLE`, to co widzi
@@ -54,7 +56,7 @@ Sprawdzenie: wejdź na adres `/exec` w przeglądarce — powinno pokazać `{"ok"
 - `CALENDAR_ID` — `'primary'` albo id kalendarza współdzielonego, jeśli spotkania mają widzieć wszyscy na stoisku
 - `NOTIFY` — Twój adres, żeby dostawać kopię każdej rezerwacji
 - `PEOPLE` — ta sama lista co w `app.js`, z adresami (to one dostają zaproszenie)
-- `STAND_TABLES` — ile spotkań naraz mieści stoisko przy wyborze „No preference"
+- `ASSIGN_ORDER` — kolejność przydzielania osoby przy „No preference"
 
 ## Testy
 
