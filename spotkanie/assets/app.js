@@ -323,7 +323,11 @@ if (typeof document !== "undefined") (function () {
       const t = await r.text();
       if (!t.trim().startsWith("{")) return null;    // Google served an HTML error page
       const out = JSON.parse(t);
-      return out.ok && out.people ? out.people : null;
+      if (out.ok && out.people) return out.people;
+      /* An older deployment answers per person only. Say so, so we can ask the old way
+         instead of telling the visitor we cannot check anything. */
+      if (out.ok) return "legacy";
+      return null;
     } catch (e) {
       return null;
     }
@@ -342,10 +346,42 @@ if (typeof document !== "undefined") (function () {
     return p;
   }
 
+  /* One person, asked the old way — used when the deployed script predates the day endpoint. */
+  const legacyCache = new Map();
+  function legacyBusy(date, person) {
+    const key = date + "|" + person;
+    if (legacyCache.has(key)) return legacyCache.get(key);
+    const p = (async () => {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const r = await fetch(
+            `${ENDPOINT}?action=free&date=${encodeURIComponent(date)}&person=${encodeURIComponent(person)}`
+          );
+          const t = await r.text();
+          if (t.trim().startsWith("{")) {
+            const out = JSON.parse(t);
+            if (out.ok && Array.isArray(out.busy)) return out.busy;
+          }
+        } catch (e) { /* try once more */ }
+      }
+      return null;
+    })();
+    legacyCache.set(key, p);
+    p.then((v) => { if (v === null) legacyCache.delete(key); });
+    return p;
+  }
+
   /* Busy windows for one person — or, for "no preference", the hours where nobody is free. */
   async function loadBusy(date, person) {
     const people = await loadDay(date);
     if (people === null) return null;
+    if (people === "legacy") {
+      if (person !== "any") return legacyBusy(date, person);
+      const crew = PEOPLE.filter((x) => x.id !== "any");
+      const all = await Promise.all(crew.map((x) => legacyBusy(date, x.id)));
+      if (all.some((x) => x === null)) return null;
+      return allBusyQuarters(all);
+    }
     if (person === "any") {
       const lists = PEOPLE.filter((x) => x.id !== "any").map((x) => people[x.id]).filter(Boolean);
       return lists.length ? allBusyQuarters(lists) : [];
