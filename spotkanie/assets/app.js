@@ -2,9 +2,10 @@
    Static page + Google Apps Script backend (Sheet row + Calendar event).
    Single dependency on the backend: ENDPOINT below.
 
-   Flow: pick day -> pick hourly slot (or evening) -> name/company/e-mail -> POST -> confirmation.
-   The POST is a "simple request" (text/plain) on purpose: Apps Script does not answer
-   CORS preflight, so any JSON content-type would fail in the browser. */
+   Flow: pick day -> pick person -> pick a quarter and its length (or an evening slot)
+   -> name/company/e-mail -> confirmation.
+   Everything goes over GET: Apps Script answers a POST with a 302, and WebKit re-issues that
+   redirect as a GET on /exec, so the booking silently never ran while the page saw {"ok":true}. */
 
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbzzy21Dqx2-Y7XI5HkhZIeCx7qLR7st2Ts53u37ZZT2bjoyKdtodERsHSZ8a_6d-gpalw/exec"; // paste the Apps Script /exec URL after deploying
 
@@ -144,7 +145,7 @@ function validate(b) {
   if (!b.date || !DAYS.some((d) => d.iso === b.date)) err.push("date");
   if (!b.from || !b.to) err.push("slot");
   if (b.from && b.to && toMin(b.to) <= toMin(b.from)) err.push("slot");
-  if (!b.evening && b.from && !DURATIONS.includes(toMin(b.to) - toMin(b.from))) err.push("duration");
+  if (!b.evening && b.from && b.to && !DURATIONS.includes(toMin(b.to) - toMin(b.from))) err.push("duration");
   if (!b.evening && b.to && toMin(b.to) > DAY_END * 60) err.push("duration");
   if (!b.person || !personById(b.person)) err.push("person");
   if (b.evening && !b.place) err.push("place");
@@ -179,9 +180,10 @@ if (typeof document !== "undefined") (function () {
           return;
         }
         renderPeople();
-        prefetchBusy(state.date);
         $("step-person").hidden = false;
-        $("step-time").hidden = true;
+        /* "No preference" starts selected, so the hours must appear with it. Otherwise the only
+           way forward is clicking a button that already looks chosen. */
+        showSlotsFor(state.person);
         $("step-person").scrollIntoView({ behavior: motionPref(), block: "nearest" });
       })
     );
@@ -192,7 +194,7 @@ if (typeof document !== "undefined") (function () {
        thinks about the fair day as "before lunch" and "after lunch" anyway. */
     const cell = (t) => {
       const free = isFree(t, SLOT_MIN, state.busy);
-      return `<button class="slot${free ? "" : " taken"}" data-from="${t}"${
+      return `<button class="slot${free ? "" : " taken"}" role="radio" aria-checked="false" data-from="${t}"${
         free ? "" : ' disabled title="Already booked"'
       }>${t}</button>`;
     };
@@ -256,15 +258,19 @@ if (typeof document !== "undefined") (function () {
 
   function renderPeople() {
     $("people").innerHTML = PEOPLE.map(
-      (p) => `<button type="button" class="person${p.id === state.person ? " on" : ""}" data-id="${p.id}">
+      (p) => `<button type="button" class="person${p.id === state.person ? " on" : ""}" role="radio" aria-checked="${p.id === state.person}" data-id="${p.id}">
                 <span class="pn">${p.name}</span><span class="pr">${p.role}</span>
               </button>`
     ).join("");
     $("people").querySelectorAll(".person").forEach((el) =>
       el.addEventListener("click", () => {
         state.person = el.dataset.id;
-        $("people").querySelectorAll(".person").forEach((x) => x.classList.remove("on"));
+        $("people").querySelectorAll(".person").forEach((x) => {
+          x.classList.remove("on");
+          x.setAttribute("aria-checked", "false");
+        });
         el.classList.add("on");
+        el.setAttribute("aria-checked", "true");
         clearSlotSelection();
         showSlotsFor(state.person);
       })
@@ -272,8 +278,11 @@ if (typeof document !== "undefined") (function () {
   }
 
   function pickSlot(from, to, evening, el) {
-    document.querySelectorAll(".slot,.evening-toggle").forEach((x) => x.classList.remove("on"));
-    if (el) el.classList.add("on");
+    document.querySelectorAll(".slot,.evening-toggle").forEach((x) => {
+      x.classList.remove("on");
+      x.setAttribute("aria-checked", "false");
+    });
+    if (el) { el.classList.add("on"); el.setAttribute("aria-checked", "true"); }
     state.from = from;
     state.to = to;
     state.evening = evening;

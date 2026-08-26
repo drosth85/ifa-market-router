@@ -48,6 +48,9 @@
   .day .dnum{font-size:22px;font-weight:800;line-height:1}
   .day .mon{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
 
+  #slots-status{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--mut);margin:0 0 10px;min-height:14px;line-height:1.5}
+  #slots-status.warn{color:var(--amber)}
   #slots{display:block}
   .slot-group{margin-bottom:16px}
   .slot-group .sg-label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;
@@ -180,7 +183,7 @@
 
     <section id="step-person" hidden>
         <h2>2 · Who you meet</h2>
-        <div id="people"></div>
+        <div id="people" role="radiogroup" aria-label="Who you meet"></div>
         <p class="hint" style="color:var(--mut);font-size:12.5px;margin:10px 0 0;line-height:1.5">
           Pick a person or leave it to us — we then show only the hours they still have free,
           and the invitation goes straight into their calendar.
@@ -190,7 +193,7 @@
     <section id="step-time" hidden>
       <h2 id="h-time">3 · Time <span class="tzhead">all times Berlin · CEST</span></h2>
       <p id="slots-status" hidden></p>
-      <div id="slots"></div>
+      <div id="slots" role="radiogroup" aria-label="Meeting time"></div>
       <div class="legend"><span><i></i>free</span><span class="taken"><i></i>already booked</span></div>
 
       <div id="step-dur" hidden>

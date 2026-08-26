@@ -1,7 +1,13 @@
 /* node test-logic.js — statyczne asercje dla formularza spotkań. */
 const A = require("./assets/app.js");
 let pass = 0, fail = 0;
-const ok = (cond, label) => { cond ? pass++ : (fail++, console.log("  FAIL:", label)); };
+/* A throwing assertion used to abort the whole run and hide the summary — catch it. */
+const ok = (cond, label) => {
+  let value;
+  try { value = typeof cond === "function" ? cond() : cond; }
+  catch (e) { fail++; console.log("  THROW:", label, "->", e.message); return; }
+  value ? pass++ : (fail++, console.log("  FAIL:", label));
+};
 
 // dni targów
 ok(A.DAYS.length === 5, "5 dni targowych");
@@ -85,7 +91,8 @@ ok(A.validate({ ...good, company: "" }).includes("company"), "brak firmy odrzuco
 ok(A.validate({ ...good, name: "Ja" }).includes("name"), "za krótkie imię odrzucone");
 ok(A.validate({ ...good, date: "2026-09-09" }).includes("date"), "dzień spoza targów odrzucony");
 ok(A.validate({ ...good, evening: true, place: "" }).includes("place"), "wieczór bez miejsca odrzucony");
-ok(A.validate({ ...good, evening: true, place: "Hotel bar", to: "12:00" }).length === 0, "wieczór z miejscem przechodzi");
+ok(A.validate({ ...good, evening: true, from: "19:00", to: "20:00", place: "Hotel bar" }).length === 0, "wieczór z miejscem przechodzi");
+ok(() => A.validate({ ...good, to: undefined }).includes("slot"), "brak godziny końcowej nie wywala walidatora");
 ok(A.validate({ ...good, person: "" }).includes("person"), "brak wybranej osoby odrzucony");
 ok(A.validate({ ...good, person: "ktos-obcy" }).includes("person"), "osoba spoza listy odrzucona");
 ok(A.validate({ ...good, person: "any" }).length === 0, "brak preferencji jest poprawnym wyborem");

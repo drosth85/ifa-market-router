@@ -8,7 +8,7 @@
  *      so it lands in that person's own calendar,
  *   3. a confirmation e-mail to the visitor.
  *
- * Answers text/plain POSTs, because Apps Script cannot serve a CORS preflight.
+ * The page books over GET (see handleBooking); doPost is kept for scripted callers and tests.
  */
 
 var CALENDAR_ID = 'primary';        // fallback calendar, used when a person has none of their own
