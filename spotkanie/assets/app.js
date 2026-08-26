@@ -281,13 +281,12 @@ if (typeof document !== "undefined") (function () {
 
       try {
         if (ENDPOINT.startsWith("[[")) throw new Error("no-endpoint");
-        const r = await fetch(ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(b),
-        });
+        /* GET, not POST: Apps Script answers a POST with a 302 and WebKit re-issues it as a GET
+           on /exec, so the booking never runs while the page still sees {"ok":true}. */
+        const r = await fetch(ENDPOINT + "?action=book&payload=" + encodeURIComponent(JSON.stringify(b)));
         const out = await r.json();
         if (!out.ok) throw new Error(out.reason || "failed");
+        if (!out.booked) throw new Error("stale-backend");
         showDone(b);
       } catch (e) {
         btn.disabled = false;
@@ -298,6 +297,8 @@ if (typeof document !== "undefined") (function () {
             ? "Backend nie jest jeszcze podpięty — wklej adres Apps Script w assets/app.js."
             : e.message === "taken"
             ? "Ten slot właśnie został zajęty. Wybierz inny."
+            : e.message === "stale-backend"
+            ? "Backend jest w starej wersji — rezerwacja nie została zapisana. Napisz do nas."
             : "Nie udało się wysłać. Spróbuj ponownie albo napisz do nas.";
       }
     });

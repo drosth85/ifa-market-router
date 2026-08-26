@@ -35,7 +35,19 @@ var PEOPLE = {
 
 function doPost(e) {
   try {
-    var b = JSON.parse(e.postData.contents);
+    return handleBooking(JSON.parse(e.postData.contents));
+  } catch (err) {
+    return json({ ok: false, reason: String(err) });
+  }
+}
+
+/**
+ * The page books over GET, not POST. Apps Script answers a POST with a 302, and WebKit
+ * (Safari, every iPhone) re-issues that redirect as a GET on /exec — the booking silently
+ * never runs and the visitor still sees a confirmation. A GET has nothing to downgrade.
+ */
+function handleBooking(b) {
+  try {
 
     var missing = ['name', 'company', 'email', 'date', 'from', 'to'].filter(function (k) {
       return !b[k];
@@ -120,16 +132,24 @@ function doPost(e) {
       }
     } catch (mailErr) { /* the booking stands even if mail quota is spent */ }
 
-    return json({ ok: true, event: eventUrl, person: withWhom });
+    return json({ ok: true, booked: true, event: eventUrl, person: withWhom });
   } catch (err) {
     return json({ ok: false, reason: String(err) });
   }
 }
 
 /** Lets you sanity-check the deployment in a browser.
-    ?diag=1&date=2026-09-04&from=10:00&to=10:15&person=any tells you what the collision check sees. */
+    ?diag=1&date=2026-09-04&from=10:00&to=10:15&person=any tells you what the collision check sees.
+    ?action=book&payload=<url-encoded JSON> books — this is the path the page uses. */
 function doGet(e) {
   var p = (e && e.parameter) || {};
+  if (p.action === 'book' && p.payload) {
+    try {
+      return handleBooking(JSON.parse(p.payload));
+    } catch (err) {
+      return json({ ok: false, reason: 'bad payload: ' + err });
+    }
+  }
   if (!p.diag) return json({ ok: true, service: 'ifa-booking' });
   try {
     var date = p.date || '2026-09-04', from = p.from || '10:00', to = p.to || '10:15';
