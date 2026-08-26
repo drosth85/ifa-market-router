@@ -16,14 +16,14 @@ var CALENDAR_ID = 'primary';        // fallback calendar, used when a person has
 /* One calendar per person: create them in Google Calendar on this account, then paste the ids
    (Calendar settings -> Integrate calendar -> Calendar ID). Empty value = use CALENDAR_ID. */
 var CALENDARS = {
-  any:        '',
-  mamcarczyk: '',
-  tuchowska:  '',
-  tabak:      '',
-  palka:      '',
-  kocaba:     '',
-  juszczyk:   '',
-  drozd:      ''
+  any:        '',   // no calendar of its own: availability is summed across the crew below
+  mamcarczyk: 'b35b6a8afc310198e7194055591a4af5905c09ffe273ef579906ede462bf2c69@group.calendar.google.com',
+  tuchowska:  '4a2cba031e56a837a1d41aed1f85f82fb276df2c937920347728d9b42e2c0157@group.calendar.google.com',
+  tabak:      'b5610f91507b5d41e4269694c572f3fe987821f29b57436b543b68186ed042e5@group.calendar.google.com',
+  palka:      '0bced86f57a91ba4f011212e7382ada3985b7469674ca361d8bf77037698a6ba@group.calendar.google.com',
+  kocaba:     '81f2cdc0628f9e9ec4d7aaee6960f96b7b48c6d44f440f4ed290ab17479a1d3b@group.calendar.google.com',
+  juszczyk:   '91b2b8c65cbb32720ef0bab92775359c3e00c86355d8220510c5c7768b519b4e@group.calendar.google.com',
+  drozd:      ''    // empty = CALENDAR_ID, i.e. the account's own calendar
 };
 
 /* Abuse limits. The endpoint is public and anonymous by necessity, and every booking sends mail
@@ -247,6 +247,27 @@ function underLimit(email) {
   return { ok: true };
 }
 
+/** Every calendar a stand meeting can live in — used when no person was chosen. */
+function crewCalendars() {
+  var out = [], seen = {};
+  for (var pid in CALENDARS) {
+    if (pid === 'any') continue;
+    var cal = calendarFor(pid);
+    if (cal && !seen[cal.getId()]) { seen[cal.getId()] = true; out.push(cal); }
+  }
+  return out;
+}
+
+/** Stand meetings only — a private entry in a fallback calendar must not block a visitor. */
+function standEvents(cal, from, to, isOwnCalendar) {
+  var events = cal.getEvents(from, to);
+  if (isOwnCalendar) return events;
+  return events.filter(function (ev) {
+    return String(ev.getLocation() || '').indexOf('H27E-17') !== -1 ||
+           String(ev.getTitle() || '').indexOf('(IFA)') !== -1;
+  });
+}
+
 /** The person's own calendar when they have one, otherwise the shared fallback. */
 function calendarFor(pid) {
   var id = CALENDARS[pid];
@@ -269,27 +290,39 @@ function minutesBetween(from, to) { return toMin(to) - toMin(from); }
  *   - no preference:  busy only when every table is taken in that window.
  */
 function isTaken(date, from, to, pid) {
+  var start = new Date(date + 'T' + from + ':00');
+  var end   = new Date(date + 'T' + to + ':00');
+
+  if (pid === 'any') {
+    // The stand is full when STAND_TABLES meetings run at once, wherever they are booked.
+    var busy = 0, cals = crewCalendars();
+    for (var c = 0; c < cals.length; c++) {
+      busy += standEvents(cals[c], start, end, ownsCalendar(cals[c])).length;
+      if (busy >= STAND_TABLES) return true;
+    }
+    return false;
+  }
+
   var cal = calendarFor(pid);
-  var events = cal.getEvents(new Date(date + 'T' + from + ':00'),
-                             new Date(date + 'T' + to + ':00'));
-  // With a calendar of their own, everything in it counts — including meetings added by hand.
-  if (CALENDARS[pid]) return pid === 'any' ? events.length >= STAND_TABLES : events.length > 0;
-  // Only our stand meetings count — private entries in the same calendar must not block a visitor.
-  var ours = events.filter(function (ev) {
-    return String(ev.getLocation() || '').indexOf('H27E-17') !== -1 ||
-           String(ev.getTitle() || '').indexOf('(IFA)') !== -1;
-  });
-  if (pid === 'any') return ours.length >= STAND_TABLES;
+  var events = standEvents(cal, start, end, !!CALENDARS[pid]);
+  if (CALENDARS[pid]) return events.length > 0;   // their own calendar: anything in it counts
 
   var email = String(PEOPLE[pid].email || '').toLowerCase();
   if (!email) return false;
-  for (var i = 0; i < ours.length; i++) {
-    var guests = ours[i].getGuestList();
+  for (var i = 0; i < events.length; i++) {
+    var guests = events[i].getGuestList();
     for (var j = 0; j < guests.length; j++) {
       if (String(guests[j].getEmail()).toLowerCase() === email) return true;
     }
-    if (String(ours[i].getTitle()).indexOf(PEOPLE[pid].name) !== -1) return true;
+    if (String(events[i].getTitle()).indexOf(PEOPLE[pid].name) !== -1) return true;
   }
+  return false;
+}
+
+/** True when this calendar belongs to one person (not the shared fallback). */
+function ownsCalendar(cal) {
+  var id = cal.getId();
+  for (var pid in CALENDARS) if (CALENDARS[pid] && CALENDARS[pid] === id) return true;
   return false;
 }
 
