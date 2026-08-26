@@ -72,6 +72,14 @@ function doPost(e) {
  */
 function handleBooking(b) {
   try {
+    /* Google sometimes swallows the answer while the booking itself went through. The page then
+       retries, so the same nonce must give back the first answer instead of booking twice. */
+    var cache = CacheService.getScriptCache();
+    var nonceKey = b.nonce ? 'n:' + String(b.nonce).slice(0, 40) : null;
+    if (nonceKey) {
+      var seen = cache.get(nonceKey);
+      if (seen) return ContentService.createTextOutput(seen).setMimeType(ContentService.MimeType.JSON);
+    }
 
     var missing = ['name', 'company', 'email', 'date', 'from', 'to'].filter(function (k) {
       return !b[k];
@@ -192,7 +200,9 @@ function handleBooking(b) {
       c.remove('day:' + b.date + ':' + pid);
     } catch (e) {}
 
-    return json({ ok: true, booked: true, event: eventUrl, person: withWhom, assigned: assigned });
+    var answer = JSON.stringify({ ok: true, booked: true, event: eventUrl, person: withWhom, assigned: assigned });
+    if (nonceKey) { try { cache.put(nonceKey, answer, 900); } catch (e) {} }
+    return ContentService.createTextOutput(answer).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return json({ ok: false, reason: String(err) });
   }

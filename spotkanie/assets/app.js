@@ -430,6 +430,9 @@ if (typeof document !== "undefined") (function () {
         /* GET, not POST: Apps Script answers a POST with a 302 and WebKit re-issues it as a GET
            on /exec, so the booking never runs while the page still sees {"ok":true}.
            Google also serves an occasional HTML 404 instead of the script output — one retry. */
+        /* One nonce per attempt, kept across the retry: if Google loses the answer after the
+           booking went through, the retry gets that same answer instead of a second meeting. */
+        b.nonce = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
         const url = ENDPOINT + "?action=book&payload=" + encodeURIComponent(JSON.stringify(b));
         let out = await fetchBooking(url);
         if (!out) out = await fetchBooking(url);
