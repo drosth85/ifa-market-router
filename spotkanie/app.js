@@ -173,6 +173,7 @@ if (typeof document !== "undefined") (function () {
         $("days").querySelectorAll(".day").forEach((x) => x.classList.remove("on"));
         el.classList.add("on");
         clearSlotSelection();
+        prefetchBusy(state.date);
         if (state.fixedPerson) {
           showSlotsFor(state.person);
           return;
@@ -181,18 +182,30 @@ if (typeof document !== "undefined") (function () {
         prefetchBusy(state.date);
         $("step-person").hidden = false;
         $("step-time").hidden = true;
-        $("step-person").scrollIntoView({ behavior: "smooth", block: "nearest" });
+        $("step-person").scrollIntoView({ behavior: motionPref(), block: "nearest" });
       })
     );
   }
 
   function renderSlots() {
-    $("slots").innerHTML = gridSlots(DAY_START, DAY_END, SLOT_MIN)
-      .map((t) => {
-        const free = isFree(t, SLOT_MIN, state.busy);
-        return `<button class="slot${free ? "" : " taken"}" data-from="${t}"${free ? "" : " disabled"}>${t}</button>`;
-      })
-      .join("");
+    /* Split at lunchtime: 32 identical buttons in one block are hard to aim at, and everyone
+       thinks about the fair day as "before lunch" and "after lunch" anyway. */
+    const cell = (t) => {
+      const free = isFree(t, SLOT_MIN, state.busy);
+      return `<button class="slot${free ? "" : " taken"}" data-from="${t}"${
+        free ? "" : ' disabled title="Already booked"'
+      }>${t}</button>`;
+    };
+    const all = gridSlots(DAY_START, DAY_END, SLOT_MIN);
+    const morning = all.filter((t) => toMin(t) < 13 * 60);
+    const afternoon = all.filter((t) => toMin(t) >= 13 * 60);
+    $("slots").innerHTML =
+      `<div class="slot-group"><span class="sg-label">Morning</span><div class="slot-grid">${morning
+        .map(cell)
+        .join("")}</div></div>` +
+      `<div class="slot-group"><span class="sg-label">Afternoon</span><div class="slot-grid">${afternoon
+        .map(cell)
+        .join("")}</div></div>`;
     $("slots").querySelectorAll(".slot:not([disabled])").forEach((el) =>
       el.addEventListener("click", () => {
         if (el.classList.contains("on")) { clearSlotSelection(); return; }  // click again = undo
@@ -215,6 +228,7 @@ if (typeof document !== "undefined") (function () {
     state.dur = SLOT_MIN;
     state.evening = false;
     $("step-who").hidden = true;
+    $("summary").hidden = true;
   }
 
   /* 15 / 30 / 45 — only the lengths that still fit before closing time. */
@@ -232,10 +246,12 @@ if (typeof document !== "undefined") (function () {
         $("dur").querySelectorAll(".dur").forEach((x) => x.classList.remove("on"));
         el.classList.add("on");
         $("dur-when").textContent = state.from + "–" + state.to;
+        renderSummary();
       })
     );
     $("dur-when").textContent = state.from + "–" + state.to;
     $("step-dur").hidden = false;
+    renderSummary();
   }
 
   function renderPeople() {
@@ -271,7 +287,8 @@ if (typeof document !== "undefined") (function () {
       renderDurations();
     }
     $("step-who").hidden = false;
-    if (!evening) $("step-who").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    renderSummary();
+    if (!evening) $("step-who").scrollIntoView({ behavior: motionPref(), block: "nearest" });
   }
 
   /* Returns the parsed answer, or null when Google handed us an HTML error page. */
@@ -289,52 +306,57 @@ if (typeof document !== "undefined") (function () {
      an empty list means "show everything", and the server still refuses a taken slot.
      Answers are cached per day+person and prefetched for the whole crew, so picking a
      person feels instant even though Apps Script needs a second or two to answer. */
-  const busyCache = new Map();
+  /* Respect the visitor's motion setting instead of always animating. */
+  const motionPref = () =>
+    window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 
-  /* One call. Returns null — not [] — when the answer did not arrive: "unknown" must never be
-     mistaken for "everything free", or taken hours light up again after a hiccup. */
-  async function fetchBusyOnce(date, person) {
+  const dayCache = new Map();   // date -> promise of { person_id: busy[] } or null
+
+  /* One request per day for the whole crew. Seven separate calls to Apps Script were the reason
+     "no preference" felt slow: it had to wait for the slowest of seven round trips. */
+  async function fetchDayOnce(date) {
     try {
       const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
-      const timer = ctl ? setTimeout(() => ctl.abort(), 8000) : null;
-      const r = await fetch(
-        `${ENDPOINT}?action=free&date=${encodeURIComponent(date)}&person=${encodeURIComponent(person)}`,
-        ctl ? { signal: ctl.signal } : {}
-      );
+      const timer = ctl ? setTimeout(() => ctl.abort(), 12000) : null;
+      const r = await fetch(`${ENDPOINT}?action=free&date=${encodeURIComponent(date)}`);
       if (timer) clearTimeout(timer);
       const t = await r.text();
-      if (!t.trim().startsWith("{")) return null;      // Google served an HTML error page
+      if (!t.trim().startsWith("{")) return null;    // Google served an HTML error page
       const out = JSON.parse(t);
-      return out.ok && Array.isArray(out.busy) ? out.busy : null;
+      return out.ok && out.people ? out.people : null;
     } catch (e) {
       return null;
     }
   }
 
-  function loadBusy(date, person) {
-    const key = date + "|" + person;
-    if (busyCache.has(key)) return busyCache.get(key);
+  function loadDay(date) {
+    if (dayCache.has(date)) return dayCache.get(date);
     const p = (async () => {
-      if (ENDPOINT.startsWith("[[")) return [];
-      if (person === "any") {
-        const crew = PEOPLE.filter((x) => x.id !== "any");
-        const all = await Promise.all(crew.map((x) => loadBusy(date, x.id)));
-        if (all.some((x) => x === null)) return null;  // partial knowledge is no knowledge
-        return allBusyQuarters(all);
-      }
-      let busy = await fetchBusyOnce(date, person);
-      if (busy === null) busy = await fetchBusyOnce(date, person);   // one retry
-      return busy;
+      if (ENDPOINT.startsWith("[[")) return {};
+      let people = await fetchDayOnce(date);
+      if (people === null) people = await fetchDayOnce(date);   // one retry
+      return people;
     })();
-    busyCache.set(key, p);
-    p.then((v) => { if (v === null) busyCache.delete(key); });       // never cache "unknown"
+    dayCache.set(date, p);
+    p.then((v) => { if (v === null) dayCache.delete(date); });  // never cache "unknown"
     return p;
+  }
+
+  /* Busy windows for one person — or, for "no preference", the hours where nobody is free. */
+  async function loadBusy(date, person) {
+    const people = await loadDay(date);
+    if (people === null) return null;
+    if (person === "any") {
+      const lists = PEOPLE.filter((x) => x.id !== "any").map((x) => people[x.id]).filter(Boolean);
+      return lists.length ? allBusyQuarters(lists) : [];
+    }
+    return people[person] || [];
   }
 
   /* Warm the cache for everybody the moment a day is picked — by the time the visitor
      has read the names, the answer is usually already in. */
   function prefetchBusy(date) {
-    PEOPLE.filter((p) => p.id !== "any").forEach((p) => loadBusy(date, p.id));
+    loadDay(date);
   }
 
   /* Paints the grid straight away, then dims what the calendar says is taken. */
@@ -343,7 +365,7 @@ if (typeof document !== "undefined") (function () {
     $("step-time").hidden = false;
     renderSlots();
     $("slots").classList.add("checking");
-    $("step-time").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    $("step-time").scrollIntoView({ behavior: motionPref(), block: "nearest" });
     const busy = await loadBusy(state.date, picked);
     if (state.person !== picked) return;   // they changed their mind while we waited
     $("slots").classList.remove("checking");
@@ -355,6 +377,19 @@ if (typeof document !== "undefined") (function () {
     $("slots").classList.remove("unchecked");
     state.busy = busy;
     renderSlots();
+  }
+
+  /* What the visitor is about to book, in one line above the button. */
+  function renderSummary() {
+    const day = DAYS.find((d) => d.iso === state.date);
+    if (!day || !state.from) { $("summary").hidden = true; return; }
+    const who = personById(state.person);
+    const whoLabel = state.person === "any" ? "first colleague free" : who.name;
+    $("summary").innerHTML =
+      `<b>${day.dow} ${day.d} ${day.mon}</b> · ${state.from}–${state.to}` +
+      (state.evening ? ` · evening${state.place ? ", " + state.place : ""}` : "") +
+      ` · with <b>${whoLabel}</b> <span class="tz">Berlin time</span>`;
+    $("summary").hidden = false;
   }
 
   function bookingFromForm() {
@@ -395,7 +430,7 @@ if (typeof document !== "undefined") (function () {
       $("with-line").hidden = false;
       $("with-name").textContent = fixed.name;
       $("with-role").textContent = fixed.role;
-      $("h-time").textContent = "2 · Time";
+      $("h-time").innerHTML = '2 · Time <span class="tzhead">all times Berlin · CEST</span>';
       $("h-you").textContent = "3 · You";
       document.title = "Book a slot with " + fixed.name + " — IFA 2026";
     }
@@ -417,21 +452,28 @@ if (typeof document !== "undefined") (function () {
       ev.preventDefault();
       const b = bookingFromForm();
       const err = validate(b);
+      ["f-name", "f-company", "f-email", "f-place"].forEach((id) => $(id).classList.remove("bad"));
+      if (err.includes("name")) $("f-name").classList.add("bad");
+      if (err.includes("company")) $("f-company").classList.add("bad");
+      if (err.includes("email")) $("f-email").classList.add("bad");
+      if (err.includes("place")) $("f-place").classList.add("bad");
       if (err.length) {
         $("msg").textContent =
           err.includes("place")
-            ? "Podaj miejsce spotkania wieczorem."
+            ? "Tell us where the evening meeting should be."
             : err.includes("duration")
-            ? "Wybierz długość spotkania, która mieści się przed zamknięciem targów."
+            ? "Pick a length that still fits before the show closes."
             : err.includes("person")
-            ? "Wybierz osobę do spotkania."
-            : "Uzupełnij imię i nazwisko, firmę i adres e-mail.";
+            ? "Pick who you want to meet."
+            : err.includes("email")
+            ? "That e-mail address does not look right."
+            : "Add your name, company and work e-mail.";
         $("msg").className = "msg bad";
         return;
       }
       const btn = $("send");
       btn.disabled = true;
-      btn.textContent = "Sending…";
+      btn.textContent = "Booking…";
       $("msg").textContent = "";
 
       try {
@@ -456,13 +498,13 @@ if (typeof document !== "undefined") (function () {
         $("msg").className = "msg bad";
         $("msg").textContent =
           e.message === "no-endpoint"
-            ? "Backend nie jest jeszcze podpięty — wklej adres Apps Script w assets/app.js."
+            ? "Booking is not connected yet. Write to us and we will hold the slot."
             : e.message === "taken"
-            ? "Ten slot właśnie został zajęty. Wybierz inny."
+            ? "That slot has just been taken. Pick another one."
             : e.message === "stale-backend"
-            ? "Backend jest w starej wersji — rezerwacja nie została zapisana. Napisz do nas."
+            ? "The booking did not save. Write to us and we will hold the slot."
             : e.message === "network"
-            ? "Google nie odpowiedział. Spróbuj jeszcze raz za chwilę."
+            ? "No answer from the server. Try again in a moment."
             : "Nie udało się wysłać. Spróbuj ponownie albo napisz do nas.";
       }
     });
