@@ -215,14 +215,25 @@ function doGet(e) {
   try {
     var date = p.date || '2026-09-04', from = p.from || '10:00', to = p.to || '10:15';
     var pid = PEOPLE[p.person] ? p.person : 'any';
-    var cal = CalendarApp.getCalendarById(CALENDAR_ID) || CalendarApp.getDefaultCalendar();
-    var events = cal.getEvents(new Date(date + 'T' + from + ':00'), new Date(date + 'T' + to + ':00'));
+    var t0 = new Date().getTime();
+    var cal = calendarFor(pid);
+    var calName = cal ? cal.getName() : '(none)';
+    var tCal = new Date().getTime() - t0;
+    var t1 = new Date().getTime();
+    var spans = dayBusy(pid, date, true);
+    var tDay = new Date().getTime() - t1;
+    var t2 = new Date().getTime();
+    var taken = isTaken(date, from, to, pid);
+    var tTaken = new Date().getTime() - t2;
     return json({
       ok: true,
+      person: pid,
+      calendar: calName,
+      calendarId: CALENDARS[pid] || CALENDAR_ID,
       sheetRows: getSheet().getLastRow() - 1,
-      calendar: cal.getName(),
-      eventsInWindow: events.map(function (ev) { return ev.getTitle(); }),
-      taken: isTaken(date, from, to, pid)
+      busyToday: spans,
+      taken: taken,
+      ms: { calendar: tCal, dayRead: tDay, takenCheck: tTaken }
     });
   } catch (err) {
     return json({ ok: false, reason: String(err) });
@@ -259,17 +270,6 @@ function underLimit(email) {
   props.setProperty('count:' + today, String(total + 1));
   props.setProperty('mail:' + today + ':' + email.toLowerCase(), String(perMail + 1));
   return { ok: true };
-}
-
-/** Every calendar a stand meeting can live in — used when no person was chosen. */
-function crewCalendars() {
-  var out = [], seen = {};
-  for (var pid in CALENDARS) {
-    if (pid === 'any') continue;
-    var cal = calendarFor(pid);
-    if (cal && !seen[cal.getId()]) { seen[cal.getId()] = true; out.push(cal); }
-  }
-  return out;
 }
 
 /** Stand meetings only — a private entry in a fallback calendar must not block a visitor. */
@@ -381,28 +381,15 @@ function freeBusy(date, person) {
   try {
     if (FAIR_DAYS.indexOf(String(date)) === -1) return { ok: false, reason: 'bad:date' };
     var pid = PEOPLE[person] ? person : 'any';
-    var cache = CacheService.getScriptCache();
-    var key = 'fb:' + date + ':' + pid;
-    var hit = cache.get(key);
-    if (hit) return JSON.parse(hit);
-    var cal = calendarFor(pid);
-    var dayStart = new Date(date + 'T' + pad2(DAY_START_H) + ':00:00');
-    var dayEnd   = new Date(date + 'T' + pad2(DAY_END_H) + ':00:00');
-    var events = cal.getEvents(dayStart, dayEnd);
-    if (!CALENDARS[pid]) {
-      events = events.filter(function (ev) {
-        return String(ev.getLocation() || '').indexOf('H27E-17') !== -1 ||
-               String(ev.getTitle() || '').indexOf('(IFA)') !== -1;
-      });
+    var spans;
+    if (pid === 'any') {
+      // Busy only where every colleague is busy — one free person keeps the slot open.
+      // The page normally works this out itself from the individual answers; this is the fallback.
+      spans = allBusyWindows(ASSIGN_ORDER.map(function (id) { return dayBusy(id, date, false); }));
+    } else {
+      spans = dayBusy(pid, date, false);
     }
-    var spans = events.map(function (ev) {
-      return [fmtTime(ev.getStartTime()), fmtTime(ev.getEndTime())];
-    });
-    // With no personal calendar and no chosen person, only a full stand blocks a slot.
-    if (pid === 'any' && !CALENDARS[pid]) spans = fullWindows(spans);
-    var res = { ok: true, date: date, person: pid, busy: spans };
-    cache.put(key, JSON.stringify(res), 120);   // two minutes; a new booking clears it anyway
-    return res;
+    return { ok: true, date: date, person: pid, busy: spans };
   } catch (err) {
     return { ok: false, reason: String(err) };
   }
