@@ -52,6 +52,10 @@
   .slot:hover:not([disabled]){border-color:var(--mut)}
   .slot[disabled]{opacity:.32;cursor:not-allowed;text-decoration:line-through}
   #slots.checking{position:relative}
+  #slots.unchecked::after{content:"nie udało się sprawdzić zajętości — potwierdzimy mailem";
+    position:absolute;right:0;top:-22px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--amber)}
+  #slots.unchecked{position:relative}
   #slots.checking::after{content:"sprawdzam wolne terminy…";position:absolute;right:0;top:-22px;
     font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
   .slot.on{border-color:var(--teal);background:var(--bg2);color:var(--teal)}
