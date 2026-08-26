@@ -49,6 +49,16 @@ ok(new Set(A.PEOPLE.map(p => p.id)).size === A.PEOPLE.length, "identyfikatory os
 ok(A.personById("drozd").name === "Tomasz Drozd", "wyszukiwanie osoby po id");
 ok(A.personById("nikt") === null, "nieznane id zwraca null");
 
+// wolne/zajete kwadranse
+const busy = [["11:00","11:30"],["14:15","14:30"]];
+ok(A.isFree("10:00", 15, busy), "kwadrans poza zajetoscia jest wolny");
+ok(!A.isFree("11:00", 15, busy), "start w zajetym oknie odrzucony");
+ok(!A.isFree("11:15", 15, busy), "srodek zajetego okna odrzucony");
+ok(A.isFree("11:30", 15, busy), "start w chwili konca zajetosci jest wolny");
+ok(!A.isFree("10:45", 30, busy), "dluzsze spotkanie wchodzace w zajetosc odrzucone");
+ok(A.isFree("10:45", 15, busy), "krotsze spotkanie przed zajetoscia przechodzi");
+ok(A.isFree("09:00", 45, []), "brak zajetosci = wszystko wolne");
+
 // walidacja
 const good = { name: "Jan Kowalski", company: "Acme", email: "jan@acme.com",
                date: "2026-09-05", from: "11:00", to: "11:15", person: "tabak", evening: false };

@@ -193,6 +193,7 @@ function doGet(e) {
       return json({ ok: false, reason: 'bad payload: ' + err });
     }
   }
+  if (p.action === 'free') return json(freeBusy(p.date, p.person));
   if (p.diag !== DIAG_KEY) return json({ ok: true, service: 'ifa-booking' });
   try {
     var date = p.date || '2026-09-04', from = p.from || '10:00', to = p.to || '10:15';
@@ -288,6 +289,51 @@ function isTaken(date, from, to, pid) {
   }
   return false;
 }
+
+/**
+ * What the page needs to grey out taken slots: the busy windows of one person on one fair day.
+ * Returned as ["HH:MM","HH:MM"] pairs clipped to the stand hours.
+ */
+function freeBusy(date, person) {
+  try {
+    if (FAIR_DAYS.indexOf(String(date)) === -1) return { ok: false, reason: 'bad:date' };
+    var pid = PEOPLE[person] ? person : 'any';
+    var cal = calendarFor(pid);
+    var dayStart = new Date(date + 'T' + pad2(DAY_START_H) + ':00:00');
+    var dayEnd   = new Date(date + 'T' + pad2(DAY_END_H) + ':00:00');
+    var events = cal.getEvents(dayStart, dayEnd);
+    if (!CALENDARS[pid]) {
+      events = events.filter(function (ev) {
+        return String(ev.getLocation() || '').indexOf('H27E-17') !== -1 ||
+               String(ev.getTitle() || '').indexOf('(IFA)') !== -1;
+      });
+    }
+    var spans = events.map(function (ev) {
+      return [fmtTime(ev.getStartTime()), fmtTime(ev.getEndTime())];
+    });
+    // With no personal calendar and no chosen person, only a full stand blocks a slot.
+    if (pid === 'any' && !CALENDARS[pid]) spans = fullWindows(spans);
+    return { ok: true, date: date, person: pid, busy: spans };
+  } catch (err) {
+    return { ok: false, reason: String(err) };
+  }
+}
+
+/** Quarter-hours in which at least STAND_TABLES meetings run at once. */
+function fullWindows(spans) {
+  var out = [];
+  for (var m = DAY_START_H * 60; m < DAY_END_H * 60; m += 15) {
+    var n = 0;
+    for (var i = 0; i < spans.length; i++) {
+      if (toMin(spans[i][0]) < m + 15 && m < toMin(spans[i][1])) n++;
+    }
+    if (n >= STAND_TABLES) out.push([hhmm(m), hhmm(m + 15)]);
+  }
+  return out;
+}
+
+function pad2(n) { return (n < 10 ? '0' : '') + n; }
+function hhmm(m) { return pad2(Math.floor(m / 60)) + ':' + pad2(m % 60); }
 
 /** The sheet may hand back a Date for a time cell, depending on how it was typed. */
 function fmtTime(v) {

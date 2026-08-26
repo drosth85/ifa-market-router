@@ -61,6 +61,12 @@ function durationsFor(from, end) {
   return DURATIONS.filter((d) => toMin(from) + d <= end * 60);
 }
 
+/* Is [from, from+dur) clear of every busy window? busy = [["HH:MM","HH:MM"], …] */
+function isFree(from, dur, busy) {
+  const s = toMin(from), e = s + dur;
+  return !(busy || []).some((w) => toMin(w[0]) < e && s < toMin(w[1]));
+}
+
 /* Two meetings clash when they overlap, not only when they start at the same minute. */
 function overlaps(aFrom, aTo, bFrom, bTo) {
   return toMin(aFrom) < toMin(bTo) && toMin(bFrom) < toMin(aTo);
@@ -122,7 +128,7 @@ function validate(b) {
    so `boot` threw "Can't find variable: $" and the page rendered empty. */
 if (typeof document !== "undefined") (function () {
   const $ = (id) => document.getElementById(id);
-  const state = { date: null, from: null, to: null, dur: SLOT_MIN, evening: false, place: "", person: "any" };
+  const state = { date: null, from: null, to: null, dur: SLOT_MIN, evening: false, place: "", person: "any", busy: [] };
 
   function renderDays() {
     $("days").innerHTML = DAYS.map(
@@ -137,18 +143,23 @@ if (typeof document !== "undefined") (function () {
         state.date = el.dataset.iso;
         $("days").querySelectorAll(".day").forEach((x) => x.classList.remove("on"));
         el.classList.add("on");
-        $("step-time").hidden = false;
-        renderSlots();
-        $("step-time").scrollIntoView({ behavior: "smooth", block: "nearest" });
+        renderPeople();
+        $("step-person").hidden = false;
+        $("step-time").hidden = true;
+        clearSlotSelection();
+        $("step-person").scrollIntoView({ behavior: "smooth", block: "nearest" });
       })
     );
   }
 
   function renderSlots() {
     $("slots").innerHTML = gridSlots(DAY_START, DAY_END, SLOT_MIN)
-      .map((t) => `<button class="slot" data-from="${t}">${t}</button>`)
+      .map((t) => {
+        const free = isFree(t, SLOT_MIN, state.busy);
+        return `<button class="slot${free ? "" : " taken"}" data-from="${t}"${free ? "" : " disabled"}>${t}</button>`;
+      })
       .join("");
-    $("slots").querySelectorAll(".slot").forEach((el) =>
+    $("slots").querySelectorAll(".slot:not([disabled])").forEach((el) =>
       el.addEventListener("click", () => pickSlot(el.dataset.from, addMinutes(el.dataset.from, state.dur), false, el))
     );
     $("evening-times").innerHTML = eveningTimes(EVENING_START, EVENING_END)
@@ -164,13 +175,12 @@ if (typeof document !== "undefined") (function () {
     state.from = state.to = null;
     state.dur = SLOT_MIN;
     state.evening = false;
-    $("step-person").hidden = true;
     $("step-who").hidden = true;
   }
 
   /* 15 / 30 / 45 — only the lengths that still fit before closing time. */
   function renderDurations() {
-    const opts = durationsFor(state.from, DAY_END);
+    const opts = durationsFor(state.from, DAY_END).filter((d) => isFree(state.from, d, state.busy));
     if (!opts.includes(state.dur)) state.dur = opts[0];
     state.to = addMinutes(state.from, state.dur);
     $("dur").innerHTML = opts
@@ -196,10 +206,16 @@ if (typeof document !== "undefined") (function () {
               </button>`
     ).join("");
     $("people").querySelectorAll(".person").forEach((el) =>
-      el.addEventListener("click", () => {
+      el.addEventListener("click", async () => {
         state.person = el.dataset.id;
         $("people").querySelectorAll(".person").forEach((x) => x.classList.remove("on"));
         el.classList.add("on");
+        clearSlotSelection();
+        $("step-time").hidden = false;
+        $("slots").innerHTML = `<p class="hint" style="grid-column:1/-1;color:var(--mut);font-size:13px;margin:0">Sprawdzam wolne terminy…</p>`;
+        state.busy = await loadBusy(state.date, state.person);
+        renderSlots();
+        $("step-time").scrollIntoView({ behavior: "smooth", block: "nearest" });
       })
     );
   }
@@ -216,10 +232,8 @@ if (typeof document !== "undefined") (function () {
     } else {
       renderDurations();
     }
-    renderPeople();
-    $("step-person").hidden = false;
     $("step-who").hidden = false;
-    if (!evening) $("step-person").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (!evening) $("step-who").scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
   /* Returns the parsed answer, or null when Google handed us an HTML error page. */
@@ -230,6 +244,21 @@ if (typeof document !== "undefined") (function () {
       return t.trim().startsWith("{") ? JSON.parse(t) : null;
     } catch (e) {
       return null;
+    }
+  }
+
+  /* Availability of the chosen person for that day. A failure must not block booking —
+     an empty list means "show everything", and the server still refuses a taken slot. */
+  async function loadBusy(date, person) {
+    if (ENDPOINT.startsWith("[[")) return [];
+    try {
+      const r = await fetch(`${ENDPOINT}?action=free&date=${encodeURIComponent(date)}&person=${encodeURIComponent(person)}`);
+      const t = await r.text();
+      if (!t.trim().startsWith("{")) return [];
+      const out = JSON.parse(t);
+      return out.ok && Array.isArray(out.busy) ? out.busy : [];
+    } catch (e) {
+      return [];
     }
   }
 
@@ -336,6 +365,6 @@ if (typeof document !== "undefined") (function () {
 
 /* ---------- node (tests) ---------- */
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { DAYS, PEOPLE, personById, hourlySlots, gridSlots, durationsFor, overlaps, addMinutes, toMin,
+  module.exports = { DAYS, PEOPLE, personById, hourlySlots, gridSlots, durationsFor, overlaps, isFree, addMinutes, toMin,
     eveningTimes, validate, gcalLink, DAY_START, DAY_END, EVENING_START, EVENING_END, SLOT_MIN, DURATIONS };
 }
