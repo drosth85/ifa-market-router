@@ -36,7 +36,7 @@ var DAY_END_H   = 18;
 var ASSIGN_ORDER = ['juszczyk', 'mamcarczyk', 'tuchowska', 'tabak', 'kocaba', 'drozd', 'palka'];
 var MAX_PER_DAY = 60;               // total bookings accepted per calendar day
 var MAX_PER_MAIL = 3;               // bookings per e-mail address per calendar day
-var DIAG_KEY    = 'zmien-mnie';     // ?diag=<DIAG_KEY>; anything else gets nothing
+var DIAG_KEY    = 'gw0zdz';     // ?diag=<DIAG_KEY>; anything else gets nothing
 // Spreadsheet that collects the bookings. Leave SHEET_ID empty only if this script is bound to
 // that sheet (Extensions -> Apps Script); a standalone project must open it by id.
 var SHEET_ID    = '1o1kKErUs80VT6lxddnEAw-UWHmCCUct1vGxAOe3uP38';
@@ -185,7 +185,12 @@ function handleBooking(b) {
     } catch (mailErr) { /* the booking stands even if mail quota is spent */ }
 
     // The freshly taken slot must disappear from the grid straight away.
-    try { CacheService.getScriptCache().remove('fb:' + b.date + ':' + pid); } catch (e) {}
+    try {
+      var c = CacheService.getScriptCache();
+      c.remove('fb:' + b.date + ':' + pid);
+      c.remove('fb:' + b.date + ':any');
+      c.remove('day:' + b.date + ':' + pid);
+    } catch (e) {}
 
     return json({ ok: true, booked: true, event: eventUrl, person: withWhom, assigned: assigned });
   } catch (err) {
@@ -304,10 +309,9 @@ function isTaken(date, from, to, pid) {
 
   if (pid === 'any') return !firstFree(date, from, to);
 
-  var cal = calendarFor(pid);
-  var events = standEvents(cal, start, end, !!CALENDARS[pid]);
-  if (CALENDARS[pid]) return events.length > 0;   // their own calendar: anything in it counts
+  if (CALENDARS[pid]) return busyAt(dayBusy(pid, date, true), from, to);  // own calendar: all of it counts
 
+  var events = standEvents(calendarFor(pid), start, end, false);
   var email = String(PEOPLE[pid].email || '').toLowerCase();
   if (!email) return false;
   for (var i = 0; i < events.length; i++) {
@@ -320,12 +324,44 @@ function isTaken(date, from, to, pid) {
   return false;
 }
 
-/** The first colleague in ASSIGN_ORDER with nothing in that window, or null when all are busy. */
+/**
+ * Busy spans of one person for a whole fair day, cached for two minutes.
+ * Walking seven calendars live took up to 50 s, so every availability question goes through here.
+ */
+function dayBusy(pid, date, fresh) {
+  var cache = CacheService.getScriptCache();
+  var key = 'day:' + date + ':' + pid;
+  if (!fresh) {
+    var hit = cache.get(key);
+    if (hit) return JSON.parse(hit);
+  }
+  var spans = spansOf(standEvents(
+    calendarFor(pid),
+    new Date(date + 'T' + pad2(DAY_START_H) + ':00:00'),
+    new Date(date + 'T' + pad2(DAY_END_H) + ':00:00'),
+    !!CALENDARS[pid]
+  ));
+  cache.put(key, JSON.stringify(spans), 120);
+  return spans;
+}
+
+function busyAt(spans, from, to) {
+  for (var i = 0; i < spans.length; i++) {
+    if (toMin(spans[i][0]) < toMin(to) && toMin(from) < toMin(spans[i][1])) return true;
+  }
+  return false;
+}
+
+/**
+ * The first colleague in ASSIGN_ORDER who is free. The cached day is used to pick a candidate,
+ * then that one candidate is re-read live — so a two-minute-old cache cannot double-book.
+ */
 function firstFree(date, from, to) {
   for (var i = 0; i < ASSIGN_ORDER.length; i++) {
     var pid = ASSIGN_ORDER[i];
     if (!PEOPLE[pid]) continue;
-    if (!isTaken(date, from, to, pid)) return pid;
+    if (busyAt(dayBusy(pid, date, false), from, to)) continue;
+    if (!busyAt(dayBusy(pid, date, true), from, to)) return pid;
   }
   return null;
 }

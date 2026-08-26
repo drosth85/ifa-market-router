@@ -59,6 +59,12 @@ ok(!A.isFree("10:45", 30, busy), "dluzsze spotkanie wchodzace w zajetosc odrzuco
 ok(A.isFree("10:45", 15, busy), "krotsze spotkanie przed zajetoscia przechodzi");
 ok(A.isFree("09:00", 45, []), "brak zajetosci = wszystko wolne");
 
+// "no preference" = wolne dopoki ktos jest wolny
+const q = A.allBusyQuarters([[["10:00","10:30"]], [["10:15","10:45"]]], 10, 11);
+ok(q.length === 1 && q[0][0] === "10:15", "zajete tylko tam, gdzie zajeci sa wszyscy");
+ok(A.allBusyQuarters([[["10:00","11:00"]], []], 10, 11).length === 0, "jedna wolna osoba trzyma slot otwarty");
+ok(A.allBusyQuarters([], 10, 11).length === 0, "brak danych = nic nie blokujemy");
+
 // linki personalne
 ok(A.personFromQuery("?td").id === "drozd", "?td wybiera Tomasza Drozda");
 ok(A.personFromQuery("?p=td").id === "drozd", "?p=td dziala tak samo");

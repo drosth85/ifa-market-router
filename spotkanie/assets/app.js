@@ -76,6 +76,20 @@ function durationsFor(from, end) {
   return DURATIONS.filter((d) => toMin(from) + d <= end * 60);
 }
 
+/* Quarter-hours where nobody is free — one free colleague keeps the slot open. */
+function allBusyQuarters(perPerson, startH, endH) {
+  const out = [];
+  const from = (startH == null ? 10 : startH) * 60;
+  const to = (endH == null ? 18 : endH) * 60;
+  for (let m = from; m < to; m += 15) {
+    const everyoneBusy =
+      perPerson.length > 0 &&
+      perPerson.every((busy) => (busy || []).some((w) => toMin(w[0]) < m + 15 && m < toMin(w[1])));
+    if (everyoneBusy) out.push([toHHMM(m), toHHMM(m + 15)]);
+  }
+  return out;
+}
+
 /* Is [from, from+dur) clear of every busy window? busy = [["HH:MM","HH:MM"], …] */
 function isFree(from, dur, busy) {
   const s = toMin(from), e = s + dur;
@@ -280,6 +294,17 @@ if (typeof document !== "undefined") (function () {
   function loadBusy(date, person) {
     const key = date + "|" + person;
     if (busyCache.has(key)) return busyCache.get(key);
+    /* "No preference" is the intersection of everybody's busy time — computed here from answers
+       we already have, because asking the script to walk seven calendars took up to 50 seconds. */
+    if (person === "any") {
+      const p = (async () => {
+        const crew = PEOPLE.filter((x) => x.id !== "any");
+        const all = await Promise.all(crew.map((x) => loadBusy(date, x.id)));
+        return allBusyQuarters(all);
+      })();
+      busyCache.set(key, p);
+      return p;
+    }
     const p = (async () => {
       if (ENDPOINT.startsWith("[[")) return [];
       try {
@@ -306,7 +331,7 @@ if (typeof document !== "undefined") (function () {
   /* Warm the cache for everybody the moment a day is picked — by the time the visitor
      has read the names, the answer is usually already in. */
   function prefetchBusy(date) {
-    PEOPLE.forEach((p) => loadBusy(date, p.id));
+    PEOPLE.filter((p) => p.id !== "any").forEach((p) => loadBusy(date, p.id));
   }
 
   /* Paints the grid straight away, then dims what the calendar says is taken. */
@@ -442,6 +467,6 @@ if (typeof document !== "undefined") (function () {
 
 /* ---------- node (tests) ---------- */
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { DAYS, PEOPLE, personById, personFromQuery, hourlySlots, gridSlots, durationsFor, overlaps, isFree, addMinutes, toMin,
+  module.exports = { DAYS, PEOPLE, personById, personFromQuery, allBusyQuarters, hourlySlots, gridSlots, durationsFor, overlaps, isFree, addMinutes, toMin,
     eveningTimes, validate, gcalLink, DAY_START, DAY_END, EVENING_START, EVENING_END, SLOT_MIN, DURATIONS };
 }
