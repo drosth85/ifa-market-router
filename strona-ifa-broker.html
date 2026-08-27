@@ -11,7 +11,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230E9C86'/><text x='16' y='23' font-family='Helvetica,Arial' font-size='19' font-weight='bold' fill='%23fff' text-anchor='middle'>M</text></svg>">
 <style>
   :root{
-    --bg:#0C0D12; --surf:#14161D; --surf2:#1B1E28; --line:#2A2E3A; --panel:#1D212C;
+    --bg:#0A0B0E; --surf:#14161D; --surf2:#1B1E28; --line:#2A2E3A; --panel:#1D212C;
     --ink:#F2F0EA; --dim:#9DA0AC; --sand:#E7DCC2;
     --accent:#2FE3C6; --accent-soft:rgba(47,227,198,.13); --accent-line:rgba(47,227,198,.4);
     --phones:#7FB3FF; --hurt:#FFB020; --detal:#2FE3C6;
@@ -20,12 +20,10 @@
     --fm:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
     --maxw:1120px;
   }
-  @media (prefers-color-scheme:light){:root{
-    --bg:#F4F1E9;--surf:#fff;--surf2:#EDE8DB;--line:#DED8C7;--panel:#fff;
-    --ink:#15171E;--dim:#5A5D68;--sand:#2A2E3A;--accent:#0E9C86;--accent-soft:rgba(14,156,134,.1);--accent-line:rgba(14,156,134,.35);
-  }}
-  :root[data-theme="light"]{--bg:#F4F1E9;--surf:#fff;--surf2:#EDE8DB;--line:#DED8C7;--panel:#fff;--ink:#15171E;--dim:#5A5D68;--sand:#2A2E3A;--accent:#0E9C86;--accent-soft:rgba(14,156,134,.1);--accent-line:rgba(14,156,134,.35)}
-  :root[data-theme="dark"]{--bg:#0C0D12;--surf:#14161D;--surf2:#1B1E28;--line:#2A2E3A;--panel:#1D212C;--ink:#F2F0EA;--dim:#9DA0AC;--sand:#E7DCC2;--accent:#2FE3C6;--accent-soft:rgba(47,227,198,.13);--accent-line:rgba(47,227,198,.4)}
+  /* Strona jest czarna ZAWSZE. Wcześniej podążała za motywem systemu gościa, więc każdy
+     z jasnym motywem widział jasną wersję — rozjazd z formularzem, katalogami i ulotkami,
+     które są czarne. */
+  :root[data-theme="dark"]{--bg:#0A0B0E;--surf:#14161D;--surf2:#1B1E28;--line:#2A2E3A;--panel:#1D212C;--ink:#F2F0EA;--dim:#9DA0AC;--sand:#E7DCC2;--accent:#2FE3C6;--accent-soft:rgba(47,227,198,.13);--accent-line:rgba(47,227,198,.4)}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--fb);line-height:1.55;-webkit-font-smoothing:antialiased}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
@@ -33,7 +31,6 @@
   .flag{background:var(--hurt);color:#1a1400;text-align:center;font-family:var(--fm);font-size:11.5px;
     letter-spacing:.06em;padding:6px 12px;text-transform:uppercase}
   header.ribbon{background:var(--sand);color:#14161D}
-  :root[data-theme="light"] header.ribbon{color:#F4F1E9}
   header.ribbon .wrap{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;padding:11px 22px;
     font-family:var(--fm);font-size:12px;letter-spacing:.07em;text-transform:uppercase}
   header.ribbon b{font-weight:800}
@@ -206,7 +203,7 @@
 <nav><div class="wrap">
   <span class="brand">Monstelo × Mobilki</span>
   <a href="#companies">Companies</a><a href="#platforms">Trade</a><a href="#offer">Brand &amp; HUB</a><a href="#team">Team</a>
-  <a href="#contact" class="cta">Book a meeting</a>
+  <a href="https://ifa.monstelo.com/meet-us/" class="cta">Book a meeting</a>
 </div></nav>
 
 <section class="hero"><div class="wrap">
@@ -216,7 +213,7 @@
   <p class="sub">Data-driven stock trading across Europe. We buy your surplus, we sell it fast and sharp.</p>
   <div class="cta-row">
     <a class="btn primary" href="#platforms">Find your lead track ↓</a>
-    <a class="btn ghost" href="#contact">Book a meeting at IFA</a>
+    <a class="btn ghost" href="https://ifa.monstelo.com/meet-us/">Book a meeting at IFA</a>
   </div>
   <p class="sellon"><span class="k">Sourcing across</span>
     <span>28 EU markets</span><span class="own">· overstock · clearance · returns · open-box</span></p>
@@ -303,8 +300,10 @@
   <p class="lead" style="font-size:15px">We also run brand onboarding on Europe's marketplaces and a logistics HUB as a service.
     It is not our main message at the fair — the full offer is in the printed materials and at the stand.</p>
   <div class="also-links">
-    <a href="materialy-drukowane/ulotka-obsluga-marki.html">Brand management — flyer →</a>
-    <a href="materialy-drukowane/ulotka-hub-logistyczny.html">Logistics HUB — flyer →</a>
+    <a href="https://ifa.monstelo.com/materialy-drukowane/katalog-monstelo.html">Monstelo — catalogue →</a>
+    <a href="https://ifa.monstelo.com/materialy-drukowane/katalog-mobilki.html">Mobilki GSM — catalogue →</a>
+    <a href="https://ifa.monstelo.com/materialy-drukowane/ulotka-obsluga-marki.html">Brand management — flyer →</a>
+    <a href="https://ifa.monstelo.com/materialy-drukowane/ulotka-hub-logistyczny.html">Logistics HUB — flyer →</a>
   </div>
 </div></section>
 
@@ -365,7 +364,7 @@
   <div class="book">
     <div class="tracks">I'm interested in</div>
     <div class="tlist">Phones · Accessories wholesale · Brand on marketplaces · Logistics HUB</div>
-    <a class="btn primary" href="spotkanie/">Book a slot at the stand →</a>
+    <a class="btn primary" href="https://ifa.monstelo.com/meet-us/">Book a slot at the stand →</a>
     <p class="alt">Prefer e-mail? Wholesale &amp; sourcing — <a href="mailto:info@monstelo.com">info@monstelo.com</a> · phones — <a href="mailto:sales@mobilki-gsm.pl">sales@mobilki-gsm.pl</a> · brands &amp; HUB — <a href="mailto:brands@monstelo.com">brands@monstelo.com</a><br>
       Or simply walk up to <b>H27E-17</b>, Reseller Park, any of the five days.</p>
   </div>
