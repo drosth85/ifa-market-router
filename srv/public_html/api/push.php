@@ -20,7 +20,8 @@ try {
   $del = $pdo->prepare("DELETE FROM calendar_busy WHERE date = ? AND person_id = ? AND src = 'gcal'");
   $seen = $pdo->prepare('INSERT INTO push_seen (person_id,date,seen_at) VALUES (?,?,?)
                          ON CONFLICT(person_id,date) DO UPDATE SET seen_at = excluded.seen_at');
-  $ins = $pdo->prepare('INSERT INTO calendar_busy (person_id,date,from_t,to_t) VALUES (?,?,?,?)');
+  $ins = $pdo->prepare("INSERT INTO calendar_busy (person_id,date,from_t,to_t,src,title)
+                        VALUES (?,?,?,?,'gcal',?)");
   $rows = 0;
   foreach ($in['days'] as $date => $people) {
     if (!in_array($date, fair_days(), true) || !is_array($people)) continue;
@@ -30,7 +31,7 @@ try {
       $seen->execute([$pid, $date, now_berlin()->format('c')]);
       foreach ($spans as $s) {
         if (to_min($s[0] ?? '') < 0 || to_min($s[1] ?? '') < 0) continue;
-        $ins->execute([$pid, $date, $s[0], $s[1]]); $rows++;
+        $ins->execute([$pid, $date, $s[0], $s[1], clean_field($s[2] ?? '', 120)]); $rows++;
       }
     }
   }

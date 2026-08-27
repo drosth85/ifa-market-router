@@ -63,8 +63,9 @@ $ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\n" .
   "END:VCALENDAR";
 $parsed = ics_busy($ics);
 ok(count($parsed) === 2, "kanal ICS: zostaja tylko realne spotkania w dniach targowych (" . count($parsed) . ")");
-ok($parsed[0] === ['2026-09-04','11:00','11:30'], "czas UTC przeliczony na Berlin", json_encode($parsed[0] ?? null));
-ok($parsed[1] === ['2026-09-05','14:00','14:45'], "czas z TZID zachowany", json_encode($parsed[1] ?? null));
+ok(array_slice($parsed[0] ?? [], 0, 3) === ['2026-09-04','11:00','11:30'], "czas UTC przeliczony na Berlin", json_encode($parsed[0] ?? null));
+ok(($parsed[0][3] ?? '') === 'Grip UTC', "tytul spotkania zaciagniety z kanalu", json_encode($parsed[0][3] ?? null));
+ok(array_slice($parsed[1] ?? [], 0, 3) === ['2026-09-05','14:00','14:45'], "czas z TZID zachowany", json_encode($parsed[1] ?? null));
 ok(!array_filter($parsed, fn($p) => $p[0] === '2026-09-06'), "wpis calodniowy pominiety");
 ok(!array_filter($parsed, fn($p) => $p[0] === '2026-09-07'), "spotkanie odwolane pominiete");
 ok(ics_busy("nie-ics") === [], "smieci nie wywalaja parsera");

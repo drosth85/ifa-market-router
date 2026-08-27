@@ -52,6 +52,7 @@ function db(): PDO {
     person_id TEXT NOT NULL, date TEXT NOT NULL, from_t TEXT NOT NULL, to_t TEXT NOT NULL,
     src TEXT NOT NULL DEFAULT 'gcal')");
   try { $pdo->exec("ALTER TABLE calendar_busy ADD COLUMN src TEXT NOT NULL DEFAULT 'gcal'"); } catch (Throwable $e) {}
+  try { $pdo->exec('ALTER TABLE calendar_busy ADD COLUMN title TEXT'); } catch (Throwable $e) {}
   $pdo->exec('CREATE INDEX IF NOT EXISTS idx_busy_day ON calendar_busy(date)');
   $pdo->exec('CREATE TABLE IF NOT EXISTS sync_meta (key TEXT PRIMARY KEY, value TEXT)');
   return $pdo;

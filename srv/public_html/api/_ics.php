@@ -17,16 +17,17 @@ function ics_busy(string $body): array {
   }
   $ev = null;
   foreach ($merged as $l) {
-    if (strpos($l, 'BEGIN:VEVENT') === 0) { $ev = ['start' => null, 'end' => null, 'allday' => false, 'cancelled' => false]; continue; }
+    if (strpos($l, 'BEGIN:VEVENT') === 0) { $ev = ['start' => null, 'end' => null, 'allday' => false, 'cancelled' => false, 'title' => '']; continue; }
     if ($ev === null) continue;
     if (strpos($l, 'END:VEVENT') === 0) {
       if ($ev['start'] && $ev['end'] && !$ev['allday'] && !$ev['cancelled']) {
         $d = $ev['start']->format('Y-m-d');
-        if (in_array($d, fair_days(), true)) $out[] = [$d, $ev['start']->format('H:i'), $ev['end']->format('H:i')];
+        if (in_array($d, fair_days(), true)) $out[] = [$d, $ev['start']->format('H:i'), $ev['end']->format('H:i'), $ev['title']];
       }
       $ev = null; continue;
     }
     if (stripos($l, 'STATUS:CANCELLED') === 0) { $ev['cancelled'] = true; continue; }
+    if (stripos($l, 'SUMMARY:') === 0) { $ev['title'] = substr($l, 8); continue; }
     if (preg_match('/^(DTSTART|DTEND)([^:]*):(.+)$/i', $l, $m)) {
       $which = strtoupper($m[1]) === 'DTSTART' ? 'start' : 'end';
       $params = $m[2]; $val = trim($m[3]);
@@ -63,8 +64,9 @@ function ics_refresh(): array {
     $pdo->beginTransaction();
     try {
       $pdo->prepare("DELETE FROM calendar_busy WHERE person_id = ? AND src = 'ics'")->execute([$pid]);
-      $ins = $pdo->prepare("INSERT INTO calendar_busy (person_id,date,from_t,to_t,src) VALUES (?,?,?,?,'ics')");
-      foreach ($spans as $sp) { $ins->execute([$pid, $sp[0], $sp[1], $sp[2]]); $rows++; }
+      $ins = $pdo->prepare("INSERT INTO calendar_busy (person_id,date,from_t,to_t,src,title)
+                            VALUES (?,?,?,?,'ics',?)");
+      foreach ($spans as $sp) { $ins->execute([$pid, $sp[0], $sp[1], $sp[2], clean_field($sp[3] ?? '', 120)]); $rows++; }
       $pdo->commit();
     } catch (Throwable $e) { if ($pdo->inTransaction()) $pdo->rollBack(); $failed[] = $pid; continue; }
     $people++;

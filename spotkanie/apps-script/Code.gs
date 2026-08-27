@@ -611,7 +611,10 @@ function collectBusy_() {
       FAIR_DAYS.forEach(function (d) { days[d][pid] = []; });   // odczyt się udał — publikujemy stan
       events.forEach(function (ev) {
         var d = Utilities.formatDate(ev.getStartTime(), 'Europe/Berlin', 'yyyy-MM-dd');
-        if (days[d]) days[d][pid].push([fmtTime(ev.getStartTime()), fmtTime(ev.getEndTime())]);
+        // Trzeci element to tytuł: pozwala pokazać na liście leadów także spotkania
+        // dopisane ręcznie w kalendarzu, których nie było w naszym formularzu.
+        if (days[d]) days[d][pid].push([fmtTime(ev.getStartTime()), fmtTime(ev.getEndTime()),
+                                        String(ev.getTitle() || '').slice(0, 120)]);
       });
     } catch (err) {
       // Kalendarz nieczytelny: NIE publikujemy dla niego nic — backend zostawi poprzedni stan.
