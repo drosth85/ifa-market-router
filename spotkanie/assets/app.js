@@ -556,7 +556,11 @@ if (typeof document !== "undefined") (function () {
   function done(b, out) {
     const day = DAYS.find((d) => d.iso === b.date);
     $("form-wrap").hidden = true;
+    /* Kwit przestaje być kontrolką i staje się paragonem: zostają pola i stempel,
+       znika przycisk, żeby nie wisiał w stanie „Booking…". */
     $("ticket").classList.add("stamped");
+    $("tk-cta").hidden = true;
+    $("tk-fields").querySelectorAll(".f").forEach((el) => { el.disabled = true; el.style.cursor = "default"; });
     $("done").hidden = false;
     $("done-ref").textContent = ticketRef(state);
     $("done-when").textContent =
