@@ -252,6 +252,7 @@ function doGet(e) {
     }
   }
   if (p.action === 'free') return json(freeBusyDay(p.date));
+  if (p.action === 'cancel' && p.payload) return json(cancelEvent(p.payload));
   if (p.diag !== DIAG_KEY) return json({ ok: true, service: 'ifa-booking' });
   try {
     var date = p.date || '2026-09-04', from = p.from || '10:00', to = p.to || '10:15';
@@ -498,6 +499,24 @@ function freeBusyDay(date) {
     generated_at: Utilities.formatDate(new Date(), 'Europe/Berlin', "yyyy-MM-dd'T'HH:mm:ssXXX"),
     booking_enabled: bookingEnabled()
   };
+}
+
+/**
+ * Odwołanie spotkania z panelu leadów: kasuje wydarzenie w kalendarzu handlowca.
+ * Slot zwalnia backend PHP; tutaj sprzątamy tylko kalendarz, żeby nie został duch.
+ */
+function cancelEvent(payloadJson) {
+  try {
+    var p = JSON.parse(payloadJson);
+    var pid = PEOPLE[p.person] ? p.person : 'any';
+    var cal = calendarFor(pid);
+    var ev = cal.getEventById(String(p.event || ''));
+    if (!ev) return { ok: false, reason: 'not-found' };
+    ev.deleteEvent();
+    return { ok: true, deleted: String(p.event) };
+  } catch (err) {
+    return { ok: false, reason: String(err) };
+  }
 }
 
 /** B5: wyłącznik formularza bez wdrażania kodu — właściwość skryptu `booking_enabled` = "no". */
