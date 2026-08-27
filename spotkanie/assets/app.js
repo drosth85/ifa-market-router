@@ -239,12 +239,14 @@ if (typeof document !== "undefined") (function () {
       DAYS.map((d) => `<option value="${d.iso}">${d.dow} ${d.d} ${d.mon}</option>`).join("");
   }
 
+  /* Lista osób powstaje RAZ i nigdy nie jest przebudowywana. Wcześniej odświeżała się przy
+     każdej zmianie dnia (żeby pokazać liczby wolnych kwadransów) i przy okazji gubiła wybór
+     gościa — wybierał osobę, zmieniał dzień i wracał do „Anyone free", nie wiedząc dlaczego. */
   function fillPeople() {
     $("f-person").innerHTML = PEOPLE.map((p) => {
-      const free = state.free && state.free[p.id] != null ? state.free[p.id] : null;
       const langs = p.langs.length ? " · " + p.langs.join("/") : "";
-      const left = p.id === "any" || free === null ? "" : free === 0 ? " — fully booked" : ` — ${free} slots free`;
-      return `<option value="${p.id}"${free === 0 && p.id !== "any" ? " disabled" : ""}>${p.name}${langs}${left}</option>`;
+      const role = p.id === "any" ? "" : " — " + p.role;
+      return `<option value="${p.id}">${p.name}${role}${langs}</option>`;
     }).join("");
     if (state.fixedPerson) $("f-person").value = state.person;
   }
@@ -314,13 +316,11 @@ if (typeof document !== "undefined") (function () {
     $("f-time").value = "";
     if (!date) { state.day = null; fillTimes(); return; }
     $("hint-time").textContent = "Checking free hours…";
-    state.day = null; state.free = {};
+    state.day = null;
     const out = await loadDay(date);
     if ($("f-day").value !== date) return;
     state.day = out || { people: {} };
-    state.free = (out && out.free) || {};
     freshness();
-    fillPeople();
     fillTimes();
     fillLengths();
   }

@@ -276,6 +276,7 @@ function doGet(e) {
       ok: true,
       person: pid,
       last_push_result: PropertiesService.getScriptProperties().getProperty('last_push_result'),
+      sync_key_fp: keyFingerprint_(),
       calendar: calName,
       calendarId: CALENDARS[pid] || CALENDAR_ID,
       sheetRows: getSheet().getLastRow() - 1,
@@ -573,9 +574,19 @@ function json(o) {
 var PHP_BASE = 'https://ifa.monstelo.com/api';
 
 function syncKey_() {
-  return PropertiesService.getScriptProperties().getProperty('sync_key') || '';
+  /* .trim(): klucz wklejony z podswietleniem lapie spacje albo znak nowej linii,
+     a wtedy podpis rozjezdza sie o wszystko i nie widac dlaczego. */
+  return String(PropertiesService.getScriptProperties().getProperty('sync_key') || '').trim();
 }
 
+/* Odcisk klucza — 12 znaków skrótu. Pozwala sprawdzić, czy Apps Script i backend mają TEN SAM
+   klucz, bez pokazywania klucza komukolwiek. Rozjazd = wszystkie wypchnięcia dostają 403. */
+function keyFingerprint_() {
+  var k = syncKey_();
+  if (!k) return 'BRAK KLUCZA';
+  var raw = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, k, Utilities.Charset.UTF_8);
+  return raw.map(function (b) { return ('0' + (b & 0xFF).toString(16)).slice(-2); }).join('').slice(0, 12);
+}
 function sign_(ts, body) {
   var raw = Utilities.computeHmacSha256Signature(ts + '.' + body, syncKey_());
   return raw.map(function (b) { return ('0' + (b & 0xFF).toString(16)).slice(-2); }).join('');
@@ -638,7 +649,6 @@ function collectBusy_() {
 
 function pushBusy() {
   if (!pushDue_()) return;
-  PropertiesService.getScriptProperties().setProperty('last_push_ms', String(new Date().getTime()));
   var body = JSON.stringify({ days: collectBusy_() });
   var ts = String(Math.floor(new Date().getTime() / 1000));
   var res = UrlFetchApp.fetch(PHP_BASE + '/push.php', {
@@ -646,6 +656,11 @@ function pushBusy() {
     headers: { 'X-Sync-Ts': ts, 'X-Sync-Sig': sign_(ts, body) },
     payload: body, muteHttpExceptions: true
   });
+  /* Odstęp odmierzamy od UDANEGO wypchnięcia. Gdyby liczyć od próby, jeden odrzucony strzał
+     kupowałby sobie pełne dwie minuty ciszy zamiast ponowić przy najbliższym cyklu. */
+  if (res.getResponseCode() === 200) {
+    PropertiesService.getScriptProperties().setProperty('last_push_ms', String(new Date().getTime()));
+  }
   /* Bez tego błąd backendu ginie w muteHttpExceptions i wygląda jak udane wypchnięcie. */
   PropertiesService.getScriptProperties().setProperty('last_push_result',
     Utilities.formatDate(new Date(), 'Europe/Berlin', 'HH:mm:ss') + ' HTTP ' +
