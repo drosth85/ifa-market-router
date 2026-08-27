@@ -585,7 +585,7 @@ function sign_(ts, body) {
  * Wyzwalacz "co minutę" w Apps Script potrafi dryfować o kilka minut; warunek na minutę
  * podzielną przez 10 gubił wtedy cały cykl (zaobserwowane: przerwa 36 minut).
  *   - dni targowe 9:00-19:00  → co minutę,
- *   - przed targami 7:00-21:00 → co 9 minut,
+ *   - przed targami 7:00-21:00 → co 2 minuty,
  *   - poza tym i po targach   → wcale.
  */
 function pushDue_() {
@@ -600,7 +600,7 @@ function pushDue_() {
   if (fair ? (hour < 9 || hour >= 19) : (hour < 7 || hour >= 21)) return false;
 
   var last = Number(props.getProperty('last_push_ms') || 0);
-  var minGap = fair ? 45 * 1000 : 9 * 60 * 1000;
+  var minGap = fair ? 45 * 1000 : 2 * 60 * 1000;   // targi: co minutę · przed targami: co 2 minuty
   return now.getTime() - last >= minGap;
 }
 
