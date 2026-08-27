@@ -3,6 +3,7 @@ ini_set('display_errors','1'); error_reporting(E_ALL);
 require_once __DIR__ . '/_bootstrap.php';
 require_once __DIR__ . '/_domain.php';
 require_once __DIR__ . '/free.php';
+require_once __DIR__ . '/_ics.php';
 header('Content-Type: text/plain; charset=utf-8');
 if (!hash_equals((string)cfg('admin_key'), (string)($_GET['key'] ?? ''))) { http_response_code(403); exit('403'); }
 
@@ -46,10 +47,26 @@ db()->prepare('INSERT INTO calendar_busy (person_id,date,from_t,to_t) VALUES (?,
     ->execute(['tabak','2026-09-04','15:00','15:45']);
 $b = busy_for_day('2026-09-04');
 ok(count($b['tabak']) === 2, 'zajetosc laczy rezerwacje i kalendarz');
-ok($b['drozd'] === [], 'osoba bez spotkan ma pusta zajetosc');
+ok(count($b) === 7 && is_array($b['drozd']), 'zajetosc zwraca tablice dla kazdej z 7 osob');
 ok(free_quarters($b['tabak']) === 32 - 5, 'wolne kwadranse policzone (32 minus 2 i 3)');
 ok(free_quarters([]) === 32, 'pusty dzien to 32 kwadranse');
 db()->exec("DELETE FROM bookings WHERE source='test'");
 db()->exec("DELETE FROM calendar_busy WHERE person_id='tabak' AND date='2026-09-04'");
+
+// --- kanal ICS z aplikacji IFA ---
+$ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\n" .
+  "BEGIN:VEVENT\r\nDTSTART:20260904T090000Z\r\nDTEND:20260904T093000Z\r\nSUMMARY:Grip UTC\r\nEND:VEVENT\r\n" .
+  "BEGIN:VEVENT\r\nDTSTART;TZID=Europe/Berlin:20260905T140000\r\nDTEND;TZID=Europe/Berlin:20260905T144500\r\nEND:VEVENT\r\n" .
+  "BEGIN:VEVENT\r\nDTSTART;VALUE=DATE:20260906\r\nDTEND;VALUE=DATE:20260907\r\nSUMMARY:calodniowe\r\nEND:VEVENT\r\n" .
+  "BEGIN:VEVENT\r\nDTSTART:20260907T100000Z\r\nDTEND:20260907T103000Z\r\nSTATUS:CANCELLED\r\nEND:VEVENT\r\n" .
+  "BEGIN:VEVENT\r\nDTSTART:20261201T100000Z\r\nDTEND:20261201T103000Z\r\nEND:VEVENT\r\n" .
+  "END:VCALENDAR";
+$parsed = ics_busy($ics);
+ok(count($parsed) === 2, "kanal ICS: zostaja tylko realne spotkania w dniach targowych (" . count($parsed) . ")");
+ok($parsed[0] === ['2026-09-04','11:00','11:30'], "czas UTC przeliczony na Berlin", json_encode($parsed[0] ?? null));
+ok($parsed[1] === ['2026-09-05','14:00','14:45'], "czas z TZID zachowany", json_encode($parsed[1] ?? null));
+ok(!array_filter($parsed, fn($p) => $p[0] === '2026-09-06'), "wpis calodniowy pominiety");
+ok(!array_filter($parsed, fn($p) => $p[0] === '2026-09-07'), "spotkanie odwolane pominiete");
+ok(ics_busy("nie-ics") === [], "smieci nie wywalaja parsera");
 
 echo "\n$pass passed, $fail failed\n";

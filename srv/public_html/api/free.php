@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/_bootstrap.php';
 require_once __DIR__ . '/_domain.php';
+require_once __DIR__ . '/_ics.php';
+require_once __DIR__ . '/_calendar.php';
 
 /** Zajętość dnia: nasze rezerwacje + ostatnia migawka z Kalendarza Google. */
 function busy_for_day(string $date): array {
@@ -37,12 +39,19 @@ if (basename($_SERVER['SCRIPT_FILENAME'] ?? '') === 'free.php') {
   foreach ($people as $pid => $spans) $free[$pid] = free_quarters($spans);
   $pushed = meta_get('last_push_at');
   header('Cache-Control: private, max-age=20');
-  json_out([
+  $icsAt = meta_get('last_ics_at');
+  $icsStale = !$icsAt || (time() - strtotime($icsAt)) > 300;
+  echo json_encode([
     'ok' => true, 'date' => $date, 'people' => $people, 'free' => $free,
     'generated_at' => $pushed,
     'stale_seconds' => $pushed ? max(0, time() - strtotime($pushed)) : null,
     'booking_enabled' => meta_get('booking_enabled', 'yes') !== 'no',
-  ]);
+    'ics_at' => $icsAt,
+  ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+  /* Kanały ICS z aplikacji IFA odświeżamy PO odesłaniu odpowiedzi — gość nigdy na to nie czeka. */
+  if ($icsStale) { finish_response(); ics_refresh(); }
+  exit;
 }
 
 /**

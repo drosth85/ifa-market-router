@@ -16,7 +16,8 @@ if (!is_array($in['days'] ?? null)) json_out(['ok' => false, 'reason' => 'bad:pa
 $pdo = db();
 $pdo->beginTransaction();
 try {
-  $del = $pdo->prepare('DELETE FROM calendar_busy WHERE date = ? AND person_id = ?');
+  // tylko wiersze z Kalendarza Google — zajętość z aplikacji IFA żyje obok, ze źródłem 'ics'
+  $del = $pdo->prepare("DELETE FROM calendar_busy WHERE date = ? AND person_id = ? AND src = 'gcal'");
   $seen = $pdo->prepare('INSERT INTO push_seen (person_id,date,seen_at) VALUES (?,?,?)
                          ON CONFLICT(person_id,date) DO UPDATE SET seen_at = excluded.seen_at');
   $ins = $pdo->prepare('INSERT INTO calendar_busy (person_id,date,from_t,to_t) VALUES (?,?,?,?)');
