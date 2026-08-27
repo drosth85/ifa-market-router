@@ -142,11 +142,13 @@ function ticketFields(state) {
 }
 
 /* Czego brakuje do rezerwacji — treść przycisku bierze się stąd. */
-function nextStep(state, formReady) {
+function nextStep(state, formReady, detailsFilled) {
   if (!state.date) return { key: "date", label: "Pick a day to start" };
   if (!state.person) return { key: "person", label: "Pick who you want to meet" };
   if (!state.from) return { key: "time", label: "Pick a time" };
   if (state.evening && !state.place) return { key: "place", label: "Tell us where to meet" };
+  // Zgoda to jedno kliknięcie, więc mówimy o niej wprost zamiast ogólnego "uzupełnij dane".
+  if (!formReady && detailsFilled) return { key: "consent", label: "Tick the consent box ▸" };
   if (!formReady) return { key: "you", label: "Add your details ▸" };
   return { key: "go", label: "Book this meeting ▸" };
 }
@@ -333,12 +335,13 @@ if (typeof document !== "undefined") (function () {
     show("step-len", true);
   }
 
-  function formReady() {
+  function detailsFilled() {
     return $("f-name").value.trim().length >= 3 &&
            $("f-company").value.trim() !== "" &&
-           /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test($("f-email").value.trim()) &&
-           $("f-consent").checked;
+           /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test($("f-email").value.trim());
   }
+
+  function formReady() { return detailsFilled() && $("f-consent").checked; }
 
   function renderTicket() {
     $("tk-ref").textContent = ticketRef(state);
@@ -353,7 +356,7 @@ if (typeof document !== "undefined") (function () {
     $("tk-fields").querySelectorAll(".f").forEach((el) =>
       el.addEventListener("click", () => { const t = $(el.dataset.go); if (t && !t.hidden) jump(el.dataset.go); })
     );
-    const step = nextStep(state, formReady());
+    const step = nextStep(state, formReady(), detailsFilled());
     const btn = $("tk-cta");
     btn.textContent = state.sending ? "Booking…" : step.label;
     btn.classList.toggle("go", step.key === "go" || step.key === "you");
@@ -590,7 +593,7 @@ if (typeof document !== "undefined") (function () {
       const step = $("tk-cta").dataset.step;
       if (step === "go") { submit(); return; }
       const target = { date: "step-day", person: "step-person", time: "step-time",
-                       place: "step-time", you: "step-you" }[step];
+                       place: "step-time", you: "step-you", consent: "step-you" }[step];
       if (target && !$(target).hidden) jump(target);
     });
     $("form").addEventListener("submit", (e) => { e.preventDefault(); submit(); });

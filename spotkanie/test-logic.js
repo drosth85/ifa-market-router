@@ -112,7 +112,9 @@ ok(A.ticketFields({}).every(([, v]) => v.startsWith("·")), "puste pola kwitu to
 ok(A.nextStep({}, false).key === "date", "pierwszy krok to wybor dnia");
 ok(A.nextStep({ date: "2026-09-06" }, false).key === "person", "po dniu pytamy o osobe");
 ok(A.nextStep({ ...st, to: "13:45" }, false).key === "you", "z kompletem wyboru prosimy o dane");
-ok(A.nextStep({ ...st, to: "13:45" }, true).key === "go", "komplet danych odblokowuje rezerwacje");
+ok(A.nextStep({ ...st, to: "13:45" }, true, true).key === "go", "komplet danych odblokowuje rezerwacje");
+ok(A.nextStep({ ...st, to: "13:45" }, false, true).key === "consent", "wypelnione dane bez zgody wskazuja zgode");
+ok(A.nextStep({ ...st, to: "13:45" }, false, false).key === "you", "puste dane prosza o dane");
 ok(A.nextStep({ date: "2026-09-06", person: "any", from: "19:00", evening: true }, true).key === "place",
    "wieczor bez miejsca prosi o miejsce");
 ok(A.PEOPLE.filter(p => p.id !== "any").every(p => p.langs.length > 0), "kazdy handlowiec ma co najmniej jeden jezyk");

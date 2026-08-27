@@ -1,0 +1,19 @@
+Options -Indexes
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+<FilesMatch "\.(sqlite|sqlite-wal|sqlite-shm|db|log)$">
+  Require all denied
+</FilesMatch>
+
+# Strona i skrypt muszą być odświeżane od razu — LiteSpeed domyślnie każe je trzymać 7 dni,
+# przez co poprawka wypuszczona w trakcie targów nie dotarłaby do nikogo, kto był tu wcześniej.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|js|css)$">
+    Header set Cache-Control "no-cache, must-revalidate, max-age=0"
+    Header unset Expires
+  </FilesMatch>
+  <FilesMatch "^(free|book|push|retry|list|health|cancel)\.php$">
+    Header set Cache-Control "no-store"
+  </FilesMatch>
+</IfModule>
