@@ -42,9 +42,13 @@
   .f.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:15px}
   label{display:block;font-size:12.5px;font-weight:600;color:var(--mute);margin:0 0 6px}
   label .opt{font-weight:400}
-  input,select,textarea{width:100%;background:var(--field);border:1px solid var(--line);border-radius:10px;
-    color:var(--ink);font-family:var(--sans);font-size:16px;padding:13px;outline:none;
-    appearance:none;-webkit-appearance:none}
+  /* appearance:none TYLKO dla pól tekstowych i list — checkboxy muszą zostać checkboxami,
+     inaczej znika i wygląd, i możliwość kliknięcia. */
+  input:not([type="checkbox"]),select,textarea{width:100%;background:var(--field);
+    border:1px solid var(--line);border-radius:10px;color:var(--ink);font-family:var(--sans);
+    font-size:16px;padding:13px;outline:none;appearance:none;-webkit-appearance:none}
+  input[type="checkbox"]{appearance:auto;-webkit-appearance:checkbox;width:22px;height:22px;
+    flex:none;margin:0;cursor:pointer}
   select{background-image:linear-gradient(45deg,transparent 50%,var(--mute) 50%),
                           linear-gradient(135deg,var(--mute) 50%,transparent 50%);
     background-position:calc(100% - 19px) 22px,calc(100% - 14px) 22px;
@@ -58,12 +62,12 @@
 
   .evening{display:flex;gap:10px;align-items:flex-start;background:var(--field);border:1px solid var(--line);
     border-radius:10px;padding:12px 13px;margin-bottom:15px;cursor:pointer}
-  .evening input{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--amber)}
+  .evening input{margin-top:1px;accent-color:var(--amber)}
   .evening b{font-size:13.5px;font-weight:600;display:block}
   .evening .sub{display:block;color:var(--mute);font-size:11.5px;margin-top:2px;line-height:1.45}
 
   .consent{display:flex;gap:10px;align-items:flex-start;margin:2px 0 16px;cursor:pointer}
-  .consent input{width:20px;height:20px;flex:none;margin-top:2px;accent-color:var(--teal)}
+  .consent input{margin-top:1px;accent-color:var(--teal)}
   .consent span{font-size:11.5px;line-height:1.5;color:var(--mute)}
   .consent a{color:var(--teal)}
 
@@ -198,7 +202,7 @@
 
 <button type="button" class="themebtn" id="themebtn">theme</button>
 
-<script src="assets/app.js?v=20260827b"></script>
+<script src="assets/app.js?v=20260827c"></script>
 <script>
   (function(){
     var r=document.documentElement, b=document.getElementById('themebtn');
