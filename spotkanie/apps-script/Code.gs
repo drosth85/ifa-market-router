@@ -556,12 +556,21 @@ function sign_(ts, body) {
   return raw.map(function (b) { return ('0' + (b & 0xFF).toString(16)).slice(-2); }).join('');
 }
 
-/** Czy jesteśmy w oknie, w którym warto odświeżać (dni targowe, 9:00-19:00 Berlin). */
+/**
+ * Jak często odświeżać. W dni targowe (9:00-19:00 Berlin) co minutę — tam liczy się każda sekunda.
+ * Przed targami rezerwacje też spływają i handlowcy dopisują spotkania ręcznie, więc odświeżamy
+ * co 10 minut. Poza tym oknem funkcja kończy się natychmiast (~0,1 s), żeby nie zjadać
+ * dobowego limitu 90 minut wyzwalaczy.
+ */
 function inFairWindow_() {
   var now = new Date();
   var day = Utilities.formatDate(now, 'Europe/Berlin', 'yyyy-MM-dd');
   var hour = Number(Utilities.formatDate(now, 'Europe/Berlin', 'HH'));
-  return FAIR_DAYS.indexOf(day) !== -1 && hour >= 9 && hour < 19;
+  var minute = Number(Utilities.formatDate(now, 'Europe/Berlin', 'mm'));
+
+  if (FAIR_DAYS.indexOf(day) !== -1) return hour >= 9 && hour < 19;          // targi: co minutę
+  if (day > FAIR_DAYS[FAIR_DAYS.length - 1]) return false;                   // po targach: koniec
+  return hour >= 7 && hour < 21 && minute % 10 === 0;                        // przed targami: co 10 min
 }
 
 /** Zajętość całej załogi na wszystkie dni targowe — jeden odczyt kalendarza na osobę. */
