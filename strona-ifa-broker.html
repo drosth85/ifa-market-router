@@ -1,10 +1,14 @@
-<title>IFA 2026 — Monstelo × Mobilki (prototyp strony v0)</title>
-<script>
-  // design v2 (jasny) jest domyślny; v1 (ciemny) do porównania. Ustawiane przed renderem — bez mignięcia.
-  (function(){ try{ document.documentElement.setAttribute('data-theme',
-    localStorage.getItem('ifa-design') || 'light'); }catch(e){
-    document.documentElement.setAttribute('data-theme','light'); } })();
-</script>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monstelo × Mobilki GSM — overstock in, best price out | IFA Berlin 2026, H27E-17</title>
+<meta name="description" content="Data-driven stock trading across Europe. We buy overstock, clearance, returns and open-box — and resell it at the market's best price. Phones and consumer electronics, new and refurbished, B2B. IFA Berlin 2026, Reseller Park, stand H27E-17.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Overstock in. Best price out. — Monstelo × Mobilki GSM at IFA Berlin 2026">
+<meta property="og:description" content="We buy your surplus stock and resell it fast, priced against live market data. Meet us at Reseller Park, stand H27E-17, 4–8 September 2026.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230E9C86'/><text x='16' y='23' font-family='Helvetica,Arial' font-size='19' font-weight='bold' fill='%23fff' text-anchor='middle'>M</text></svg>">
 <style>
   :root{
     --bg:#0C0D12; --surf:#14161D; --surf2:#1B1E28; --line:#2A2E3A; --panel:#1D212C;
@@ -72,10 +76,6 @@
 
   /* proof KPIs */
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-  /* design switch v1 (ciemny) / v2 (jasny) — do porównania */
-  .themebtn{cursor:pointer;font-family:var(--fm);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--dim);background:transparent;border:1px solid var(--line);border-radius:100px;padding:6px 12px}
-  .themebtn:hover{color:var(--ink);border-color:var(--accent-line)}
   /* akcent marketplace */
   .sellon{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-top:26px;
     padding-top:18px;border-top:1px solid var(--line);font-size:15px;font-weight:700}
@@ -142,19 +142,70 @@
 
   @media (max-width:820px){.g2,.g3,.g4,.co,.kpis,.lanes,.team,.offer .g2{grid-template-columns:1fr}
     .lane+.lane{border-left:0;border-top:1px solid var(--line)} .team{grid-template-columns:1fr 1fr}}
-</style>
 
-<div class="flag">PROTOTYP v0 — do wewnętrznej pracy z Krissem · treści [DO UZUPEŁNIENIA] · nie publikować</div>
+  /* ---- team: monogram cards, no photos, no phone numbers ---- */
+  .team-group + .team-group{margin-top:30px}
+  .team-group .glab{font-family:var(--fm);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--dim);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .team-group .glab b{color:var(--ink);font-weight:700}
+  .person{text-align:left}
+  .person .mg{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;
+    font-family:var(--fm);font-weight:700;font-size:13.5px;letter-spacing:.02em;
+    background:var(--accent-soft);border:1px solid var(--accent-line);color:var(--accent);margin-bottom:12px}
+  .person.mob .mg{background:rgba(127,179,255,.12);border-color:rgba(127,179,255,.4);color:var(--phones)}
+  .person .rl{font-size:12.5px;line-height:1.4}
+  .person .langs{font-family:var(--fm);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--dim);margin-top:9px}
+  .person .em{display:inline-block;margin-top:9px;font-family:var(--fm);font-size:11.5px;
+    color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-line);
+    padding-bottom:2px;word-break:break-word}
+  .person .em:hover{color:var(--ink);border-color:var(--ink)}
+  .desk{margin-top:22px;background:var(--surf2);border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;display:flex;flex-wrap:wrap;gap:6px 22px;align-items:baseline;
+    font-family:var(--fm);font-size:12px;color:var(--dim)}
+  .desk b{color:var(--ink);font-weight:700}
+  .desk a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-line)}
+
+  /* ---- booking block ---- */
+  .book{margin-top:22px;background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:24px;max-width:620px}
+  .book .tracks{font-family:var(--fm);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+  .book .tlist{font-size:15px;color:var(--ink);margin-top:7px;font-weight:600}
+  .book .btn{margin-top:20px;display:inline-block}
+  .book .alt{font-family:var(--fm);font-size:12px;color:var(--dim);margin-top:16px;line-height:1.7}
+  .book .alt a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-line)}
+  .foot-contact{margin-top:12px;font-family:var(--fm);font-size:12px;line-height:1.9}
+  .foot-contact a{color:var(--accent);text-decoration:none}
+  .disc{font-size:11px;line-height:1.6;margin-top:16px;opacity:.75;max-width:78ch}
+</style>
+<!-- Google Ads (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17508931481"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-17508931481');
+</script>
+<!-- Meta Pixel -->
+<script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,
+  'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '1912520865651352');
+  fbq('track', 'PageView');
+</script>
+</head>
+<body>
 
 <header class="ribbon"><div class="wrap">
-  <span><b>IFA BERLIN 2026</b></span><span>Reseller Park</span><span>3–8 września (event 4–8.09)</span>
-  <span>Hall H27E · stoisko 17</span><span style="margin-left:auto">Monstelo × Mobilki GSM</span>
+  <span><b>IFA BERLIN 2026</b></span><span>Reseller Park</span><span>4–8 September</span>
+  <span>Hall H27E · Stand 17</span><span style="margin-left:auto">Monstelo × Mobilki GSM</span>
 </div></header>
 
 <nav><div class="wrap">
   <span class="brand">Monstelo × Mobilki</span>
-  <a href="#companies">Firmy</a><a href="#platforms">Platformy</a><a href="#offer">Marka &amp; HUB</a><a href="#team">Zespół</a>
-  <button type="button" id="theme" class="themebtn" aria-live="polite">design v2 · jasny</button>
+  <a href="#companies">Companies</a><a href="#platforms">Trade</a><a href="#offer">Brand &amp; HUB</a><a href="#team">Team</a>
   <a href="#contact" class="cta">Book a meeting</a>
 </div></nav>
 
@@ -212,34 +263,34 @@
 </div></section>
 
 <section><div class="wrap">
-  <div class="eyebrow">Dlaczego my — realne liczby</div>
+  <div class="eyebrow">Why us — the real numbers</div>
   <div class="kpis">
-    <div class="kpi"><div class="n">241</div><div class="l">marek w obrocie</div></div>
-    <div class="kpi"><div class="n">28</div><div class="l">rynków UE obsłużonych B2B</div></div>
-    <div class="kpi"><div class="n">~80<em>%</em></div><div class="l">zamówień wysłanych w 24h</div></div>
-    <div class="kpi"><div class="n">~8<em>000</em></div><div class="l">produktów monitorowanych cenowo</div></div>
+    <div class="kpi"><div class="n">241</div><div class="l">brands traded</div></div>
+    <div class="kpi"><div class="n">28</div><div class="l">EU markets served B2B</div></div>
+    <div class="kpi"><div class="n">~80<em>%</em></div><div class="l">of orders shipped in 24 h</div></div>
+    <div class="kpi"><div class="n">~8<em>000</em></div><div class="l">products price-monitored live</div></div>
   </div>
-  <p class="lead" style="font-size:13px;margin-top:12px">Źródło: ecom-rag (trailing 12m). Wolumen 735 tys. szt./rok jako warstwa wspierająca, nie hero. Przychodu nie pokazujemy (benchmark: przegrywamy o rząd wielkości). „Across Europe" = monitoring rynku; sprzedaż PL-centryczna.</p>
+  <p class="lead" style="font-size:13px;margin-top:12px">Trailing-12-month operational data from our own commerce platform. Every deal is priced against live market data.</p>
 </div></section>
 
 <section id="platforms"><div class="wrap">
-  <div class="eyebrow">Dwie ścieżki · kupujesz od nas albo sprzedajesz nam</div>
-  <h2>Masz stock albo szukasz stocku? Pogadajmy.</h2>
+  <div class="eyebrow">Two tracks · you buy from us, or you sell to us</div>
+  <h2>Got stock, or looking for stock? Let's talk.</h2>
   <div class="grid" style="gap:18px;margin-top:24px">
 
     <div class="plat" style="--pc:var(--phones)">
-      <div class="head"><span class="num">01</span><h3>Telefony — Mobilki GSM</h3><span class="who">Mobilki</span></div>
+      <div class="head"><span class="num">01</span><h3>Phones — Mobilki GSM</h3><span class="who">Mobilki</span></div>
       <div class="lanes">
-        <div class="lane"><div class="lab">Klienci / Buyers</div><h4>Kupuj telefony</h4><p>New, open-box i graded second-life. Hurt, gotowe do odsprzedaży, z certyfikatem stanu.</p><a href="#contact">Chcę kupować telefony →</a></div>
-        <div class="lane"><div class="lab">Dostawcy / Suppliers</div><h4>Sprzedaj nam stock</h4><p>Trade-in, buyback, overstock, returns, open-box. Wycena i szybka realizacja.</p><a href="#contact">Mam telefony do sprzedania →</a></div>
+        <div class="lane"><div class="lab">Buyers</div><h4>Buy phones</h4><p>New, open-box and graded second-life. Wholesale, ready to resell, with a certified condition grade.</p><a href="#contact">I want to buy phones →</a></div>
+        <div class="lane"><div class="lab">Suppliers</div><h4>Sell us your stock</h4><p>Trade-in, buyback, overstock, returns, open-box. Valuation and fast settlement.</p><a href="#contact">I have phones to sell →</a></div>
       </div>
     </div>
 
     <div class="plat" style="--pc:var(--hurt)">
-      <div class="head"><span class="num">02</span><h3>Akcesoria &amp; elektronika — hurt</h3><span class="who">Monstelo hurt</span></div>
+      <div class="head"><span class="num">02</span><h3>Accessories &amp; electronics — wholesale</h3><span class="who">Monstelo wholesale</span></div>
       <div class="lanes">
-        <div class="lane"><div class="lab">Klienci / Buyers</div><h4>Kupuj stock B2B</h4><p>Akcesoria mobilne i elektronika gotowa do odsprzedaży. Pliki produktowe, pricing, fulfilment.</p><a href="#contact">Potrzebuję stocku →</a></div>
-        <div class="lane"><div class="lab">Dostawcy / Suppliers</div><h4>Zaoferuj stock</h4><p>Overstock, końcówki serii, OEM / private label. Odbieramy wolumen, chronimy kanały.</p><a href="#contact">Mam stock do ulokowania →</a></div>
+        <div class="lane"><div class="lab">Buyers</div><h4>Buy B2B stock</h4><p>Mobile accessories and consumer electronics ready to resell. Product files, pricing, fulfilment.</p><a href="#contact">I need stock →</a></div>
+        <div class="lane"><div class="lab">Suppliers</div><h4>Offer us stock</h4><p>Overstock, end-of-line, OEM / private label. We take the volume and protect your channels.</p><a href="#contact">I have stock to place →</a></div>
       </div>
     </div>
 
@@ -247,97 +298,90 @@
 </div></section>
 
 <section id="offer" class="offer"><div class="wrap">
-  <div class="eyebrow">Poza handlem stockiem</div>
-  <h2 style="font-size:clamp(20px,2.6vw,28px)">Obsługa marki &amp; HUB — na życzenie.</h2>
-  <p class="lead" style="font-size:15px">Prowadzimy też brand onboarding na marketplace i HUB logistyczny jako usługę.
-    To nie jest nasz główny przekaz na targach — pełna oferta jest na materiałach drukowanych i przy stoisku.</p>
+  <div class="eyebrow">Beyond stock trading</div>
+  <h2 style="font-size:clamp(20px,2.6vw,28px)">Brand management &amp; HUB — on request.</h2>
+  <p class="lead" style="font-size:15px">We also run brand onboarding on Europe's marketplaces and a logistics HUB as a service.
+    It is not our main message at the fair — the full offer is in the printed materials and at the stand.</p>
   <div class="also-links">
-    <a href="materialy-drukowane/ulotka-obsluga-marki.html">Obsługa marki — ulotka →</a>
-    <a href="materialy-drukowane/ulotka-hub-logistyczny.html">HUB logistyczny — ulotka →</a>
+    <a href="materialy-drukowane/ulotka-obsluga-marki.html">Brand management — flyer →</a>
+    <a href="materialy-drukowane/ulotka-hub-logistyczny.html">Logistics HUB — flyer →</a>
   </div>
 </div></section>
 
 <section id="team"><div class="wrap">
-  <div class="eyebrow">Zespół — poznaj nas na stoisku</div>
-  <h2>Kto Cię obsłuży.</h2>
-  <p class="ph-note" style="margin:10px 0 18px">Placeholder — potrzebna lista: imię, rola, „co łapie", foto, kontakt/LinkedIn. Telefonów NIE publikujemy.</p>
-  <div class="team">
-    <div class="person"><div class="ph">foto</div><div class="nm">Kriss</div><div class="rl">Strona &amp; stoisko</div><div class="catch">Web / brand</div></div>
-    <div class="person"><div class="ph">foto</div><div class="nm">Tomasz</div><div class="rl">Detal · marketplace &amp; HUB</div><div class="catch">Brandy + HUB</div></div>
-    <div class="person"><div class="ph">foto</div><div class="nm">Daniel</div><div class="rl">Detal · brand acquisition</div><div class="catch">Nowe brandy</div></div>
-    <div class="person"><div class="ph">foto</div><div class="nm">Michał</div><div class="rl">Hurt · sprzedaż/zakup</div><div class="catch">Leady hurt</div></div>
-    <div class="person"><div class="ph">foto</div><div class="nm">Błażej</div><div class="rl">Hurt · sprzedaż/zakup</div><div class="catch">Leady hurt</div></div>
-    <div class="person"><div class="ph">foto</div><div class="nm">Asia</div><div class="rl">Biuro Monstelo</div><div class="catch">Wsparcie / gifty</div></div>
-    <div class="person"><div class="ph">foto</div><div class="nm">[Mobilki]</div><div class="rl">Telefony · buyback</div><div class="catch">Leady telefony</div></div>
-    <div class="person"><div class="ph">foto</div><div class="nm">[+ reszta]</div><div class="rl">[DO UZUPEŁNIENIA]</div><div class="catch">—</div></div>
+  <div class="eyebrow">Team — meet us at the stand</div>
+  <h2>Who will take care of you.</h2>
+  <p class="lead" style="font-size:15px">All five days at Reseller Park, stand H27E-17. Write ahead or just walk up.</p>
+
+  <div class="team-group">
+    <div class="glab"><b>Monstelo</b> — accessories &amp; consumer electronics, wholesale</div>
+    <div class="team">
+      <div class="person"><div class="mg">SJ</div><div class="nm">Sebastian Juszczyk</div>
+        <div class="rl">Co-Owner &amp; Head of Global Sourcing</div><div class="langs">PL · EN</div>
+        <a class="em" href="mailto:sebastian@monstelo.com">sebastian@monstelo.com</a></div>
+      <div class="person"><div class="mg">MM</div><div class="nm">Michał Mamcarczyk</div>
+        <div class="rl">Key Account Manager</div><div class="langs">EN · PL</div>
+        <a class="em" href="mailto:mm@monstelo.com">mm@monstelo.com</a></div>
+      <div class="person"><div class="mg">NT</div><div class="nm">Nikola Tuchowska</div>
+        <div class="rl">Key Account Manager</div><div class="langs">EN · PL</div>
+        <a class="em" href="mailto:nikola.tuchowska@monstelo.com">nikola.tuchowska@monstelo.com</a></div>
+      <div class="person"><div class="mg">KP</div><div class="nm">Kamil Pałka</div>
+        <div class="rl">Key Account Manager</div><div class="langs">PL · CZ</div>
+        <a class="em" href="mailto:kamil.palka@monstelo.com">kamil.palka@monstelo.com</a></div>
+      <div class="person"><div class="mg">ŁT</div><div class="nm">Łukasz Tabak</div>
+        <div class="rl">Key Account Manager</div><div class="langs">PL</div>
+        <a class="em" href="mailto:lukasz.tabak@monstelo.com">lukasz.tabak@monstelo.com</a></div>
+      <div class="person"><div class="mg">BK</div><div class="nm">Błażej Kócaba</div>
+        <div class="rl">Key Account Manager</div><div class="langs">PL</div>
+        <a class="em" href="mailto:blazej.kocaba@monstelo.com">blazej.kocaba@monstelo.com</a></div>
+    </div>
+    <div class="desk"><span><b>Brands &amp; marketplace / HUB</b></span>
+      <span><a href="mailto:brands@monstelo.com">brands@monstelo.com</a></span>
+      <span><b>Office</b> <a href="mailto:info@monstelo.com">info@monstelo.com</a></span></div>
+  </div>
+
+  <div class="team-group">
+    <div class="glab"><b>Mobilki GSM</b> — phones, buyback &amp; second life</div>
+    <div class="team">
+      <div class="person mob"><div class="mg">BK</div><div class="nm">Bartosz Kozieł</div>
+        <div class="rl">Sales Director</div><div class="langs">PL · EN</div>
+        <a class="em" href="mailto:bartosz@mobilkigsm.pl">bartosz@mobilkigsm.pl</a></div>
+      <div class="person mob"><div class="mg">PU</div><div class="nm">Patryk Ura</div>
+        <div class="rl">Wholesale Sales Specialist</div><div class="langs">PL · EN</div>
+        <a class="em" href="mailto:patryk@mobilki-gsm.pl">patryk@mobilki-gsm.pl</a></div>
+      <div class="person mob"><div class="mg">KP</div><div class="nm">Krzysztof Paluch</div>
+        <div class="rl">Wholesale Sales Specialist</div><div class="langs">PL · EN</div>
+        <a class="em" href="mailto:krzysztof@mobilki-gsm.pl">krzysztof@mobilki-gsm.pl</a></div>
+    </div>
+    <div class="desk"><span><b>Wholesale desk</b> — general enquiries</span>
+      <span><a href="mailto:sales@mobilki-gsm.pl">sales@mobilki-gsm.pl</a></span></div>
   </div>
 </div></section>
 
 <section id="contact"><div class="wrap">
-  <div class="eyebrow">Umów rozmowę</div>
-  <h2>Spotkajmy się na IFA — Reseller Park.</h2>
-  <p class="lead">Wybierz tor, zostaw kontakt, umówimy konkretną rozmowę na stoisku. (Formularz poglądowy — do podpięcia + zgoda marketingowa GDPR.)</p>
-  <div class="card" style="margin-top:20px;max-width:560px">
-    <div style="font-family:var(--fm);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)">Interesuje mnie</div>
-    <div style="font-size:14px;color:var(--ink);margin-top:6px">Telefony · Hurt akcesoria · Brand na marketplace · HUB</div>
-    <button type="button" id="mail-open" class="btn primary" style="margin-top:18px;display:inline-block;border:none;cursor:pointer">Zostaw e-mail →</button>
-    <form id="mail-form" class="mailwrap" hidden>
-      <div class="mailrow">
-        <input type="email" id="mail-in" required placeholder="you@company.com" autocomplete="email" inputmode="email">
-        <button type="submit" class="mailsend" aria-label="Wyślij"></button>
-      </div>
-      <p class="mailnote">Odezwiemy się w jeden dzień roboczy — albo złap nas na stoisku H27E-17.</p>
-    </form>
-    <div id="mail-done" class="mailnote" hidden style="color:var(--accent)"></div>
-    <p style="font-size:11px;color:var(--dim);margin-top:12px">☐ Zgoda na kontakt marketingowy (GDPR). Dane przetwarzane przez Monstelo / Mobilki GSM.</p>
+  <div class="eyebrow">Book a meeting</div>
+  <h2>Let's meet at IFA — Reseller Park.</h2>
+  <p class="lead">Pick a slot and we will keep the time free at the stand. Twenty minutes is enough to go through numbers.</p>
+  <div class="book">
+    <div class="tracks">I'm interested in</div>
+    <div class="tlist">Phones · Accessories wholesale · Brand on marketplaces · Logistics HUB</div>
+    <a class="btn primary" href="spotkanie/">Book a slot at the stand →</a>
+    <p class="alt">Prefer e-mail? Wholesale &amp; sourcing — <a href="mailto:info@monstelo.com">info@monstelo.com</a> · phones — <a href="mailto:sales@mobilki-gsm.pl">sales@mobilki-gsm.pl</a> · brands &amp; HUB — <a href="mailto:brands@monstelo.com">brands@monstelo.com</a><br>
+      Or simply walk up to <b>H27E-17</b>, Reseller Park, any of the five days.</p>
   </div>
 </div></section>
 
 <footer><div class="wrap">
   <div class="foot-brand">Overstock in. Best price out.</div>
-  <div style="margin-top:8px">Monstelo × Mobilki GSM · IFA Berlin 2026 · Reseller Park</div>
-  <div style="margin-top:8px" class="ph-note">Domena robocza „IFAmonstelo&amp;mobilki.com" ma znak „&amp;" — niedozwolony w adresie. Propozycje: ifa.monstelo.com · monstelo-mobilki.com/ifa · monstelo-ifa.com. Uwaga: „IFA" to znak imprezy — sprawdzić dopuszczalność w domenie.</div>
+  <div style="margin-top:8px">Monstelo × Mobilki GSM · IFA Berlin 2026 · Reseller Park · Hall H27E, stand 17 · 4–8 September 2026</div>
+  <p class="foot-contact">
+    <a href="mailto:info@monstelo.com">info@monstelo.com</a> · monstelo.com &nbsp;|&nbsp;
+    <a href="mailto:sales@mobilki-gsm.pl">sales@mobilki-gsm.pl</a> · mobilkigsm.pl
+  </p>
+  <p class="disc">Figures are trailing-12-month operational data. Third-party brand and marketplace names are the
+    property of their respective owners and are used nominatively, to describe what we distribute and where we
+    sell. Not an endorsement or a claim of affiliation.</p>
 </div></footer>
 
-<script>
-  (function(){
-    var root = document.documentElement, btn = document.getElementById('theme');
-    function label(){ btn.textContent = root.getAttribute('data-theme') === 'dark'
-      ? 'design v1 · ciemny' : 'design v2 · jasny'; }
-    label();
-    btn.addEventListener('click', function(){
-      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      root.setAttribute('data-theme', next);
-      try{ localStorage.setItem('ifa-design', next); }catch(e){}
-      label();
-    });
-  })();
-</script>
-
-<script>
-  // wysuwany input maila + kwadratowy przycisk (arrow → spinner). Prototyp: potwierdzenie lokalne.
-  (function(){
-    var ARROW='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h12M12 6l6 6-6 6"/></svg>';
-    var SPIN='<svg class="spin" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9"/></svg>';
-    var open=document.getElementById('mail-open'),
-        form=document.getElementById('mail-form'),
-        input=document.getElementById('mail-in'),
-        done=document.getElementById('mail-done'),
-        send=form&&form.querySelector('.mailsend');
-    if(!open||!form) return;
-    send.innerHTML=ARROW;
-    open.addEventListener('click',function(){
-      open.hidden=true; form.hidden=false;
-      setTimeout(function(){ input.focus({preventScroll:true}); },60);
-    });
-    form.addEventListener('submit',function(e){
-      e.preventDefault();
-      var email=input.value.trim(); if(!email) return;
-      send.disabled=true; send.innerHTML=SPIN;
-      setTimeout(function(){
-        form.hidden=true; done.hidden=false;
-        done.textContent='Zapisane: '+email+'. Odezwiemy się wkrótce.';
-      },500);
-    });
-  })();
-</script>
+</body>
+</html>
