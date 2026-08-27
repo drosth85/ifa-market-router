@@ -107,15 +107,16 @@ ok(A.validate({ ...good, from: "11:15", to: "11:00" }).includes("slot"), "koniec
 const st = { side: "buy", date: "2026-09-06", from: "13:15", dur: 30, person: "juszczyk" };
 ok(A.ticketRef(st) === "IFA-0906-1315-SJ", "numer kwitu z dnia, godziny i inicjalow");
 ok(A.ticketRef({}) === "IFA-····-····-AN", "pusty kwit ma kropki i AN");
-ok(A.ticketFields(st).length === 5, "kwit ma piec pol");
+ok(A.ticketFields(st).length === 4, "kwit ma cztery pola (bez strony transakcji)");
 ok(A.ticketFields({}).every(([, v]) => v.startsWith("·")), "puste pola kwitu to kropki");
-ok(A.nextStep({}, false).key === "side", "pierwszy krok to strona transakcji");
-ok(A.nextStep({ side: "buy" }, false).key === "date", "po stronie transakcji pytamy o dzien");
-ok(A.nextStep({ side: "buy", date: "2026-09-06" }, false).key === "person", "potem o osobe");
+ok(A.nextStep({}, false).key === "date", "pierwszy krok to wybor dnia");
+ok(A.nextStep({ date: "2026-09-06" }, false).key === "person", "po dniu pytamy o osobe");
 ok(A.nextStep({ ...st, to: "13:45" }, false).key === "you", "z kompletem wyboru prosimy o dane");
 ok(A.nextStep({ ...st, to: "13:45" }, true).key === "go", "komplet danych odblokowuje rezerwacje");
-ok(A.nextStep({ side: "buy", date: "2026-09-06", person: "any", from: "19:00", evening: true }, true).key === "place",
+ok(A.nextStep({ date: "2026-09-06", person: "any", from: "19:00", evening: true }, true).key === "place",
    "wieczor bez miejsca prosi o miejsce");
+ok(A.PEOPLE.filter(p => p.id !== "any").every(p => p.langs.length > 0), "kazdy handlowiec ma co najmniej jeden jezyk");
+ok(A.ticketFields({ from: "19:00", evening: true, dur: 60 })[1][1].includes("evening"), "kwit oznacza spotkanie wieczorne");
 
 // liczba wolnych kwadransow
 ok(A.freeQuarters([]) === 32, "pusty dzien to 32 kwadranse");

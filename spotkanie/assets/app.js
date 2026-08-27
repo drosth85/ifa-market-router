@@ -134,18 +134,16 @@ function ticketFields(state) {
   const day = DAYS.find((d) => d.iso === state.date);
   const p = personById(state.person);
   return [
-    ["SIDE", state.side ? (state.side === "buy" ? "we buy" : "we sell") : dots(7)],
     ["DAY", day ? `${day.d} ${day.mon}` : dots(5)],
-    ["TIME", state.from ? `${state.from}` : dots(5)],
-    ["LEN", state.from ? `${state.dur}` : dots(2)],
+    ["TIME", state.from ? (state.evening ? `${state.from} evening` : state.from) : dots(5)],
+    ["LEN", state.from ? (state.evening ? "60" : String(state.dur)) : dots(2)],
     ["WITH", p ? (p.id === "any" ? "anyone free" : p.name) : dots(12)],
   ];
 }
 
 /* Czego brakuje do rezerwacji — treść przycisku bierze się stąd. */
 function nextStep(state, formReady) {
-  if (!state.side) return { key: "side", label: "Pick your side to start" };
-  if (!state.date) return { key: "date", label: "Pick a day" };
+  if (!state.date) return { key: "date", label: "Pick a day to start" };
   if (!state.person) return { key: "person", label: "Pick who you want to meet" };
   if (!state.from) return { key: "time", label: "Pick a time" };
   if (state.evening && !state.place) return { key: "place", label: "Tell us where to meet" };
@@ -197,7 +195,7 @@ function hourlySlots(start, end) {
 if (typeof document !== "undefined") (function () {
   const $ = (id) => document.getElementById(id);
   const state = {
-    side: null, date: null, person: null, from: null, to: null, dur: SLOT_MIN,
+    date: null, person: null, from: null, to: null, dur: SLOT_MIN,
     evening: false, place: "", busy: [], free: {}, day: null, fixedPerson: false,
     stale: null, nonce: null, sending: false,
   };
@@ -258,15 +256,6 @@ if (typeof document !== "undefined") (function () {
     );
   }
 
-  function renderSides() {
-    $("sides").querySelectorAll(".side").forEach((el) => {
-      const on = el.dataset.side === state.side;
-      el.classList.toggle("on", on);
-      el.setAttribute("aria-checked", String(on));
-      el.addEventListener("click", () => pickSide(el.dataset.side), { once: true });
-    });
-  }
-
   function renderPeople() {
     const list = state.side === "sell" ? PEOPLE : PEOPLE;      // ta sama załoga, kolejność bez zmian
     $("people").innerHTML = list.map((p) => {
@@ -276,8 +265,9 @@ if (typeof document !== "undefined") (function () {
         : (state.free && state.free[p.id] != null ? state.free[p.id] : freeQuarters(busy));
       const known = state.day !== null;
       const full = known && free === 0;
-      const langs = p.id === "any" ? "" :
-        `<span class="lg">${LANGS.map((l) => `<em${p.langs.includes(l) ? ' class="y"' : ""}>${l}</em>`).join("")}</span>`;
+      // Tylko języki, którymi ta osoba faktycznie mówi — wygaszone chipy myliły gości.
+      const langs = p.id === "any" || !p.langs.length ? "" :
+        `<span class="lg">${p.langs.map((l) => `<em>${l}</em>`).join("")}</span>`;
       return `<button type="button" class="p${p.id === "any" ? " any" : ""}${p.id === state.person ? " on" : ""}"
                 role="radio" aria-checked="${p.id === state.person}" data-id="${p.id}" ${full ? "disabled" : ""}>
                 <span class="ini">${p.id === "any" ? "◆" : p.name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2)}</span>
@@ -355,7 +345,7 @@ if (typeof document !== "undefined") (function () {
     $("tk-fields").innerHTML = ticketFields(state)
       .map(([k, v]) => {
         const empty = v.startsWith("·");
-        const step = { SIDE: "step-side", DAY: "step-side", TIME: "step-time", LEN: "step-time", WITH: "step-person" }[k];
+        const step = { DAY: "step-day", TIME: "step-time", LEN: "step-time", WITH: "step-person" }[k];
         return `<button type="button" class="f${empty ? " e" : ""}" data-go="${step}">
                   <span class="k">${k}</span> <span class="v">${v}</span></button>`;
       })
@@ -400,6 +390,10 @@ if (typeof document !== "undefined") (function () {
     show("step-person", !state.fixedPerson);
     show("step-time", false);
     show("step-you", false);
+    show("evening", true);
+    show("evening-fields", false);
+    $("evening-btn").classList.remove("on");
+    state.evening = false;
     renderTicket();
 
     if (!state.fixedPerson) { renderPeople(); jump("step-person"); }
@@ -434,23 +428,41 @@ if (typeof document !== "undefined") (function () {
   function pickTime(from) {
     state.from = from;
     state.evening = false;
+    state.place = "";
     state.dur = DURATIONS[0];
     state.to = addMinutes(from, state.dur);
+    show("evening", false);          // jedno albo drugie — nie oba naraz
     renderTimes();
     show("step-you", true);
     renderTicket();
   }
 
-  function pickEvening() {
-    const t = $("evening-times").value || pad(EVENING_START) + ":00";
+  /* Wieczór wyklucza się z godziną na stoisku: zaznaczony kwadrans znika, siatka też. */
+  function openEvening() {
     state.evening = true;
-    state.from = t;
+    state.from = $("evening-when").value || pad(EVENING_START) + ":00";
     state.dur = 60;
-    state.to = addMinutes(t, 60);
-    show("evening-where", true);
+    state.to = addMinutes(state.from, 60);
+    state.place = $("evening-place").value.trim();
+    show("evening-fields", true);
+    show("times", false);
+    show("legend", false);
+    show("step-len", false);
+    $("evening-btn").classList.add("on");
     show("step-you", true);
     renderTicket();
-    jump("step-you");
+  }
+
+  function closeEvening() {
+    state.evening = false;
+    state.from = state.to = null;
+    state.place = "";
+    show("evening-fields", false);
+    show("times", true);
+    show("legend", true);
+    $("evening-btn").classList.remove("on");
+    renderTimes();
+    renderTicket();
   }
 
   function bookingFromForm() {
@@ -466,8 +478,6 @@ if (typeof document !== "undefined") (function () {
       phone: $("f-phone").value.trim().slice(0, 30),
       note: $("f-note").value.trim().slice(0, 500),
       consent: $("f-consent").checked ? 1 : 0,
-      marketing: $("f-marketing").checked ? 1 : 0,
-      side: state.side,
       date: state.date,
       from: state.from,
       to: state.to,
@@ -475,7 +485,7 @@ if (typeof document !== "undefined") (function () {
       person: state.person,
       personName: (personById(state.person) || {}).name || "",
       evening: state.evening,
-      place: state.evening ? $("f-place").value.trim().slice(0, 120) : "",
+      place: state.evening ? $("evening-place").value.trim().slice(0, 120) : "",
       tz: TZ,
       source: state.fixedPerson ? "link-" + state.person : "ifa-booking",
       nonce: state.nonce,
@@ -510,8 +520,11 @@ if (typeof document !== "undefined") (function () {
   async function submit() {
     const b = bookingFromForm();
     const err = validate(b);
-    ["f-name", "f-company", "f-email", "f-place"].forEach((id) => $(id).classList.remove("bad"));
-    err.forEach((e) => { const el = $("f-" + e); if (el) el.classList.add("bad"); });
+    ["f-name", "f-company", "f-email", "evening-place"].forEach((id) => $(id).classList.remove("bad"));
+    err.forEach((e) => {
+      const el = e === "place" ? $("evening-place") : $("f-" + e);
+      if (el) el.classList.add("bad");
+    });
     if (err.length) {
       $("msg").textContent = err.includes("consent")
         ? "Tick the consent box so we can arrange the meeting."
@@ -563,21 +576,21 @@ if (typeof document !== "undefined") (function () {
       $("with-role").textContent = fixed.role;
       document.title = "Book a slot with " + fixed.name + " — IFA 2026";
     }
-    renderSides();
     renderDays();
     renderTicket();
 
-    $("evening-btn").addEventListener("click", pickEvening);
-    $("evening-times").addEventListener("change", () => { if (state.evening) pickEvening(); });
-    ["f-name", "f-company", "f-email", "f-consent", "f-place"].forEach((id) =>
+    $("evening-btn").addEventListener("click", () => (state.evening ? closeEvening() : openEvening()));
+    $("evening-when").addEventListener("change", () => { if (state.evening) openEvening(); });
+    $("evening-place").addEventListener("input", () => { state.place = $("evening-place").value.trim(); renderTicket(); });
+    ["f-name", "f-company", "f-email", "f-consent"].forEach((id) =>
       $(id).addEventListener("input", renderTicket)
     );
     $("f-consent").addEventListener("change", renderTicket);
     $("tk-cta").addEventListener("click", () => {
       const step = $("tk-cta").dataset.step;
       if (step === "go") { submit(); return; }
-      const target = { side: "step-side", date: "step-day", person: "step-person", time: "step-time",
-                       place: "step-you", you: "step-you" }[step];
+      const target = { date: "step-day", person: "step-person", time: "step-time",
+                       place: "step-time", you: "step-you" }[step];
       if (target && !$(target).hidden) jump(target);
     });
     $("form").addEventListener("submit", (e) => { e.preventDefault(); submit(); });

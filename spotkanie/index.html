@@ -120,6 +120,7 @@
   .evening-toggle{cursor:pointer;background:var(--cover);border:1px solid var(--line);border-radius:7px;
     color:var(--chalk);padding:11px 13px;font-family:var(--sans);font-size:13.5px;font-weight:700}
   .evening-toggle:hover{border-color:var(--amber);color:var(--amber)}
+  .evening-toggle.on{border-color:var(--amber);color:var(--amber);background:var(--cover)}
   .evening .hint{color:var(--mute);font-size:12px;line-height:1.5;margin-top:9px}
 
   label{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
@@ -215,21 +216,7 @@
 
   <div id="form-wrap">
 
-    <section id="step-side">
-      <h2>Which side are you on?</h2>
-      <div class="sides" id="sides" role="radiogroup" aria-label="Which side are you on">
-        <button type="button" class="side" role="radio" aria-checked="false" data-side="sell">
-          <span class="k">I want stock</span><span class="v">We sell</span>
-          <span class="d">Top brands, sharp prices, ready to ship from Poland.</span>
-        </button>
-        <button type="button" class="side" role="radio" aria-checked="false" data-side="buy">
-          <span class="k">I have stock</span><span class="v">We buy</span>
-          <span class="d">Overstock, clearance, returns, open-box. Priced by live data.</span>
-        </button>
-      </div>
-    </section>
-
-    <section id="step-day" hidden>
+    <section id="step-day">
       <h2>Day</h2>
       <div id="days" role="radiogroup" aria-label="Fair day"></div>
     </section>
@@ -243,7 +230,7 @@
       <h2>Time <span class="tz">all times Berlin · CEST</span></h2>
       <p id="fresh"></p>
       <div id="times" role="radiogroup" aria-label="Meeting time"></div>
-      <div class="legend"><span><i></i>free</span><span class="tk"><i></i>already booked</span></div>
+      <div class="legend" id="legend"><span><i></i>free</span><span class="tk"><i></i>already booked</span></div>
 
       <div id="step-len" hidden>
         <h2>How long</h2>
@@ -251,18 +238,23 @@
         <p id="len-note"></p>
       </div>
 
-      <div class="evening">
-        <div class="row">
-          <button type="button" class="evening-toggle" id="evening-btn">Evening after the show</button>
-          <select id="evening-times" aria-label="Evening time">
-            <option>18:00</option><option>18:30</option><option>19:00</option><option>19:30</option>
-            <option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option>
-            <option>22:00</option><option>22:30</option><option>23:00</option>
-          </select>
-        </div>
-        <div id="evening-where" hidden style="margin-top:12px">
-          <label for="f-place">Where</label>
-          <input id="f-place" maxlength="120" placeholder="Restaurant, bar, hotel lobby…" autocomplete="off">
+      <div class="evening" id="evening">
+        <button type="button" class="evening-toggle" id="evening-btn">Evening after the show</button>
+        <div id="evening-fields" hidden>
+          <div class="two" style="margin-top:12px">
+            <div>
+              <label for="evening-when">When</label>
+              <select id="evening-when">
+                <option>18:00</option><option>18:30</option><option>19:00</option><option>19:30</option>
+                <option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option>
+                <option>22:00</option><option>22:30</option><option>23:00</option>
+              </select>
+            </div>
+            <div>
+              <label for="evening-place">Where</label>
+              <input id="evening-place" maxlength="120" placeholder="Restaurant, bar, hotel lobby…" autocomplete="off">
+            </div>
+          </div>
         </div>
         <p class="hint">Dinner, a drink, a longer talk — tell us where and we will be there.</p>
       </div>
@@ -289,10 +281,6 @@
             <span>I agree that Monstelo may process my details to arrange this meeting at IFA 2026.
               Controller: Import Eksport Sp. z o.o. Sp.k., Kraków. Data is kept for 90 days after the fair.
               <a href="https://monstelo.com/privacy" target="_blank" rel="noopener">Privacy notice</a>.</span>
-          </label>
-          <label class="consent">
-            <input type="checkbox" id="f-marketing">
-            <span>Optional: you may also contact me with offers after the fair.</span>
           </label>
         </div>
         <div class="msg" id="msg"></div>
