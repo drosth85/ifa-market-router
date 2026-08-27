@@ -3,195 +3,99 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Book a meeting — Monstelo × Mobilki GSM · IFA Berlin 2026</title>
-<meta name="description" content="Book 15, 30 or 45 minutes with Monstelo at IFA Berlin 2026, Reseller Park, stand H27E-17.">
+<title>Book a meeting — monstelo × mobilki at IFA Berlin 2026</title>
+<meta name="description" content="Book 15, 30 or 45 minutes with Monstelo at IFA Berlin 2026 — Reseller Park, stand H27E-17, 4–8 September.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,600;100,700;100,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   [hidden]{display:none !important}
 
   :root{
-    --cover:#0A0B0E; --ledger:#171C24; --chalk:#E9E0CC; --mute:#7C8593; --line:#232833;
-    --paper:#E7DCC2; --paper-ink:#0A0B0E; --paper-accent:#0A7A68;
-    --teal:#2FE3C6; --amber:#FFB020; --bad:#FF6B5A;
+    --bg:#0A0B0E; --card:#12151B; --field:#171C24; --line:#242A34;
+    --ink:#F1EDE3; --mute:#8A8F9A;
+    --amber:#FFB020; --amber-ink:#0A0B0E; --teal:#2FE3C6; --bad:#FF6B5A;
     --sans:Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif;
     --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    --tk:96px;
   }
   :root[data-theme="light"]{
-    --cover:#F4F1E9; --ledger:#EDE8DB; --chalk:#15171E; --mute:#5A5D68; --line:#DED8C7;
-    --teal:#0E9C86; --amber:#B57A0C; --bad:#C0392B;
+    --bg:#F4F1E9; --card:#FFFFFF; --field:#F6F3EA; --line:#DFD9CB;
+    --ink:#15171E; --mute:#5A5D68; --amber:#E09400; --amber-ink:#FFFFFF; --teal:#0E9C86;
   }
-  html,body{background:var(--cover);color:var(--chalk);font-family:var(--sans);overflow-x:hidden;
+
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--sans);overflow-x:hidden;
     -webkit-text-size-adjust:100%}
-  /* Kwit zostaje widoczny przez cały czas — zamiast go chować, odsuwamy od niego pole,
-     na które przeglądarka sama przewija przy wejściu w formularz i przy otwarciu klawiatury. */
-  html{scroll-padding-bottom:calc(var(--tk) + 28px)}
-  input,textarea,select,.consent{scroll-margin-bottom:calc(var(--tk) + 28px)}
-  body{min-height:100dvh;padding-bottom:calc(var(--tk) + env(safe-area-inset-bottom) + 12px)}
-  .wrap{max-width:720px;margin:0 auto;padding:18px 18px 26px}
-  ::selection{background:var(--paper);color:var(--paper-ink)}
+  .wrap{max-width:560px;margin:0 auto;padding:16px 16px 40px}
 
-  .top{display:flex;justify-content:space-between;align-items:center;gap:12px;
-    font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
-  .top .brand{color:var(--chalk);font-family:var(--sans);font-weight:800;font-size:12.5px;letter-spacing:.04em}
-  .themebtn{cursor:pointer;background:none;border:1px solid var(--line);border-radius:999px;
-    color:var(--mute);font-family:var(--mono);font-size:9px;letter-spacing:.1em;padding:5px 9px;text-transform:uppercase}
+  .banner{display:block;width:100%;height:auto;border-radius:14px;margin-bottom:18px}
 
-  h1{margin:20px 0 0;font-size:clamp(30px,8.6vw,52px);line-height:.94;font-weight:800;text-transform:uppercase;
-    font-variation-settings:'wdth' 100,'wght' 800;letter-spacing:-.015em;min-height:2.1em}
-  h1 .t{color:var(--teal)} h1 .a{color:var(--amber)}
-  .lead{margin-top:12px;color:var(--mute);font-size:14.5px;line-height:1.55;max-width:52ch}
-  .kpi{margin-top:12px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--mute);text-transform:uppercase}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 18px}
 
-  h2{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);
-    font-weight:600;margin:30px 0 10px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
-  h2 .tz{color:var(--mute);letter-spacing:.12em;font-size:9px}
+  .with{display:flex;align-items:center;gap:11px;background:var(--field);border:1px solid var(--teal);
+    border-radius:10px;padding:11px 13px;margin-bottom:18px}
+  .with .ini{flex:none;width:34px;height:34px;border-radius:8px;background:var(--teal);color:#07100E;
+    font-family:var(--mono);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center}
+  .with .n{display:block;font-size:15px;font-weight:700;line-height:1.2}
+  .with .r{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--mute);margin-top:2px}
 
-  .withline{margin-top:20px;background:var(--ledger);border:1px solid var(--teal);border-radius:10px;
-    padding:13px 15px;display:flex;flex-direction:column;gap:3px}
-  .withline .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
-  .withline .n{font-size:17px;font-weight:800}
-  .withline .r{font-family:var(--mono);font-size:10.5px;color:var(--mute)}
-
-  .sides{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-  .side{cursor:pointer;text-align:left;background:var(--ledger);border:1px solid var(--line);border-radius:9px;
-    padding:13px 14px;color:var(--chalk);font-family:var(--sans)}
-  .side .k{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;color:var(--mute);text-transform:uppercase}
-  .side .v{display:block;font-size:16px;font-weight:800;margin-top:4px}
-  .side .d{display:block;font-family:var(--mono);font-size:9.5px;color:var(--mute);margin-top:5px;line-height:1.45}
-  .side.on{border-color:var(--teal)}
-  .side.on .v{color:var(--teal)}
-
-  #days{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
-  .day{cursor:pointer;background:var(--ledger);border:1px solid var(--line);border-radius:9px;color:var(--chalk);
-    padding:11px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:var(--sans)}
-  .day .dow{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
-  .day .dnum{font-size:21px;font-weight:800;line-height:1}
-  .day .mon{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
-  .day.on{background:var(--paper);border-color:var(--paper);color:var(--paper-ink)}
-  .day.on .dow,.day.on .mon{color:var(--paper-ink);opacity:.7}
-
-  #people{display:flex;flex-direction:column;gap:7px}
-  .p{cursor:pointer;display:flex;align-items:center;gap:11px;text-align:left;background:var(--ledger);
-    border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--chalk);font-family:var(--sans);min-height:56px}
-  .p.any{border-style:dashed}
-  .p.on{border-color:var(--teal)}
-  .p[disabled]{opacity:.4;cursor:not-allowed}
-  .p .ini{flex:none;width:34px;height:34px;border-radius:6px;background:var(--line);color:var(--chalk);
-    font-family:var(--mono);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
-  .p.on .ini{background:var(--teal);color:#07100E}
-  .p.any .ini{background:transparent;border:1px dashed var(--mute);color:var(--mute);font-size:14px}
-  .p .txt{flex:1;min-width:0}
-  .p .nm{display:block;font-size:14.5px;font-weight:700;line-height:1.15}
-  .p .rl{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.05em;color:var(--mute);margin-top:2px}
-  .p .lg{display:flex;gap:3px;margin-top:5px}
-  .p .lg em{font-style:normal;font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:var(--mute);
-    border:1px solid var(--line);border-radius:3px;padding:1px 4px}
-  .p .lg em.y{border-color:var(--teal);color:var(--teal)}
-  .p .free{flex:none;text-align:right;font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;color:var(--mute);text-transform:uppercase}
-  .p .free b{display:block;font-size:15px;color:var(--chalk)}
-  .p.on .free b{color:var(--teal)}
-
-  #fresh{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);
-    margin:0 0 9px;min-height:13px;line-height:1.5}
-  #fresh.warn{color:var(--amber)}
-  .tgroup{margin-bottom:14px}
-  .tg{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;
-    color:var(--mute);margin-bottom:7px}
-  .hours{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px}
-  .h{cursor:pointer;background:var(--ledger);border:1px solid var(--line);border-radius:7px;color:var(--chalk);
-    font-family:var(--mono);font-size:13px;padding:12px 2px;min-height:44px}
-  .h.sel{background:var(--paper);border-color:var(--paper);color:var(--paper-ink);font-weight:700}
-  .h[disabled]{opacity:.32;cursor:not-allowed;text-decoration:line-through}
-  .legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:9px;letter-spacing:.1em;
-    text-transform:uppercase;color:var(--mute);margin-top:2px}
-  .legend i{display:inline-block;width:9px;height:9px;border:1px solid var(--line);background:var(--ledger);
-    border-radius:2px;margin-right:5px;vertical-align:-1px}
-  .legend .tk i{opacity:.32}
-
-  #lens{display:flex;gap:7px}
-  .len{flex:1;cursor:pointer;background:var(--ledger);border:1px solid var(--line);border-radius:7px;
-    color:var(--chalk);font-family:var(--mono);font-size:12px;padding:11px 0;min-height:44px}
-  .len.sel{border-color:var(--teal);color:var(--teal)}
-  .len[disabled]{opacity:.32;cursor:not-allowed}
-  #len-note{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);
-    margin-top:7px;min-height:12px}
-
-  .evening{margin-top:14px;background:var(--ledger);border:1px solid var(--line);border-radius:9px;padding:13px 14px}
-  .evening .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
-  .evening-toggle{cursor:pointer;background:var(--cover);border:1px solid var(--line);border-radius:7px;
-    color:var(--chalk);padding:11px 13px;font-family:var(--sans);font-size:13.5px;font-weight:700}
-  .evening-toggle:hover{border-color:var(--amber);color:var(--amber)}
-  .evening-toggle.on{border-color:var(--amber);color:var(--amber);background:var(--cover)}
-  .evening .hint{color:var(--mute);font-size:12px;line-height:1.5;margin-top:9px}
-
-  label{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--mute);margin:0 0 5px}
-  input,select,textarea{width:100%;background:var(--ledger);border:1px solid var(--line);border-radius:7px;
-    color:var(--chalk);font-family:var(--sans);font-size:16px;padding:12px 13px;outline:none}
+  .f{margin-bottom:15px}
+  .f.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:15px}
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--mute);margin:0 0 6px}
+  label .opt{font-weight:400}
+  input,select,textarea{width:100%;background:var(--field);border:1px solid var(--line);border-radius:10px;
+    color:var(--ink);font-family:var(--sans);font-size:16px;padding:13px;outline:none;
+    appearance:none;-webkit-appearance:none}
+  select{background-image:linear-gradient(45deg,transparent 50%,var(--mute) 50%),
+                          linear-gradient(135deg,var(--mute) 50%,transparent 50%);
+    background-position:calc(100% - 19px) 22px,calc(100% - 14px) 22px;
+    background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:38px}
+  select:disabled{opacity:.55}
   input:focus,select:focus,textarea:focus{border-color:var(--teal)}
-  input.bad,textarea.bad{border-color:var(--bad)}
-  select{font-family:var(--mono);font-size:14px}
-  textarea{resize:vertical;min-height:70px}
-  .fields{display:grid;gap:13px}
-  .two{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-  .opt{text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:11px}
+  input.bad,select.bad,textarea.bad{border-color:var(--bad)}
+  textarea{resize:vertical;min-height:74px}
+  .hint{font-size:11.5px;line-height:1.5;color:var(--mute);margin:-6px 0 15px}
+  .hint.warn{color:var(--amber)}
 
-  .consent{display:flex;gap:10px;align-items:flex-start;margin-top:4px}
+  .evening{display:flex;gap:10px;align-items:flex-start;background:var(--field);border:1px solid var(--line);
+    border-radius:10px;padding:12px 13px;margin-bottom:15px;cursor:pointer}
+  .evening input{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--amber)}
+  .evening b{font-size:13.5px;font-weight:600;display:block}
+  .evening .sub{display:block;color:var(--mute);font-size:11.5px;margin-top:2px;line-height:1.45}
+
+  .consent{display:flex;gap:10px;align-items:flex-start;margin:2px 0 16px;cursor:pointer}
   .consent input{width:20px;height:20px;flex:none;margin-top:2px;accent-color:var(--teal)}
-  .consent span{font-family:var(--sans);font-size:12px;line-height:1.5;color:var(--mute);text-transform:none;letter-spacing:0}
+  .consent span{font-size:11.5px;line-height:1.5;color:var(--mute)}
   .consent a{color:var(--teal)}
-  .msg{margin-top:11px;font-size:13px;line-height:1.5;min-height:1em}
+
+  button.send{width:100%;cursor:pointer;border:0;border-radius:999px;padding:16px;
+    background:var(--amber);color:var(--amber-ink);font-family:var(--sans);font-size:16px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;gap:10px}
+  button.send:disabled{opacity:.55;cursor:default}
+  button.send .arrow{width:22px;height:22px;border-radius:50%;border:2px solid currentColor;
+    display:flex;align-items:center;justify-content:center;font-size:11px;flex:none}
+
+  .msg{margin-top:12px;font-size:13.5px;line-height:1.5;min-height:1em}
   .msg.bad{color:var(--bad)}
-  #closed{margin-top:14px;border:1px solid var(--amber);color:var(--amber);border-radius:9px;padding:12px;
-    font-family:var(--mono);font-size:11px;line-height:1.6}
 
-  /* ---------- kwit ---------- */
-  #ticket{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--ledger);
-    border-top:1px dashed var(--mute);box-shadow:0 -12px 30px rgba(0,0,0,.35);
-    padding:9px 14px calc(10px + env(safe-area-inset-bottom));
-    border-left:3px solid var(--teal)}
-  #ticket::before{content:"";position:absolute;left:0;right:0;top:-7px;height:7px;
-    background:radial-gradient(circle at 6px 0,transparent 0 5px,var(--ledger) 5px);
-    background-size:12px 7px}
-  #tk-ref{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--teal)}
-  #tk-fields{display:flex;flex-wrap:wrap;gap:3px 12px;margin-top:4px}
-  #tk-fields .f{cursor:pointer;background:none;border:0;padding:0;font-family:var(--mono);font-size:10.5px;
-    color:var(--chalk);letter-spacing:.02em}
-  #tk-fields .f .k{color:var(--mute)}
-  #tk-fields .f.e .v{color:var(--mute)}
-  #tk-cta{margin-top:8px;width:100%;cursor:pointer;border:0;border-radius:7px;padding:13px;
-    font-family:var(--sans);font-size:14.5px;font-weight:700;background:#1E242E;color:var(--mute);min-height:46px}
-  #tk-cta.go{background:var(--teal);color:#07100E}
-  :root[data-theme="light"] #tk-cta{background:#DFD9CB}
-  :root[data-theme="light"] #tk-cta.go{color:#fff}
-  #tk-cta:disabled{opacity:.6;cursor:default}
-  #ticket.stamped::after{content:"BOOKED";position:absolute;right:16px;top:12px;font-family:var(--mono);
-    font-weight:700;font-size:20px;letter-spacing:.2em;color:var(--teal);opacity:.22;transform:rotate(-6deg)}
+  .done{text-align:center;padding:6px 0 4px}
+  .done .tick{width:52px;height:52px;margin:0 auto 14px;border-radius:50%;background:var(--teal);
+    color:#07100E;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800}
+  .done h2{font-size:22px;font-weight:800;margin-bottom:8px}
+  .done .when{font-family:var(--mono);font-size:14px;color:var(--teal);letter-spacing:.03em}
+  .done .who{font-family:var(--mono);font-size:12px;color:var(--mute);margin-top:4px}
+  .done p{font-size:13.5px;line-height:1.6;color:var(--mute);margin:14px 0 16px}
+  .done a.cal{display:inline-block;text-decoration:none;border:1px solid var(--line);border-radius:999px;
+    padding:12px 20px;color:var(--ink);font-size:14px;font-weight:600}
 
-  .done{background:var(--paper);color:var(--paper-ink);border-radius:12px;padding:24px 20px;text-align:center}
-  .done .ref{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--paper-accent)}
-  .done h3{margin:8px 0 6px;font-size:26px;font-weight:800;text-transform:uppercase}
-  .done .when{font-family:var(--mono);font-size:13px;letter-spacing:.04em}
-  .done .who{font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;opacity:.7;margin-top:4px}
-  .done p{font-size:13.5px;line-height:1.6;margin:14px 0 16px;opacity:.8}
-  .done a{display:inline-block;text-decoration:none;border:1px solid var(--paper-ink);border-radius:8px;
-    padding:11px 17px;color:var(--paper-ink);font-size:13.5px;font-weight:700}
-
-  footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);color:var(--mute);
-    font-size:11.5px;line-height:1.7}
+  footer{margin-top:18px;text-align:center;color:var(--mute);font-size:11.5px;line-height:1.8}
   footer a{color:var(--mute)}
+  .themebtn{position:fixed;right:12px;bottom:12px;z-index:9;cursor:pointer;background:var(--card);
+    border:1px solid var(--line);border-radius:999px;color:var(--mute);font-family:var(--mono);
+    font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:7px 11px}
 
-  .day:focus-visible,.side:focus-visible,.p:focus-visible,.h:focus-visible,.len:focus-visible,
-  .evening-toggle:focus-visible,#tk-cta:focus-visible,#tk-fields .f:focus-visible,.themebtn:focus-visible{
+  select:focus-visible,input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{
     outline:2px solid var(--teal);outline-offset:2px}
-
-  @media(max-width:560px){
-    .two{grid-template-columns:1fr}
-    .hours{grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:5px}
-  }
+  @media(max-width:420px){ .f.two{grid-template-columns:1fr} }
 </style>
 <script>
   (function(){ try{ var t=localStorage.getItem('ifa-design'); if(t) document.documentElement.setAttribute('data-theme',t);}catch(e){} })();
@@ -200,122 +104,101 @@
 <body>
 <div class="wrap">
 
-  <div class="top">
-    <span class="brand">MONSTELO<span style="color:var(--amber)">.</span> × mobilki gsm.pl</span>
-    <button type="button" class="themebtn" id="themebtn">theme</button>
-  </div>
-  <div class="top" style="margin-top:6px"><span>IFA Berlin 2026 · Reseller Park · stand H27E-17 · 4–8 Sep</span></div>
+  <picture>
+    <source media="(max-width:640px)" srcset="assets/banner-800.png">
+    <img class="banner" src="assets/banner.png" width="1600" height="791"
+         alt="monstelo × mobilki at IFA Berlin 2026 — Reseller Park, stand H27E-17, 4–8 September">
+  </picture>
 
-  <h1>Overstock <span class="t">in.</span><br>Best price <span class="a">out.</span></h1>
-  <p class="lead">Book 15, 30 or 45 minutes at the stand. Tell us which side of the trade you are on
-    and we put the right person at the table.</p>
-  <div class="kpi">241 brands · 28 EU markets · ~8,000 prices tracked live</div>
-
-  <div class="withline" id="with-line" hidden>
-    <span class="k">Meeting with</span>
-    <span class="n" id="with-name"></span>
-    <span class="r" id="with-role"></span>
-  </div>
-
-  <div id="form-wrap">
-
-    <section id="step-day">
-      <h2>Day</h2>
-      <div id="days" role="radiogroup" aria-label="Fair day"></div>
-    </section>
-
-    <section id="step-person" hidden>
-      <h2>Who do you want to meet</h2>
-      <div id="people" role="radiogroup" aria-label="Who do you want to meet"></div>
-    </section>
-
-    <section id="step-time" hidden>
-      <h2>Time <span class="tz">all times Berlin · CEST</span></h2>
-      <p id="fresh"></p>
-      <div id="times" role="radiogroup" aria-label="Meeting time"></div>
-      <div class="legend" id="legend"><span><i></i>free</span><span class="tk"><i></i>already booked</span></div>
-
-      <div id="step-len" hidden>
-        <h2>How long</h2>
-        <div id="lens" role="radiogroup" aria-label="Meeting length"></div>
-        <p id="len-note"></p>
-      </div>
-
-      <div class="evening" id="evening">
-        <button type="button" class="evening-toggle" id="evening-btn">Evening after the show</button>
-        <div id="evening-fields" hidden>
-          <div class="two" style="margin-top:12px">
-            <div>
-              <label for="evening-when">When</label>
-              <select id="evening-when">
-                <option>18:00</option><option>18:30</option><option>19:00</option><option>19:30</option>
-                <option>20:00</option><option>20:30</option><option>21:00</option><option>21:30</option>
-                <option>22:00</option><option>22:30</option><option>23:00</option>
-              </select>
-            </div>
-            <div>
-              <label for="evening-place">Where</label>
-              <input id="evening-place" maxlength="120" placeholder="Restaurant, bar, hotel lobby…" autocomplete="off">
-            </div>
-          </div>
-        </div>
-        <p class="hint">Dinner, a drink, a longer talk — tell us where and we will be there.</p>
-      </div>
-    </section>
-
+  <div class="card">
     <form id="form" novalidate>
-      <section id="step-you" hidden>
-        <h2>Your details</h2>
-        <div class="fields">
-          <div class="two">
-            <div><label for="f-name">Name</label><input id="f-name" maxlength="80" autocomplete="name"></div>
-            <div><label for="f-company">Company</label><input id="f-company" maxlength="80" autocomplete="organization"></div>
-          </div>
-          <div class="two">
-            <div><label for="f-email">Work e-mail</label><input id="f-email" type="email" maxlength="120" autocomplete="email"></div>
-            <div><label for="f-phone">Phone <span class="opt">optional</span></label><input id="f-phone" type="tel" maxlength="30" autocomplete="tel"></div>
-          </div>
-          <div>
-            <label for="f-note">What do you want to talk about? <span class="opt">optional</span></label>
-            <textarea id="f-note" maxlength="500" placeholder="Buying stock · selling us your surplus · brand store · logistics"></textarea>
-          </div>
-          <label class="consent">
-            <input type="checkbox" id="f-consent">
-            <span>I agree that Monstelo may process my details to arrange this meeting at IFA 2026.
-              Controller: Import Eksport Sp. z o.o. Sp.k., Kraków. Data is kept for 90 days after the fair.
-              <a href="https://monstelo.com/privacy" target="_blank" rel="noopener">Privacy notice</a>.</span>
-          </label>
-        </div>
-        <div class="msg" id="msg"></div>
-        <div id="closed" hidden>Booking is closed right now. Write to brands@monstelo.com — we will hold a slot for you.</div>
-      </section>
-    </form>
-  </div>
 
-  <div class="done" id="done" hidden>
-    <div class="ref" id="done-ref"></div>
-    <h3>Meeting booked.</h3>
-    <div class="when" id="done-when"></div>
-    <div class="who" id="done-who"></div>
-    <p>Stand H27E-17, Reseller Park. A calendar invitation and a confirmation are on their way —
-      if they are not there in a minute, check spam.</p>
-    <a id="done-cal" href="#" target="_blank" rel="noopener">Add to my calendar</a>
+      <div class="with" id="with-line" hidden>
+        <span class="ini" id="with-ini"></span>
+        <span><span class="n" id="with-name"></span><span class="r" id="with-role"></span></span>
+      </div>
+
+      <div class="f">
+        <label for="f-day">Day</label>
+        <select id="f-day"><option value="">— select a day —</option></select>
+      </div>
+
+      <div class="f" id="wrap-person">
+        <label for="f-person">Who you want to meet</label>
+        <select id="f-person"></select>
+      </div>
+
+      <div class="f two">
+        <div>
+          <label for="f-time">Time</label>
+          <select id="f-time" disabled><option value="">— select a day first —</option></select>
+        </div>
+        <div>
+          <label for="f-len">Length</label>
+          <select id="f-len">
+            <option value="15">15 min</option>
+            <option value="30">30 min</option>
+            <option value="45">45 min</option>
+          </select>
+        </div>
+      </div>
+      <p class="hint" id="hint-time">All times Berlin (CEST).</p>
+
+      <label class="evening">
+        <input type="checkbox" id="f-evening">
+        <span><b>Evening after the show</b>
+          <span class="sub">Dinner, a drink, a longer talk — off-site, 18:00–23:00.</span></span>
+      </label>
+
+      <div class="f" id="wrap-place" hidden>
+        <label for="f-place">Where</label>
+        <input id="f-place" maxlength="120" placeholder="Restaurant, bar, hotel lobby…" autocomplete="off">
+      </div>
+
+      <div class="f two">
+        <div><label for="f-name">Name</label><input id="f-name" maxlength="80" autocomplete="name"></div>
+        <div><label for="f-company">Company</label><input id="f-company" maxlength="80" autocomplete="organization"></div>
+      </div>
+      <div class="f two">
+        <div><label for="f-email">Work e-mail</label><input id="f-email" type="email" maxlength="120" autocomplete="email"></div>
+        <div><label for="f-phone">Phone <span class="opt">(optional)</span></label><input id="f-phone" type="tel" maxlength="30" autocomplete="tel"></div>
+      </div>
+      <div class="f">
+        <label for="f-note">What do you want to talk about? <span class="opt">(optional)</span></label>
+        <textarea id="f-note" maxlength="500" placeholder="Buying stock · selling us your surplus · brand store · logistics"></textarea>
+      </div>
+
+      <label class="consent">
+        <input type="checkbox" id="f-consent">
+        <span>I agree that Monstelo may process my details to arrange this meeting at IFA 2026.
+          Controller: Import Eksport Sp. z o.o. Sp.k. Data kept 90 days after the fair.
+          <a href="https://monstelo.com/privacy" target="_blank" rel="noopener">Privacy notice</a>.</span>
+      </label>
+
+      <button class="send" id="send" type="submit"><span class="arrow">→</span>Book a meeting</button>
+      <div class="msg" id="msg"></div>
+    </form>
+
+    <div class="done" id="done" hidden>
+      <div class="tick">✓</div>
+      <h2>Meeting booked</h2>
+      <div class="when" id="done-when"></div>
+      <div class="who" id="done-who"></div>
+      <p>Reseller Park, stand H27E-17. A calendar invitation and a confirmation are on their way —
+        if they are not there in a minute, check spam.</p>
+      <a class="cal" id="done-cal" href="#" target="_blank" rel="noopener">Add to my calendar</a>
+    </div>
   </div>
 
   <footer>
-    Monstelo × Mobilki GSM · IFA Berlin 2026 · Reseller Park · stand H27E-17 · 4–8 September 2026<br>
-    Questions before the fair: <a href="mailto:brands@monstelo.com">brands@monstelo.com</a> · +48 602 443 657
-    <noscript><br><b>JavaScript is off — write to brands@monstelo.com and we will book the slot for you.</b></noscript>
+    <a href="mailto:brands@monstelo.com">brands@monstelo.com</a> · +48 602 443 657
+    <noscript><br><b>JavaScript is off — write to us and we will book the slot for you.</b></noscript>
   </footer>
 </div>
 
-<div id="ticket" aria-live="polite">
-  <div id="tk-ref">IFA-····-····-··</div>
-  <div id="tk-fields"></div>
-  <button type="button" id="tk-cta">Pick a day to start</button>
-</div>
+<button type="button" class="themebtn" id="themebtn">theme</button>
 
-<script src="assets/app.js?v=202608271153"></script>
+<script src="assets/app.js?v=20260827b"></script>
 <script>
   (function(){
     var r=document.documentElement, b=document.getElementById('themebtn');
