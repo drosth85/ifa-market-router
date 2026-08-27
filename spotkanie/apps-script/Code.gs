@@ -275,6 +275,7 @@ function doGet(e) {
     return json({
       ok: true,
       person: pid,
+      last_push_result: PropertiesService.getScriptProperties().getProperty('last_push_result'),
       calendar: calName,
       calendarId: CALENDARS[pid] || CALENDAR_ID,
       sheetRows: getSheet().getLastRow() - 1,
@@ -645,6 +646,11 @@ function pushBusy() {
     headers: { 'X-Sync-Ts': ts, 'X-Sync-Sig': sign_(ts, body) },
     payload: body, muteHttpExceptions: true
   });
+  /* Bez tego błąd backendu ginie w muteHttpExceptions i wygląda jak udane wypchnięcie. */
+  PropertiesService.getScriptProperties().setProperty('last_push_result',
+    Utilities.formatDate(new Date(), 'Europe/Berlin', 'HH:mm:ss') + ' HTTP ' +
+    res.getResponseCode() + ' ' + String(res.getContentText()).slice(0, 120) +
+    ' | key:' + (syncKey_() ? syncKey_().length + ' znakow' : 'BRAK'));
   var ts2 = String(Math.floor(new Date().getTime() / 1000));
   UrlFetchApp.fetch(PHP_BASE + '/retry.php', {
     method: 'get', headers: { 'X-Sync-Ts': ts2, 'X-Sync-Sig': sign_(ts2, 'retry') },
