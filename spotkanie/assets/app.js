@@ -268,6 +268,11 @@ if (typeof document !== "undefined") (function () {
 
   const isEvening = () => $("f-time").value === "evening";
 
+  /* Jedno źródło prawdy o wybranej osobie. Przy linku personalnym (?td) pole wyboru jest UKRYTE,
+     więc czytanie z niego dawało „any" i siatka pokazywała wszystko jako wolne — dokładnie tak
+     zgłosił to użytkownik 27.08. Stan wie, kto jest wybrany, niezależnie od tego, co widać. */
+  const wybranaOsoba = () => (state.fixedPerson ? state.person : $("f-person").value) || "any";
+
   function fillTimes() {
     const sel = $("f-time");
     const keep = sel.value;
@@ -276,7 +281,7 @@ if (typeof document !== "undefined") (function () {
       sel.disabled = true;
       return;
     }
-    const busy = busyFor($("f-person").value || "any");
+    const busy = busyFor(wybranaOsoba());
     const len = Number($("f-len").value) || 15;
     const opts = gridSlots(DAY_START, DAY_END, SLOT_MIN).map((t) => {
       const fits = toMin(t) + len <= DAY_END * 60;
@@ -298,7 +303,7 @@ if (typeof document !== "undefined") (function () {
     }
     $("f-len").disabled = false;
     const from = $("f-time").value;
-    const busy = busyFor($("f-person").value || "any");
+    const busy = busyFor(wybranaOsoba());
     const keep = $("f-len").value;
     $("f-len").innerHTML = DURATIONS.map((d) => {
       const ok = !from || (toMin(from) + d <= DAY_END * 60 && isFree(from, d, busy));
@@ -457,6 +462,7 @@ if (typeof document !== "undefined") (function () {
     if (fixed) {
       state.person = fixed.id;
       state.fixedPerson = true;
+      $("f-person").value = fixed.id;      // pole zostaje spójne ze stanem, choć jest ukryte
       $("wrap-person").hidden = true;
       $("with-line").hidden = false;
       $("with-ini").textContent = initials(fixed.name);
