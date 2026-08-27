@@ -92,7 +92,8 @@ ok(A.validate({ ...good, company: "" }).includes("company"), "brak firmy odrzuco
 ok(A.validate({ ...good, name: "Ja" }).includes("name"), "za krótkie imię odrzucone");
 ok(A.validate({ ...good, date: "2026-09-09" }).includes("date"), "dzień spoza targów odrzucony");
 ok(A.validate({ ...good, evening: true, place: "" }).includes("place"), "wieczór bez miejsca odrzucony");
-ok(A.validate({ ...good, evening: true, from: "19:00", to: "20:00", place: "Hotel bar" }).length === 0, "wieczór z miejscem przechodzi");
+ok(A.validate({ ...good, evening: true, from: "18:00", to: "23:00", place: "Hotel bar" }).length === 0, "wieczor jako cale okno przechodzi");
+ok(A.validate({ ...good, evening: true, from: "17:00", to: "23:00", place: "Hotel bar" }).includes("evening"), "wieczor przed 18:00 odrzucony");
 ok(() => A.validate({ ...good, to: undefined }).includes("slot"), "brak godziny końcowej nie wywala walidatora");
 ok(A.validate({ ...good, person: "" }).includes("person"), "brak wybranej osoby odrzucony");
 ok(A.validate({ ...good, person: "ktos-obcy" }).includes("person"), "osoba spoza listy odrzucona");

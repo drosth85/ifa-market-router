@@ -163,6 +163,7 @@ function validate(b) {
   if (b.from && b.to && toMin(b.to) <= toMin(b.from)) err.push("slot");
   if (!b.evening && b.from && b.to && !DURATIONS.includes(toMin(b.to) - toMin(b.from))) err.push("duration");
   if (!b.evening && b.to && toMin(b.to) > DAY_END * 60) err.push("duration");
+  if (b.evening && b.from && (toMin(b.from) < EVENING_START * 60 || toMin(b.to) > EVENING_END * 60)) err.push("evening");
   if (!b.person || !personById(b.person)) err.push("person");
   if (b.evening && !b.place) err.push("place");
   if (!b.consent) err.push("consent");
@@ -248,17 +249,11 @@ if (typeof document !== "undefined") (function () {
     if (state.fixedPerson) $("f-person").value = state.person;
   }
 
+  const isEvening = () => $("f-time").value === "evening";
+
   function fillTimes() {
     const sel = $("f-time");
-    const evening = $("f-evening").checked;
     const keep = sel.value;
-    if (evening) {
-      sel.innerHTML = eveningTimes(EVENING_START, EVENING_END)
-        .map((t) => `<option value="${t}">${t}</option>`).join("");
-      sel.disabled = false;
-      $("f-len").value = "60";
-      return;
-    }
     if (!$("f-day").value) {
       sel.innerHTML = '<option value="">— select a day first —</option>';
       sel.disabled = true;
@@ -272,15 +267,15 @@ if (typeof document !== "undefined") (function () {
       const why = !fits ? " — past closing" : " — fully booked";
       return `<option value="${t}"${ok ? "" : " disabled"}>${t}${ok ? "" : why}</option>`;
     });
-    sel.innerHTML = '<option value="">— select a time —</option>' + opts.join("");
+    sel.innerHTML = '<option value="">— select a time —</option>' + opts.join("") +
+      `<option value="evening">Evening off-site: ${pad(EVENING_START)}:00–${pad(EVENING_END)}:00</option>`;
     sel.disabled = false;
     if (keep) sel.value = keep;
   }
 
   function fillLengths() {
-    const evening = $("f-evening").checked;
-    if (evening) {
-      $("f-len").innerHTML = '<option value="60">60 min</option>';
+    if (isEvening()) {                       // wieczór to całe okno, nie kwadranse
+      $("f-len").innerHTML = '<option value="">evening</option>';
       $("f-len").disabled = true;
       return;
     }
@@ -330,12 +325,10 @@ if (typeof document !== "undefined") (function () {
     fillLengths();
   }
 
-  function onEvening() {
-    const evening = $("f-evening").checked;
-    $("wrap-place").hidden = !evening;
-    $("f-time").value = "";
+  /* Wybór wieczoru z listy godzin odsłania pytanie o miejsce i wyłącza długość. */
+  function onTime() {
+    $("wrap-place").hidden = !isEvening();
     fillLengths();
-    fillTimes();
   }
 
   function bookingFromForm() {
@@ -344,9 +337,9 @@ if (typeof document !== "undefined") (function () {
       (window.crypto || window.msCrypto).getRandomValues(buf);
       state.nonce = Array.from(buf).map((b) => b.toString(16).padStart(2, "0")).join("");
     }
-    const evening = $("f-evening").checked;
-    const from = $("f-time").value;
-    const len = evening ? 60 : Number($("f-len").value) || 15;
+    const evening = isEvening();
+    const from = evening ? pad(EVENING_START) + ":00" : $("f-time").value;
+    const len = evening ? (EVENING_END - EVENING_START) * 60 : Number($("f-len").value) || 15;
     const person = state.fixedPerson ? state.person : $("f-person").value || "any";
     return {
       name: $("f-name").value.trim().slice(0, 80),
@@ -431,8 +424,9 @@ if (typeof document !== "undefined") (function () {
     const day = DAYS.find((d) => d.iso === b.date);
     $("form").hidden = true;
     $("done").hidden = false;
-    $("done-when").textContent =
-      `${day.dow} ${day.d} ${day.mon} · ${b.from}–${b.to}` + (b.evening ? ` · ${b.place}` : "");
+    $("done-when").textContent = b.evening
+      ? `${day.dow} ${day.d} ${day.mon} · evening off-site · ${b.place}`
+      : `${day.dow} ${day.d} ${day.mon} · ${b.from}–${b.to}`;
     $("done-who").textContent = out.assigned
       ? `with ${b.personName} — the colleague free at that hour`
       : b.person === "any" ? "we will assign the right person" : `with ${b.personName}`;
@@ -458,9 +452,8 @@ if (typeof document !== "undefined") (function () {
 
     $("f-day").addEventListener("change", onDay);
     $("f-person").addEventListener("change", () => { fillTimes(); fillLengths(); });
-    $("f-time").addEventListener("change", fillLengths);
+    $("f-time").addEventListener("change", onTime);
     $("f-len").addEventListener("change", fillTimes);
-    $("f-evening").addEventListener("change", onEvening);
     $("form").addEventListener("submit", submit);
   }
 

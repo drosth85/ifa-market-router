@@ -54,7 +54,8 @@ function validate_booking(array $b): array {
   if (empty($b['consent'])) $err[] = 'consent';
   if (!empty($b['evening'])) {
     if (clean_field($b['place'] ?? '', 120) === '') $err[] = 'place';
-    if ($from >= 0 && $to >= 0 && ($from < DAY_END_H * 60 || $to > EVENING_END_H * 60 || $to - $from > 180)) $err[] = 'evening';
+    // Wieczór rezerwujemy jako całe okno 18:00-23:00 — dokładną porę ustala się przy miejscu.
+    if ($from >= 0 && $to >= 0 && ($from < DAY_END_H * 60 || $to > EVENING_END_H * 60 || $to <= $from)) $err[] = 'evening';
   } elseif ($from >= 0 && $to >= 0) {
     if ($from % 15 !== 0) $err[] = 'grid';
     if (!in_array($to - $from, DURATIONS, true)) $err[] = 'duration';
