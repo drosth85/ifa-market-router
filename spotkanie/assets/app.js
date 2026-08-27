@@ -46,13 +46,20 @@ const LANGS = ["EN", "PL", "CZ"];
 function personById(id) { return PEOPLE.find((p) => p.id === id) || null; }
 
 /* Linki personalne dla handlowców: …/spotkanie/?td, ?p=td albo ?person=drozd. */
+/* Adres z gołym znakiem procenta (np. ?utm_content=20%off z kampanii) wywracał
+   decodeURIComponent wyjątkiem URIError. Ta funkcja jest wołana przy starcie, PRZED podpięciem
+   zdarzeń, więc jeden taki link zabijał cały formularz: gość widział stronę, ale nic nie działało. */
+function dekoduj(v) {
+  try { return decodeURIComponent(String(v || "")); } catch (e) { return String(v || ""); }
+}
+
 function personFromQuery(search) {
   const q = String(search || "").replace(/^\?/, "");
   if (!q) return null;
   const keys = q
     .split("&")
     .flatMap((part) => [part.split("=")[0], part.split("=").pop()])
-    .map((k) => decodeURIComponent(k || "").toLowerCase());
+    .map((k) => dekoduj(k).toLowerCase());
   for (const k of keys) {
     if (!k) continue;
     const hit = PEOPLE.find((p) => p.id !== "any" && (p.slug === k || p.id === k));
@@ -157,11 +164,15 @@ function nextStep(state, formReady, detailsFilled) {
 
 function validate(b) {
   const err = [];
+  /* Godzina, której nie da się odczytać, dawała NaN — a każde porównanie z NaN jest fałszywe,
+     więc walidator meldował „brak błędów" i dopiero serwer odrzucał rezerwację. */
+  const zlaGodzina = (t) => t != null && t !== "" && !/^\d{1,2}:\d{2}$/.test(String(t));
   if (!b.name || b.name.trim().length < 3) err.push("name");
   if (!b.company || !b.company.trim()) err.push("company");
   if (!b.email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(b.email)) err.push("email");
   if (!b.date || !DAYS.some((d) => d.iso === b.date)) err.push("date");
   if (!b.from || !b.to) err.push("slot");
+  if (zlaGodzina(b.from) || zlaGodzina(b.to)) err.push("slot");
   if (b.from && b.to && toMin(b.to) <= toMin(b.from)) err.push("slot");
   if (!b.evening && b.from && b.to && !DURATIONS.includes(toMin(b.to) - toMin(b.from))) err.push("duration");
   if (!b.evening && b.to && toMin(b.to) > DAY_END * 60) err.push("duration");
@@ -169,7 +180,9 @@ function validate(b) {
   if (!b.person || !personById(b.person)) err.push("person");
   if (b.evening && !b.place) err.push("place");
   if (!b.consent) err.push("consent");
-  return err;
+  /* Ten sam kod potrafił wpaść dwa razy (np. 17:45-19:00 to i zła długość, i po zamknięciu).
+     Backend robi array_unique, więc bez tego kontrakt obu stron się rozjeżdżał. */
+  return err.filter((k, i) => err.indexOf(k) === i);
 }
 
 /* Link "dodaj do swojego kalendarza" dla gościa. */
