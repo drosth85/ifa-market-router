@@ -101,25 +101,85 @@
 
   select:focus-visible,input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{
     outline:2px solid var(--teal);outline-offset:2px}
+  .zgoda{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;flex-wrap:wrap;gap:10px;
+    align-items:center;justify-content:center;background:var(--card);border-top:1px solid var(--line);
+    padding:11px 14px;font-size:11.5px;line-height:1.5;color:var(--mute)}
+  .zgoda-btn{display:flex;gap:8px;flex:none}
+  .zgoda button{cursor:pointer;border-radius:999px;padding:7px 15px;font-family:var(--sans);
+    font-size:12px;font-weight:600;border:1px solid var(--line);background:transparent;color:var(--ink)}
+  .zgoda button#zgoda-tak{background:var(--amber);color:var(--amber-ink);border-color:var(--amber)}
   @media(max-width:420px){ .f.two{grid-template-columns:1fr} }
 </style>
 <script>
   (function(){ try{ var t=localStorage.getItem('ifa-design'); if(t) document.documentElement.setAttribute('data-theme',t);}catch(e){} })();
 </script>
+
+<!-- Google Ads (gtag.js). Tryb zgody v2: domyślnie WSZYSTKO odmówione, więc do momentu zgody
+     nie powstaje żaden plik cookie ani identyfikator — Google dostaje wyłącznie bezciasteczkowy
+     sygnał. Zgoda podnosi się dopiero po kliknięciu w pasku niżej. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17508931481"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied',
+    analytics_storage: 'denied', wait_for_update: 500
+  });
+  gtag('js', new Date());
+  gtag('config', 'AW-17508931481');
+  try {
+    if (localStorage.getItem('ifa-zgoda') === 'tak') {
+      gtag('consent', 'update', { ad_storage: 'granted', ad_user_data: 'granted',
+                                  ad_personalization: 'granted', analytics_storage: 'granted' });
+    }
+  } catch (e) {}
+</script>
+
+<script>
+  /* Piksel Meta. W odróżnieniu od Google nie ma trybu zgody — sam `fbevents.js` zakłada plik
+     cookie `_fbp` od razu po wczytaniu. Dlatego NIE ładujemy go wcale, dopóki gość nie kliknie
+     „Accept"; funkcja niżej jest wołana z paska zgody (i przy starcie, gdy zgoda już zapadła).
+     Wariant <noscript> z oryginalnego fragmentu pomijamy świadomie: strzelałby zawsze,
+     także bez zgody, a bez JavaScriptu formularz i tak nie działa. */
+  function wlaczMetaPixel() {
+    if (window.fbq) return;
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,
+    'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1912520865651352');
+    fbq('track', 'PageView');
+  }
+  try { if (localStorage.getItem('ifa-zgoda') === 'tak') wlaczMetaPixel(); } catch (e) {}
+</script>
 </head>
 <body>
 <div class="wrap">
 
+  <!-- Baner to największy element strony i jedyny nad zgięciem, więc decyduje o odczuciu
+       szybkości. WebP zbija go z 752 kB do 55 kB; PNG zostaje dla przeglądarek bez WebP.
+       width/height rezerwują miejsce, żeby treść nie podskoczyła po doładowaniu obrazu. -->
+  <!-- Baner to największy element strony i jedyny nad zgięciem, więc decyduje o odczuciu
+       szybkości. WebP zbija go z 752 kB do 55 kB, a `sizes` mówi przeglądarce, że w układzie
+       o szerokości 560 px plik 1600 px jest potrzebny WYŁĄCZNIE na ekranie o podwójnej gęstości
+       — zwykły desktop pobiera wersję 800 px (25 kB). width/height rezerwują miejsce,
+       żeby formularz nie podskoczył po doładowaniu obrazu. -->
   <picture>
-    <source media="(max-width:640px)" srcset="assets/banner-800.png">
-    <img class="banner" src="assets/banner.png" width="1600" height="791"
+    <source type="image/webp"
+            srcset="assets/banner-800.webp 800w, assets/banner-1600.webp 1600w"
+            sizes="(max-width:600px) 100vw, 528px">
+    <img class="banner" src="assets/banner-800.png"
+         srcset="assets/banner-800.png 800w, assets/banner.png 1600w"
+         sizes="(max-width:600px) 100vw, 528px"
+         width="1600" height="800" fetchpriority="high" decoding="async"
          alt="monstelo × mobilki at IFA Berlin 2026 — Reseller Park, stand H27E-17, 4–8 September">
   </picture>
 
   <div class="card">
     <h1>Book a meeting</h1>
     <p class="intro">Book a meeting with our team at IFA Berlin 2026.<br>
-      Reseller Park · stand H27E-17B.</p>
+      Reseller Park · stand H27E-17.</p>
 
     <form id="form" novalidate>
 
@@ -199,10 +259,44 @@
   </footer>
 </div>
 
+
+<div class="zgoda" id="zgoda" hidden>
+  <span>We use cookies to measure how well our IFA campaign works. Booking a meeting works either way.</span>
+  <span class="zgoda-btn">
+    <button type="button" id="zgoda-nie">Decline</button>
+    <button type="button" id="zgoda-tak">Accept</button>
+  </span>
+</div>
+
 <button type="button" class="themebtn" id="themebtn">theme</button>
 
-<script src="assets/app.js?v=20260827i"></script>
+<script src="assets/app.js?v=20260827k"></script>
 <script>
+  /* Pasek zgody pokazujemy tylko temu, kto jeszcze nie zdecydował. Wybór zapamiętujemy
+     lokalnie — nie wysyłamy go nigdzie, bo to informacja wyłącznie dla tej przeglądarki. */
+  (function(){
+    var pasek = document.getElementById('zgoda');
+    var zapis = null;
+    try { zapis = localStorage.getItem('ifa-zgoda'); } catch (e) {}
+    /* Pasek jest przypięty do dołu ekranu, więc bez tego zasłaniałby przycisk rezerwacji
+       dokładnie w momencie, w którym gość chce go nacisnąć. */
+    if (!zapis) { pasek.hidden = false; document.body.style.paddingBottom = '72px'; }
+    function decyzja(v){
+      try { localStorage.setItem('ifa-zgoda', v); } catch (e) {}
+      pasek.hidden = true;
+      document.body.style.paddingBottom = '';
+      if (v === 'tak') {
+        if (window.gtag) {
+          gtag('consent', 'update', { ad_storage: 'granted', ad_user_data: 'granted',
+                                      ad_personalization: 'granted', analytics_storage: 'granted' });
+        }
+        wlaczMetaPixel();
+      }
+    }
+    document.getElementById('zgoda-tak').addEventListener('click', function(){ decyzja('tak'); });
+    document.getElementById('zgoda-nie').addEventListener('click', function(){ decyzja('nie'); });
+  })();
+
   (function(){
     var r=document.documentElement, b=document.getElementById('themebtn');
     function label(){ b.textContent = r.getAttribute('data-theme')==='light' ? 'light' : 'dark'; }

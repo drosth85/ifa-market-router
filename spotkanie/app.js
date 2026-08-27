@@ -29,28 +29,37 @@ const TZ = "Europe/Berlin";
 
 /* Załoga na stoisku. Kolejność = kolejność przydziału przy "Anyone free" (ta sama w backendzie).
    Adresy e-mail żyją wyłącznie po stronie serwera — klient wysyła samo `id`. */
+/* Kolejność WYŚWIETLANIA na liście — nie mylić z kolejnością przydziału przy „Anyone free",
+   która żyje po stronie backendu (ASSIGN_ORDER w _domain.php) i jest od tej niezależna. */
 const PEOPLE = [
   { id: "any",        slug: "",   name: "Anyone free",        role: "We assign the first colleague free", langs: [] },
-  { id: "juszczyk",   slug: "sj", name: "Sebastian Juszczyk", role: "Board member · sourcing",  langs: ["EN", "PL"] },
-  { id: "mamcarczyk", slug: "mm", name: "Michał Mamcarczyk",  role: "Key Account Manager",      langs: ["EN", "PL"] },
-  { id: "tuchowska",  slug: "nt", name: "Nikola Tuchowska",   role: "Key Account Manager",      langs: ["EN", "PL"] },
-  { id: "tabak",      slug: "lt", name: "Łukasz Tabak",       role: "Key Account Manager",      langs: ["PL"] },
-  { id: "kocaba",     slug: "bk", name: "Błażej Kócaba",      role: "Key Account Manager",      langs: ["PL"] },
+  { id: "mamcarczyk", slug: "mm", name: "Michał Mamcarczyk",  role: "B2B Key Account Manager",  langs: ["EN", "PL"] },
+  { id: "tuchowska",  slug: "nt", name: "Nikola Tuchowska",   role: "B2B Key Account Manager",  langs: ["EN", "PL"] },
+  { id: "tabak",      slug: "lt", name: "Łukasz Tabak",       role: "B2B Key Account Manager",  langs: ["PL"] },
+  { id: "kocaba",     slug: "bk", name: "Błażej Kócaba",      role: "B2B Key Account Manager",  langs: ["PL"] },
+  { id: "palka",      slug: "kp", name: "Kamil Pałka",        role: "B2B Key Account Manager",  langs: ["PL", "CZ"] },
   { id: "drozd",      slug: "td", name: "Tomasz Drozd",       role: "Brand growth · retail",    langs: ["EN", "PL"] },
-  { id: "palka",      slug: "kp", name: "Kamil Pałka",        role: "Key Account Manager",      langs: ["PL", "CZ"] },
+  { id: "juszczyk",   slug: "sj", name: "Sebastian Juszczyk", role: "Board member · sourcing",  langs: ["EN", "PL"] },
 ];
 const LANGS = ["EN", "PL", "CZ"];
 
 function personById(id) { return PEOPLE.find((p) => p.id === id) || null; }
 
 /* Linki personalne dla handlowców: …/spotkanie/?td, ?p=td albo ?person=drozd. */
+/* Adres z gołym znakiem procenta (np. ?utm_content=20%off z kampanii) wywracał
+   decodeURIComponent wyjątkiem URIError. Ta funkcja jest wołana przy starcie, PRZED podpięciem
+   zdarzeń, więc jeden taki link zabijał cały formularz: gość widział stronę, ale nic nie działało. */
+function dekoduj(v) {
+  try { return decodeURIComponent(String(v || "")); } catch (e) { return String(v || ""); }
+}
+
 function personFromQuery(search) {
   const q = String(search || "").replace(/^\?/, "");
   if (!q) return null;
   const keys = q
     .split("&")
     .flatMap((part) => [part.split("=")[0], part.split("=").pop()])
-    .map((k) => decodeURIComponent(k || "").toLowerCase());
+    .map((k) => dekoduj(k).toLowerCase());
   for (const k of keys) {
     if (!k) continue;
     const hit = PEOPLE.find((p) => p.id !== "any" && (p.slug === k || p.id === k));
@@ -142,29 +151,38 @@ function ticketFields(state) {
 }
 
 /* Czego brakuje do rezerwacji — treść przycisku bierze się stąd. */
-function nextStep(state, formReady) {
+function nextStep(state, formReady, detailsFilled) {
   if (!state.date) return { key: "date", label: "Pick a day to start" };
   if (!state.person) return { key: "person", label: "Pick who you want to meet" };
   if (!state.from) return { key: "time", label: "Pick a time" };
   if (state.evening && !state.place) return { key: "place", label: "Tell us where to meet" };
+  // Zgoda to jedno kliknięcie, więc mówimy o niej wprost zamiast ogólnego "uzupełnij dane".
+  if (!formReady && detailsFilled) return { key: "consent", label: "Tick the consent box ▸" };
   if (!formReady) return { key: "you", label: "Add your details ▸" };
   return { key: "go", label: "Book this meeting ▸" };
 }
 
 function validate(b) {
   const err = [];
+  /* Godzina, której nie da się odczytać, dawała NaN — a każde porównanie z NaN jest fałszywe,
+     więc walidator meldował „brak błędów" i dopiero serwer odrzucał rezerwację. */
+  const zlaGodzina = (t) => t != null && t !== "" && !/^\d{1,2}:\d{2}$/.test(String(t));
   if (!b.name || b.name.trim().length < 3) err.push("name");
   if (!b.company || !b.company.trim()) err.push("company");
   if (!b.email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(b.email)) err.push("email");
   if (!b.date || !DAYS.some((d) => d.iso === b.date)) err.push("date");
   if (!b.from || !b.to) err.push("slot");
+  if (zlaGodzina(b.from) || zlaGodzina(b.to)) err.push("slot");
   if (b.from && b.to && toMin(b.to) <= toMin(b.from)) err.push("slot");
   if (!b.evening && b.from && b.to && !DURATIONS.includes(toMin(b.to) - toMin(b.from))) err.push("duration");
   if (!b.evening && b.to && toMin(b.to) > DAY_END * 60) err.push("duration");
+  if (b.evening && b.from && (toMin(b.from) < EVENING_START * 60 || toMin(b.to) > EVENING_END * 60)) err.push("evening");
   if (!b.person || !personById(b.person)) err.push("person");
   if (b.evening && !b.place) err.push("place");
   if (!b.consent) err.push("consent");
-  return err;
+  /* Ten sam kod potrafił wpaść dwa razy (np. 17:45-19:00 to i zła długość, i po zamknięciu).
+     Backend robi array_unique, więc bez tego kontrakt obu stron się rozjeżdżał. */
+  return err.filter((k, i) => err.indexOf(k) === i);
 }
 
 /* Link "dodaj do swojego kalendarza" dla gościa. */
@@ -192,23 +210,16 @@ function hourlySlots(start, end) {
 }
 
 /* ---------------------------------------------------------------- przeglądarka */
+/* Widok jest jednym formularzem: dzień → osoba → godzina → dane. Zajęte godziny są w liście
+   wyłączone z dopiskiem "fully booked", tak jak u Partner Tele — najprościej i bez zaskoczeń. */
 if (typeof document !== "undefined") (function () {
   const $ = (id) => document.getElementById(id);
-  const state = {
-    date: null, person: null, from: null, to: null, dur: SLOT_MIN,
-    evening: false, place: "", busy: [], free: {}, day: null, fixedPerson: false,
-    stale: null, nonce: null, sending: false,
-  };
+  const state = { day: null, free: {}, fixedPerson: false, nonce: null, sending: false };
 
-  const motion = () =>
-    window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
-
-  const show = (id, on) => { $(id).hidden = !on; };
-  const jump = (id) => $(id).scrollIntoView({ behavior: motion(), block: "start" });
+  const initials = (name) => name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 
   /* ---------- dane ---------- */
-  const dayCache = new Map();
-
+  const cache = new Map();
   async function fetchDay(date) {
     const url = USE_PHP_BACKEND
       ? `${API}/free.php?date=${encodeURIComponent(date)}`
@@ -219,250 +230,125 @@ if (typeof document !== "undefined") (function () {
       if (!t.trim().startsWith("{")) return null;
       const out = JSON.parse(t);
       return out.ok && out.people ? out : null;
-    } catch (e) {
-      return null;
-    }
+    } catch (e) { return null; }
   }
-
-  /* Dostępność to najlepszy wysiłek: jedna próba, jedno ponowienie, potem pokazujemy wszystko
-     i pozwalamy rezerwować — serwer i tak odrzuci zajęty termin. */
   function loadDay(date) {
-    if (dayCache.has(date)) return dayCache.get(date);
+    if (cache.has(date)) return cache.get(date);
     const p = (async () => (await fetchDay(date)) || (await fetchDay(date)))();
-    dayCache.set(date, p);
-    p.then((v) => { if (v === null) dayCache.delete(date); });
+    cache.set(date, p);
+    p.then((v) => { if (v === null) cache.delete(date); });
     return p;
   }
-
-  function busyFor(pid) {
+  const busyFor = (pid) => {
     if (!state.day) return [];
     if (pid === "any") {
       const lists = PEOPLE.filter((x) => x.id !== "any").map((x) => state.day.people[x.id]).filter(Boolean);
       return lists.length ? allBusyQuarters(lists) : [];
     }
     return state.day.people[pid] || [];
+  };
+
+  /* ---------- listy ---------- */
+  function fillDays() {
+    $("f-day").innerHTML = '<option value="">— select a day —</option>' +
+      DAYS.map((d) => `<option value="${d.iso}">${d.dow} ${d.d} ${d.mon}</option>`).join("");
   }
 
-  /* ---------- widok ---------- */
-  function renderDays() {
-    $("days").innerHTML = DAYS.map(
-      (d) => `<button type="button" class="day${d.iso === state.date ? " on" : ""}" role="radio"
-                aria-checked="${d.iso === state.date}" data-iso="${d.iso}">
-                <span class="dow">${d.dow}</span><span class="dnum">${d.d}</span><span class="mon">${d.mon}</span>
-              </button>`
-    ).join("");
-    $("days").querySelectorAll(".day").forEach((el) =>
-      el.addEventListener("click", () => pickDay(el.dataset.iso))
-    );
-  }
-
-  function renderPeople() {
-    const list = state.side === "sell" ? PEOPLE : PEOPLE;      // ta sama załoga, kolejność bez zmian
-    $("people").innerHTML = list.map((p) => {
-      const busy = busyFor(p.id);
-      const free = p.id === "any"
-        ? Object.values(state.free || {}).reduce((a, b) => a + b, 0)
-        : (state.free && state.free[p.id] != null ? state.free[p.id] : freeQuarters(busy));
-      const known = state.day !== null;
-      const full = known && free === 0;
-      // Tylko języki, którymi ta osoba faktycznie mówi — wygaszone chipy myliły gości.
-      const langs = p.id === "any" || !p.langs.length ? "" :
-        `<span class="lg">${p.langs.map((l) => `<em>${l}</em>`).join("")}</span>`;
-      return `<button type="button" class="p${p.id === "any" ? " any" : ""}${p.id === state.person ? " on" : ""}"
-                role="radio" aria-checked="${p.id === state.person}" data-id="${p.id}" ${full ? "disabled" : ""}>
-                <span class="ini">${p.id === "any" ? "◆" : p.name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2)}</span>
-                <span class="txt"><span class="nm">${p.name}</span><span class="rl">${p.role}</span>${langs}</span>
-                <span class="free">${known ? `<b>${free}</b>${full ? "full" : "free"}` : ""}</span>
-              </button>`;
+  /* Lista osób powstaje RAZ i nigdy nie jest przebudowywana. Wcześniej odświeżała się przy
+     każdej zmianie dnia (żeby pokazać liczby wolnych kwadransów) i przy okazji gubiła wybór
+     gościa — wybierał osobę, zmieniał dzień i wracał do „Anyone free", nie wiedząc dlaczego. */
+  function fillPeople() {
+    $("f-person").innerHTML = PEOPLE.map((p) => {
+      const langs = p.langs.length ? " · " + p.langs.join("/") : "";
+      const role = p.id === "any" ? "" : " — " + p.role;
+      return `<option value="${p.id}">${p.name}${role}${langs}</option>`;
     }).join("");
-    $("people").querySelectorAll(".p:not([disabled])").forEach((el) =>
-      el.addEventListener("click", () => pickPerson(el.dataset.id))
-    );
+    if (state.fixedPerson) $("f-person").value = state.person;
   }
 
-  function renderTimes() {
-    const busy = busyFor(state.person);
-    const cell = (t) => {
-      const free = isFree(t, SLOT_MIN, busy);
-      return `<button type="button" class="h${t === state.from ? " sel" : ""}${free ? "" : " taken"}"
-        role="radio" aria-checked="${t === state.from}" data-from="${t}"
-        ${free ? "" : ' disabled title="Already booked"'}>${t}</button>`;
-    };
-    const all = gridSlots(DAY_START, DAY_END, SLOT_MIN);
-    const half = all.filter((t) => toMin(t) < 13 * 60);
-    const rest = all.filter((t) => toMin(t) >= 13 * 60);
-    $("times").innerHTML =
-      `<div class="tgroup"><span class="tg">Morning</span><div class="hours">${half.map(cell).join("")}</div></div>` +
-      `<div class="tgroup"><span class="tg">Afternoon</span><div class="hours">${rest.map(cell).join("")}</div></div>`;
-    $("times").querySelectorAll(".h:not([disabled])").forEach((el) =>
-      el.addEventListener("click", () => pickTime(el.dataset.from))
-    );
-    renderLengths();
-  }
+  const isEvening = () => $("f-time").value === "evening";
 
-  /* Niedostępna długość nie znika — jest wygaszona i mówi dlaczego. */
-  function renderLengths() {
-    if (!state.from) { show("step-len", false); return; }
-    const busy = busyFor(state.person);
-    const opts = DURATIONS.map((d) => {
-      const fitsDay = toMin(state.from) + d <= DAY_END * 60;
-      const free = isFree(state.from, d, busy);
-      return { d, ok: fitsDay && free, why: !fitsDay ? "past 18:00" : "into a taken slot" };
-    });
-    if (!opts.find((o) => o.d === state.dur && o.ok)) {
-      const first = opts.find((o) => o.ok);
-      state.dur = first ? first.d : SLOT_MIN;
-      state.to = addMinutes(state.from, state.dur);
+  /* Jedno źródło prawdy o wybranej osobie. Przy linku personalnym (?td) pole wyboru jest UKRYTE,
+     więc czytanie z niego dawało „any" i siatka pokazywała wszystko jako wolne — dokładnie tak
+     zgłosił to użytkownik 27.08. Stan wie, kto jest wybrany, niezależnie od tego, co widać. */
+  const wybranaOsoba = () => (state.fixedPerson ? state.person : $("f-person").value) || "any";
+
+  function fillTimes() {
+    const sel = $("f-time");
+    const keep = sel.value;
+    if (!$("f-day").value) {
+      sel.innerHTML = '<option value="">— select a day first —</option>';
+      sel.disabled = true;
+      return;
     }
-    $("lens").innerHTML = opts.map((o) =>
-      `<button type="button" class="len${o.d === state.dur ? " sel" : ""}${o.ok ? "" : " off"}"
-        role="radio" aria-checked="${o.d === state.dur}" data-min="${o.d}" ${o.ok ? "" : "disabled"}>${o.d} min</button>`
-    ).join("");
-    const blocked = opts.filter((o) => !o.ok);
-    $("len-note").textContent = blocked.length
-      ? `${blocked.map((o) => o.d).join(" and ")} min runs ${blocked[0].why}`
-      : "";
-    $("lens").querySelectorAll(".len:not([disabled])").forEach((el) =>
-      el.addEventListener("click", () => {
-        state.dur = Number(el.dataset.min);
-        state.to = addMinutes(state.from, state.dur);
-        renderLengths();
-        renderTicket();
-      })
-    );
-    show("step-len", true);
+    const busy = busyFor(wybranaOsoba());
+    const len = Number($("f-len").value) || 15;
+    const opts = gridSlots(DAY_START, DAY_END, SLOT_MIN).map((t) => {
+      const fits = toMin(t) + len <= DAY_END * 60;
+      const ok = fits && isFree(t, len, busy);
+      const why = !fits ? " — past closing" : " — fully booked";
+      return `<option value="${t}"${ok ? "" : " disabled"}>${t}${ok ? "" : why}</option>`;
+    });
+    sel.innerHTML = '<option value="">— select a time —</option>' + opts.join("") +
+      `<option value="evening">Evening off-site: ${pad(EVENING_START)}:00–${pad(EVENING_END)}:00</option>`;
+    sel.disabled = false;
+    if (keep) sel.value = keep;
   }
 
-  function formReady() {
-    return $("f-name").value.trim().length >= 3 &&
-           $("f-company").value.trim() !== "" &&
-           /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test($("f-email").value.trim()) &&
-           $("f-consent").checked;
+  function fillLengths() {
+    if (isEvening()) {                       // wieczór to całe okno, nie kwadranse
+      $("f-len").innerHTML = '<option value="">evening</option>';
+      $("f-len").disabled = true;
+      return;
+    }
+    $("f-len").disabled = false;
+    const from = $("f-time").value;
+    const busy = busyFor(wybranaOsoba());
+    const keep = $("f-len").value;
+    $("f-len").innerHTML = DURATIONS.map((d) => {
+      const ok = !from || (toMin(from) + d <= DAY_END * 60 && isFree(from, d, busy));
+      return `<option value="${d}"${ok ? "" : " disabled"}>${d} min${ok ? "" : " — not free"}</option>`;
+    }).join("");
+    const wanted = DURATIONS.includes(Number(keep)) ? keep : "15";
+    $("f-len").value = wanted;
+    if ($("f-len").selectedOptions[0] && $("f-len").selectedOptions[0].disabled) {
+      const first = [].find.call($("f-len").options, (o) => !o.disabled);
+      if (first) $("f-len").value = first.value;
+    }
   }
 
-  function renderTicket() {
-    $("tk-ref").textContent = ticketRef(state);
-    $("tk-fields").innerHTML = ticketFields(state)
-      .map(([k, v]) => {
-        const empty = v.startsWith("·");
-        const step = { DAY: "step-day", TIME: "step-time", LEN: "step-time", WITH: "step-person" }[k];
-        return `<button type="button" class="f${empty ? " e" : ""}" data-go="${step}">
-                  <span class="k">${k}</span> <span class="v">${v}</span></button>`;
-      })
-      .join("");
-    $("tk-fields").querySelectorAll(".f").forEach((el) =>
-      el.addEventListener("click", () => { const t = $(el.dataset.go); if (t && !t.hidden) jump(el.dataset.go); })
-    );
-    const step = nextStep(state, formReady());
-    const btn = $("tk-cta");
-    btn.textContent = state.sending ? "Booking…" : step.label;
-    btn.classList.toggle("go", step.key === "go" || step.key === "you");
-    btn.disabled = state.sending;
-    btn.dataset.step = step.key;
-  }
-
-  function freshness(out) {
-    if (!out || !out.generated_at) { $("fresh").textContent = ""; return; }
-    const secs = out.stale_seconds != null ? out.stale_seconds : 0;
+  function freshness() {
+    const out = state.day;
+    const hint = $("hint-time");
+    if (!out || !out.generated_at) { hint.textContent = "All times Berlin (CEST)."; hint.className = "hint"; return; }
     const t = new Date(out.generated_at);
     const hh = pad(t.getHours()) + ":" + pad(t.getMinutes());
-    $("fresh").textContent = secs > 600
-      ? `Availability may be out of date (last checked ${hh}) — we confirm every meeting by e-mail`
-      : `Availability updated ${hh}`;
-    $("fresh").classList.toggle("warn", secs > 600);
+    const stale = (out.stale_seconds || 0) > 900;
+    hint.textContent = stale
+      ? `All times Berlin (CEST). Availability last checked ${hh} — we confirm every meeting by e-mail.`
+      : `All times Berlin (CEST). Availability updated ${hh}.`;
+    hint.className = stale ? "hint warn" : "hint";
   }
 
-  /* ---------- kroki ---------- */
-  function pickSide(side) {
-    state.side = side;
-    renderSides();
-    show("step-day", true);
-    renderTicket();
-    jump("step-day");
-  }
-
-  async function pickDay(iso) {
-    state.date = iso;
-    state.person = state.fixedPerson ? state.person : null;
-    state.from = state.to = null;
-    state.day = null; state.free = {};
-    renderDays();
-    show("step-person", !state.fixedPerson);
-    show("step-time", false);
-    show("step-you", false);
-    show("evening", true);
-    show("evening-fields", false);
-    $("evening-btn").classList.remove("on");
-    state.evening = false;
-    renderTicket();
-
-    if (!state.fixedPerson) { renderPeople(); jump("step-person"); }
-    $("fresh").textContent = "Checking free hours…";
-
-    const out = await loadDay(iso);
-    if (state.date !== iso) return;
+  /* ---------- reakcje ---------- */
+  async function onDay() {
+    const date = $("f-day").value;
+    $("f-time").value = "";
+    if (!date) { state.day = null; fillTimes(); return; }
+    $("hint-time").textContent = "Checking free hours…";
+    state.day = null;
+    const out = await loadDay(date);
+    if ($("f-day").value !== date) return;
     state.day = out || { people: {} };
-    state.free = (out && out.free) || {};
-    freshness(out);
-    if (out && out.booking_enabled === false) {
-      $("closed").hidden = false;
-      $("tk-cta").disabled = true;
-    }
-    if (state.fixedPerson) { showTimes(); } else { renderPeople(); }
+    freshness();
+    fillTimes();
+    fillLengths();
   }
 
-  function pickPerson(id) {
-    state.person = id;
-    state.from = state.to = null;
-    renderPeople();
-    renderTicket();
-    showTimes();
-  }
-
-  function showTimes() {
-    show("step-time", true);
-    renderTimes();
-    jump("step-time");
-  }
-
-  function pickTime(from) {
-    state.from = from;
-    state.evening = false;
-    state.place = "";
-    state.dur = DURATIONS[0];
-    state.to = addMinutes(from, state.dur);
-    show("evening", false);          // jedno albo drugie — nie oba naraz
-    renderTimes();
-    show("step-you", true);
-    renderTicket();
-  }
-
-  /* Wieczór wyklucza się z godziną na stoisku: zaznaczony kwadrans znika, siatka też. */
-  function openEvening() {
-    state.evening = true;
-    state.from = $("evening-when").value || pad(EVENING_START) + ":00";
-    state.dur = 60;
-    state.to = addMinutes(state.from, 60);
-    state.place = $("evening-place").value.trim();
-    show("evening-fields", true);
-    show("times", false);
-    show("legend", false);
-    show("step-len", false);
-    $("evening-btn").classList.add("on");
-    show("step-you", true);
-    renderTicket();
-  }
-
-  function closeEvening() {
-    state.evening = false;
-    state.from = state.to = null;
-    state.place = "";
-    show("evening-fields", false);
-    show("times", true);
-    show("legend", true);
-    $("evening-btn").classList.remove("on");
-    renderTimes();
-    renderTicket();
+  /* Wybór wieczoru z listy godzin odsłania pytanie o miejsce i wyłącza długość. */
+  function onTime() {
+    $("wrap-place").hidden = !isEvening();
+    fillLengths();
   }
 
   function bookingFromForm() {
@@ -471,6 +357,10 @@ if (typeof document !== "undefined") (function () {
       (window.crypto || window.msCrypto).getRandomValues(buf);
       state.nonce = Array.from(buf).map((b) => b.toString(16).padStart(2, "0")).join("");
     }
+    const evening = isEvening();
+    const from = evening ? pad(EVENING_START) + ":00" : $("f-time").value;
+    const len = evening ? (EVENING_END - EVENING_START) * 60 : Number($("f-len").value) || 15;
+    const person = state.fixedPerson ? state.person : $("f-person").value || "any";
     return {
       name: $("f-name").value.trim().slice(0, 80),
       company: $("f-company").value.trim().slice(0, 80),
@@ -478,16 +368,16 @@ if (typeof document !== "undefined") (function () {
       phone: $("f-phone").value.trim().slice(0, 30),
       note: $("f-note").value.trim().slice(0, 500),
       consent: $("f-consent").checked ? 1 : 0,
-      date: state.date,
-      from: state.from,
-      to: state.to,
-      minutes: state.evening ? 60 : state.dur,
-      person: state.person,
-      personName: (personById(state.person) || {}).name || "",
-      evening: state.evening,
-      place: state.evening ? $("evening-place").value.trim().slice(0, 120) : "",
+      date: $("f-day").value,
+      from: from,
+      to: from ? addMinutes(from, len) : "",
+      minutes: len,
+      person: person,
+      personName: (personById(person) || {}).name || "",
+      evening: evening,
+      place: evening ? $("f-place").value.trim().slice(0, 120) : "",
       tz: TZ,
-      source: state.fixedPerson ? "link-" + state.person : "ifa-booking",
+      source: state.fixedPerson ? "link-" + person : "ifa-booking",
       nonce: state.nonce,
     };
   }
@@ -495,9 +385,7 @@ if (typeof document !== "undefined") (function () {
   async function send(b) {
     if (USE_PHP_BACKEND) {
       const r = await fetch(`${API}/book.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(b),
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b),
       });
       const t = await r.text();
       return t.trim().startsWith("{") ? JSON.parse(t) : null;
@@ -508,42 +396,44 @@ if (typeof document !== "undefined") (function () {
   }
 
   function errorText(reason) {
-    if (!reason) return "Something went wrong. Try again in a moment.";
     if (reason === "taken") return "That slot has just been taken. Pick another one.";
-    if (reason === "closed") return "Booking is closed right now. Write to brands@monstelo.com and we will hold a slot.";
-    if (reason.startsWith("limit")) return "You have reached today's booking limit. Write to brands@monstelo.com.";
-    if (reason.startsWith("bad:consent")) return "Tick the consent box so we can arrange the meeting.";
-    if (reason.startsWith("bad:")) return "Check the highlighted fields.";
+    if (reason === "closed") return "Booking is closed right now. Write to brands@monstelo.com.";
+    if (String(reason).startsWith("limit")) return "Booking limit reached. Write to brands@monstelo.com.";
     return "Something went wrong. Try again in a moment.";
   }
 
-  async function submit() {
+  const FIELD = { name: "f-name", company: "f-company", email: "f-email", place: "f-place",
+                  date: "f-day", slot: "f-time", duration: "f-len", consent: "f-consent", person: "f-person" };
+
+  async function submit(e) {
+    if (e) e.preventDefault();
     const b = bookingFromForm();
     const err = validate(b);
-    ["f-name", "f-company", "f-email", "evening-place"].forEach((id) => $(id).classList.remove("bad"));
-    err.forEach((e) => {
-      const el = e === "place" ? $("evening-place") : $("f-" + e);
-      if (el) el.classList.add("bad");
-    });
+    Object.values(FIELD).forEach((id) => $(id).classList.remove("bad"));
+    err.forEach((k) => { if (FIELD[k]) $(FIELD[k]).classList.add("bad"); });
     if (err.length) {
-      $("msg").textContent = err.includes("consent")
-        ? "Tick the consent box so we can arrange the meeting."
-        : err.includes("email")
-        ? "That e-mail address does not look right."
-        : "Add your name, company and work e-mail.";
       $("msg").className = "msg bad";
+      $("msg").textContent =
+        err.includes("date") || err.includes("slot") ? "Pick a day and a time."
+        : err.includes("place") ? "Tell us where the evening meeting should be."
+        : err.includes("consent") ? "Tick the consent box so we can arrange the meeting."
+        : err.includes("email") ? "That e-mail address does not look right."
+        : "Add your name, company and work e-mail.";
       return;
     }
-    state.sending = true; renderTicket();
+    state.sending = true;
+    $("send").disabled = true;
+    $("send").textContent = "Booking…";
     $("msg").textContent = "";
     let out = await send(b).catch(() => null);
-    if (out === null) out = await send(b).catch(() => null);   // ten sam nonce — nie zdubluje
+    if (out === null) out = await send(b).catch(() => null);   // ten sam nonce nie zdubluje
     state.sending = false;
     if (!out || !out.ok) {
-      renderTicket();
+      $("send").disabled = false;
+      $("send").innerHTML = '<span class="arrow">→</span>Book a meeting';
       $("msg").className = "msg bad";
       $("msg").textContent = errorText(out && out.reason);
-      if (out && out.reason === "taken") { dayCache.delete(state.date); pickDay(state.date); }
+      if (out && out.reason === "taken") { cache.delete(b.date); onDay(); }
       return;
     }
     if (out.person) b.personName = out.person;
@@ -551,49 +441,57 @@ if (typeof document !== "undefined") (function () {
   }
 
   function done(b, out) {
+    /* Zdarzenie konwersji: rezerwacja to jedyny wynik, który liczy się na tej stronie.
+       Przy odmowie zgody gtag i tak nic nie zapisze — zdarzenie po prostu przepadnie. */
+    try {
+      if (window.gtag) {
+        gtag('event', 'meeting_booked', {
+          send_to: 'AW-17508931481',
+          meeting_day: b.date,
+          meeting_kind: b.evening ? 'evening' : 'stand',
+          meeting_person: b.person
+        });
+      }
+      if (window.fbq) {
+        fbq('track', 'Lead', { content_name: 'IFA 2026 meeting', content_category: b.evening ? 'evening' : 'stand' });
+      }
+    } catch (e) {}
+
     const day = DAYS.find((d) => d.iso === b.date);
-    $("form-wrap").hidden = true;
-    $("ticket").classList.add("stamped");
+    $("form").hidden = true;
     $("done").hidden = false;
-    $("done-ref").textContent = ticketRef(state);
-    $("done-when").textContent =
-      `${day.dow} ${day.d} ${day.mon} · ${b.from}–${b.to} · Berlin time` + (b.evening ? ` · ${b.place}` : "");
+    $("done-when").textContent = b.evening
+      ? `${day.dow} ${day.d} ${day.mon} · evening off-site · ${b.place}`
+      : `${day.dow} ${day.d} ${day.mon} · ${b.from}–${b.to}`;
     $("done-who").textContent = out.assigned
-      ? `With ${b.personName} — the colleague free at that hour`
-      : b.person === "any" ? "We will assign the right person" : `With ${b.personName}`;
+      ? `with ${b.personName} — the colleague free at that hour`
+      : b.person === "any" ? "we will assign the right person" : `with ${b.personName}`;
     $("done-cal").href = gcalLink(b);
-    window.scrollTo({ top: 0, behavior: motion() });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function boot() {
+    fillDays();
+    fillPeople();
+
     const fixed = personFromQuery(location.search);
     if (fixed) {
       state.person = fixed.id;
       state.fixedPerson = true;
-      show("step-person", false);
+      $("f-person").value = fixed.id;      // pole zostaje spójne ze stanem, choć jest ukryte
+      $("wrap-person").hidden = true;
       $("with-line").hidden = false;
+      $("with-ini").textContent = initials(fixed.name);
       $("with-name").textContent = fixed.name;
-      $("with-role").textContent = fixed.role;
-      document.title = "Book a slot with " + fixed.name + " — IFA 2026";
+      $("with-role").textContent = fixed.role + (fixed.langs.length ? " · " + fixed.langs.join("/") : "");
+      document.title = "Book a meeting with " + fixed.name + " — IFA 2026";
     }
-    renderDays();
-    renderTicket();
 
-    $("evening-btn").addEventListener("click", () => (state.evening ? closeEvening() : openEvening()));
-    $("evening-when").addEventListener("change", () => { if (state.evening) openEvening(); });
-    $("evening-place").addEventListener("input", () => { state.place = $("evening-place").value.trim(); renderTicket(); });
-    ["f-name", "f-company", "f-email", "f-consent"].forEach((id) =>
-      $(id).addEventListener("input", renderTicket)
-    );
-    $("f-consent").addEventListener("change", renderTicket);
-    $("tk-cta").addEventListener("click", () => {
-      const step = $("tk-cta").dataset.step;
-      if (step === "go") { submit(); return; }
-      const target = { date: "step-day", person: "step-person", time: "step-time",
-                       place: "step-time", you: "step-you" }[step];
-      if (target && !$(target).hidden) jump(target);
-    });
-    $("form").addEventListener("submit", (e) => { e.preventDefault(); submit(); });
+    $("f-day").addEventListener("change", onDay);
+    $("f-person").addEventListener("change", () => { fillTimes(); fillLengths(); });
+    $("f-time").addEventListener("change", onTime);
+    $("f-len").addEventListener("change", fillTimes);
+    $("form").addEventListener("submit", submit);
   }
 
   document.addEventListener("DOMContentLoaded", boot);

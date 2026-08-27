@@ -31,6 +31,7 @@ var CALENDARS = {
 var FAIR_DAYS   = ['2026-09-04', '2026-09-05', '2026-09-06', '2026-09-07', '2026-09-08'];
 var DAY_START_H = 10;               // stand hours; evening meetings are handled separately
 var DAY_END_H   = 18;
+var EVENING_END_H = 23;             // spotkania wieczorne poza stoiskiem: 18:00-23:00
 /* "No preference" is assigned to the first free person in this order. Meetings can always be
    held in the open IFA space, so there is no limit on parallel meetings. */
 var ASSIGN_ORDER = ['juszczyk', 'mamcarczyk', 'tuchowska', 'tabak', 'kocaba', 'drozd', 'palka'];
@@ -102,7 +103,12 @@ function handleBooking(b) {
     if (!/^\d{2}:\d{2}$/.test(b.from) || !/^\d{2}:\d{2}$/.test(b.to)) return json({ ok: false, reason: 'bad:time' });
     var mins = minutesBetween(b.from, b.to);
     if (b.evening) {
-      if (toMin(b.from) < DAY_END_H * 60 || mins <= 0 || mins > 180) return json({ ok: false, reason: 'bad:evening' });
+      /* Wieczór to CAŁE okno 18:00-23:00, nie wybrany kwadrans — formularz wysyła 300 minut.
+         Poprzedni limit 180 minut pochodził ze starego widoku i odbijał każdą wieczorną
+         rezerwację błędem 'bad:evening': gość dostawał potwierdzenie, a w kalendarzu
+         handlowca nie powstawało NIC i nikt się o tym nie dowiadywał (lead 45, 27.08). */
+      if (toMin(b.from) < DAY_END_H * 60 || mins <= 0 ||
+          toMin(b.to) > EVENING_END_H * 60) return json({ ok: false, reason: 'bad:evening' });
     } else {
       if ([15, 30, 45].indexOf(mins) === -1) return json({ ok: false, reason: 'bad:duration' });
       if (toMin(b.from) % 15 !== 0) return json({ ok: false, reason: 'bad:grid' });
@@ -256,7 +262,7 @@ function doGet(e) {
       return json({ ok: false, reason: 'bad payload: ' + err });
     }
   }
-  if (p.action === 'free') return json(freeBusyDay(p.date));
+  if (p.action === 'free') return json(freeBusyDay(p.date, p.full === '1'));
   if (p.action === 'cancel' && p.payload) return json(cancelEvent(p.payload));
   if (p.diag !== DIAG_KEY) return json({ ok: true, service: 'ifa-booking' });
   try {
@@ -490,13 +496,20 @@ function ownsCalendar(cal) {
  * Kalendarz, którego nie dało się odczytać, NIE trafia do `people` — klient traktuje brakującą
  * osobę jako niedostępną, nigdy jako wolną. `generated_at` pozwala pokazać wiek danych.
  */
-function freeBusyDay(date) {
+/**
+ * @param {boolean} full  true = cała doba i z tytułami spotkań.
+ *   Backend prosi o `full`, bo (1) spotkania wieczorne wypadają poza godziny stoiska 10-18,
+ *   (2) tytuł pozwala pokazać na liście leadów także spotkanie dopisane ręcznie w kalendarzu,
+ *   którego w naszym formularzu nigdy nie było. Starsze wdrożenie ignoruje ten parametr
+ *   i zwraca same pary godzin — backend przyjmuje oba kształty.
+ */
+function freeBusyDay(date, full) {
   if (FAIR_DAYS.indexOf(String(date)) === -1) return { ok: false, reason: 'bad:date' };
   var people = {}, failed = [];
   for (var i = 0; i < ASSIGN_ORDER.length; i++) {
     var id = ASSIGN_ORDER[i];
     try {
-      people[id] = dayBusy(id, date, false);
+      people[id] = full ? dayBusyFull_(id, date) : dayBusy(id, date, false);
     } catch (err) {
       failed.push(id);
     }
@@ -533,6 +546,18 @@ function bookingEnabled() {
   } catch (e) { return true; }
 }
 
+/* Cała doba, z tytułami. Osobno od dayBusy, żeby nie ruszać ścieżki, na której stoi rezerwacja. */
+function dayBusyFull_(pid, date) {
+  var events = standEvents(
+    calendarFor(pid),
+    new Date(date + 'T00:00:00'),
+    new Date(date + 'T23:59:59'),
+    !!CALENDARS[pid]
+  );
+  return events.map(function (ev) {
+    return [fmtTime(ev.getStartTime()), fmtTime(ev.getEndTime()), String(ev.getTitle() || '').slice(0, 120)];
+  });
+}
 function spansOf(events) {
   return events.map(function (ev) { return [fmtTime(ev.getStartTime()), fmtTime(ev.getEndTime())]; });
 }
@@ -647,6 +672,17 @@ function collectBusy_() {
   return days;
 }
 
+/**
+ * ⚠️ 27.08.2026 — WYPYCHANIE JEST WYŁĄCZONE Z UŻYCIA (uruchom `removePush`).
+ * Powód: każde wypchnięcie dostawało 403, mimo identycznego odcisku klucza po obu stronach,
+ * czystych nagłówków i nienaruszonej treści; sprawdzono i wykluczono osiem kombinacji kodowania
+ * treści i klucza. Świeżość danych bierze się teraz z pobierania po stronie backendu
+ * (`_pull.php` woła `?action=free&date=…&full=1`), więc ta ścieżka jest zbędna.
+ * Zostawiona, bo działa poprawnie od strony odczytu kalendarzy — gdyby kiedyś wrócić do wypychania.
+ *
+ * Nie włączaj wyzwalacza „na wszelki wypadek": jedno wypchnięcie to ~26 s pracy skryptu,
+ * a darmowe konto Google ma 90 minut na dobę — dzieli je z pobieraniem, które faktycznie działa.
+ */
 function pushBusy() {
   if (!pushDue_()) return;
   var body = JSON.stringify({ days: collectBusy_() });

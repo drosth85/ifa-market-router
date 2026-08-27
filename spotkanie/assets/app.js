@@ -441,6 +441,22 @@ if (typeof document !== "undefined") (function () {
   }
 
   function done(b, out) {
+    /* Zdarzenie konwersji: rezerwacja to jedyny wynik, który liczy się na tej stronie.
+       Przy odmowie zgody gtag i tak nic nie zapisze — zdarzenie po prostu przepadnie. */
+    try {
+      if (window.gtag) {
+        gtag('event', 'meeting_booked', {
+          send_to: 'AW-17508931481',
+          meeting_day: b.date,
+          meeting_kind: b.evening ? 'evening' : 'stand',
+          meeting_person: b.person
+        });
+      }
+      if (window.fbq) {
+        fbq('track', 'Lead', { content_name: 'IFA 2026 meeting', content_category: b.evening ? 'evening' : 'stand' });
+      }
+    } catch (e) {}
+
     const day = DAYS.find((d) => d.iso === b.date);
     $("form").hidden = true;
     $("done").hidden = false;
