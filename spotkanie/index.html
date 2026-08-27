@@ -25,6 +25,10 @@
   }
   html,body{background:var(--cover);color:var(--chalk);font-family:var(--sans);overflow-x:hidden;
     -webkit-text-size-adjust:100%}
+  /* Kwit zostaje widoczny przez cały czas — zamiast go chować, odsuwamy od niego pole,
+     na które przeglądarka sama przewija przy wejściu w formularz i przy otwarciu klawiatury. */
+  html{scroll-padding-bottom:calc(var(--tk) + 28px)}
+  input,textarea,select,.consent{scroll-margin-bottom:calc(var(--tk) + 28px)}
   body{min-height:100dvh;padding-bottom:calc(var(--tk) + env(safe-area-inset-bottom) + 12px)}
   .wrap{max-width:720px;margin:0 auto;padding:18px 18px 26px}
   ::selection{background:var(--paper);color:var(--paper-ink)}
@@ -166,7 +170,6 @@
   #tk-cta:disabled{opacity:.6;cursor:default}
   #ticket.stamped::after{content:"BOOKED";position:absolute;right:16px;top:12px;font-family:var(--mono);
     font-weight:700;font-size:20px;letter-spacing:.2em;color:var(--teal);opacity:.22;transform:rotate(-6deg)}
-  body:has(#step-you:focus-within) #ticket{opacity:0;pointer-events:none}
 
   .done{background:var(--paper);color:var(--paper-ink);border-radius:12px;padding:24px 20px;text-align:center}
   .done .ref{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--paper-accent)}
@@ -312,7 +315,7 @@
   <button type="button" id="tk-cta">Pick a day to start</button>
 </div>
 
-<script src="assets/app.js?v=202608271139"></script>
+<script src="assets/app.js?v=202608271152"></script>
 <script>
   (function(){
     var r=document.documentElement, b=document.getElementById('themebtn');
