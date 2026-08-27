@@ -30,6 +30,8 @@
   .banner{display:block;width:100%;height:auto;border-radius:14px;margin-bottom:18px}
 
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 18px}
+  .card h1{font-size:23px;font-weight:800;letter-spacing:-.01em;margin-bottom:6px}
+  .intro{font-size:13.5px;line-height:1.55;color:var(--mute);margin-bottom:20px}
 
   .with{display:flex;align-items:center;gap:11px;background:var(--field);border:1px solid var(--teal);
     border-radius:10px;padding:11px 13px;margin-bottom:18px}
@@ -115,6 +117,10 @@
   </picture>
 
   <div class="card">
+    <h1>Book a meeting</h1>
+    <p class="intro">Book a meeting with our team at IFA Berlin 2026.<br>
+      Reseller Park · stand H27E-17B.</p>
+
     <form id="form" novalidate>
 
       <div class="with" id="with-line" hidden>
@@ -202,7 +208,7 @@
 
 <button type="button" class="themebtn" id="themebtn">theme</button>
 
-<script src="assets/app.js?v=20260827c"></script>
+<script src="assets/app.js?v=20260827d"></script>
 <script>
   (function(){
     var r=document.documentElement, b=document.getElementById('themebtn');
