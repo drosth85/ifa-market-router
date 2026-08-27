@@ -114,8 +114,13 @@ function handleBooking(b) {
     var pid = PEOPLE[b.person] ? b.person : 'any';
     var assigned = false;
 
+    /* Rezerwacje przychodzące z backendu PHP są już rozstrzygnięte — to on pilnuje kolizji
+       i on wybrał osobę. Ponowne sprawdzanie tutaj kończyło się tym, że przy nieświeżej
+       migawce rezerwacja zostawała w bazie BEZ wydarzenia w kalendarzu. */
+    var trusted = b.source === 'php-backend';
+
     // Evening meetings are off-site, so they never collide with the stand schedule.
-    if (!b.evening) {
+    if (!b.evening && !trusted) {
       if (pid === 'any') {
         var free = firstFree(b.date, b.from, b.to);
         if (!free) return json({ ok: false, reason: 'taken' });
@@ -576,20 +581,27 @@ function sign_(ts, body) {
 }
 
 /**
- * Jak często odświeżać. W dni targowe (9:00-19:00 Berlin) co minutę — tam liczy się każda sekunda.
- * Przed targami rezerwacje też spływają i handlowcy dopisują spotkania ręcznie, więc odświeżamy
- * co 10 minut. Poza tym oknem funkcja kończy się natychmiast (~0,1 s), żeby nie zjadać
- * dobowego limitu 90 minut wyzwalaczy.
+ * Jak często odświeżać — liczone UPŁYWEM CZASU od ostatniego wypchnięcia, nie zegarem.
+ * Wyzwalacz "co minutę" w Apps Script potrafi dryfować o kilka minut; warunek na minutę
+ * podzielną przez 10 gubił wtedy cały cykl (zaobserwowane: przerwa 36 minut).
+ *   - dni targowe 9:00-19:00  → co minutę,
+ *   - przed targami 7:00-21:00 → co 9 minut,
+ *   - poza tym i po targach   → wcale.
  */
-function inFairWindow_() {
+function pushDue_() {
   var now = new Date();
   var day = Utilities.formatDate(now, 'Europe/Berlin', 'yyyy-MM-dd');
   var hour = Number(Utilities.formatDate(now, 'Europe/Berlin', 'HH'));
-  var minute = Number(Utilities.formatDate(now, 'Europe/Berlin', 'mm'));
+  var props = PropertiesService.getScriptProperties();
+  if (props.getProperty('force_push')) return true;
 
-  if (FAIR_DAYS.indexOf(day) !== -1) return hour >= 9 && hour < 19;          // targi: co minutę
-  if (day > FAIR_DAYS[FAIR_DAYS.length - 1]) return false;                   // po targach: koniec
-  return hour >= 7 && hour < 21 && minute % 10 === 0;                        // przed targami: co 10 min
+  var fair = FAIR_DAYS.indexOf(day) !== -1;
+  if (!fair && day > FAIR_DAYS[FAIR_DAYS.length - 1]) return false;      // po targach koniec
+  if (fair ? (hour < 9 || hour >= 19) : (hour < 7 || hour >= 21)) return false;
+
+  var last = Number(props.getProperty('last_push_ms') || 0);
+  var minGap = fair ? 45 * 1000 : 9 * 60 * 1000;
+  return now.getTime() - last >= minGap;
 }
 
 /** Zajętość całej załogi na wszystkie dni targowe — jeden odczyt kalendarza na osobę. */
@@ -624,7 +636,8 @@ function collectBusy_() {
 }
 
 function pushBusy() {
-  if (!inFairWindow_() && !PropertiesService.getScriptProperties().getProperty('force_push')) return;
+  if (!pushDue_()) return;
+  PropertiesService.getScriptProperties().setProperty('last_push_ms', String(new Date().getTime()));
   var body = JSON.stringify({ days: collectBusy_() });
   var ts = String(Math.floor(new Date().getTime() / 1000));
   var res = UrlFetchApp.fetch(PHP_BASE + '/push.php', {
