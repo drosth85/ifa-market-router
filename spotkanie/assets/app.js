@@ -29,15 +29,17 @@ const TZ = "Europe/Berlin";
 
 /* Załoga na stoisku. Kolejność = kolejność przydziału przy "Anyone free" (ta sama w backendzie).
    Adresy e-mail żyją wyłącznie po stronie serwera — klient wysyła samo `id`. */
+/* Kolejność WYŚWIETLANIA na liście — nie mylić z kolejnością przydziału przy „Anyone free",
+   która żyje po stronie backendu (ASSIGN_ORDER w _domain.php) i jest od tej niezależna. */
 const PEOPLE = [
   { id: "any",        slug: "",   name: "Anyone free",        role: "We assign the first colleague free", langs: [] },
-  { id: "juszczyk",   slug: "sj", name: "Sebastian Juszczyk", role: "Board member · sourcing",  langs: ["EN", "PL"] },
-  { id: "mamcarczyk", slug: "mm", name: "Michał Mamcarczyk",  role: "Key Account Manager",      langs: ["EN", "PL"] },
-  { id: "tuchowska",  slug: "nt", name: "Nikola Tuchowska",   role: "Key Account Manager",      langs: ["EN", "PL"] },
-  { id: "tabak",      slug: "lt", name: "Łukasz Tabak",       role: "Key Account Manager",      langs: ["PL"] },
-  { id: "kocaba",     slug: "bk", name: "Błażej Kócaba",      role: "Key Account Manager",      langs: ["PL"] },
+  { id: "mamcarczyk", slug: "mm", name: "Michał Mamcarczyk",  role: "B2B Key Account Manager",  langs: ["EN", "PL"] },
+  { id: "tuchowska",  slug: "nt", name: "Nikola Tuchowska",   role: "B2B Key Account Manager",  langs: ["EN", "PL"] },
+  { id: "tabak",      slug: "lt", name: "Łukasz Tabak",       role: "B2B Key Account Manager",  langs: ["PL"] },
+  { id: "kocaba",     slug: "bk", name: "Błażej Kócaba",      role: "B2B Key Account Manager",  langs: ["PL"] },
+  { id: "palka",      slug: "kp", name: "Kamil Pałka",        role: "B2B Key Account Manager",  langs: ["PL", "CZ"] },
   { id: "drozd",      slug: "td", name: "Tomasz Drozd",       role: "Brand growth · retail",    langs: ["EN", "PL"] },
-  { id: "palka",      slug: "kp", name: "Kamil Pałka",        role: "Key Account Manager",      langs: ["PL", "CZ"] },
+  { id: "juszczyk",   slug: "sj", name: "Sebastian Juszczyk", role: "Board member · sourcing",  langs: ["EN", "PL"] },
 ];
 const LANGS = ["EN", "PL", "CZ"];
 
